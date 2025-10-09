@@ -28,7 +28,6 @@ export async function compressImageToSize(
       'base64'
     );
     const originalSize = imageBuffer.length;
-    const originalImage = sharp(imageBuffer);
 
     if (originalSize <= TARGET_SIZE_BYTES) {
         return {
@@ -38,47 +37,37 @@ export async function compressImageToSize(
         };
     }
     
-    let quality = 90;
-    let compressedBuffer: Buffer | null = null;
-    
-    // Try to compress as JPEG first
-    while (quality >= 2) {
-      const currentBuffer = await originalImage.clone().jpeg({ quality, mozjpeg: true }).toBuffer();
-      if (currentBuffer.length <= TARGET_SIZE_BYTES) {
-        const compressedImageUri = `data:image/jpeg;base64,${currentBuffer.toString('base64')}`;
-        return {
-          compressedImageUri,
-          originalSize,
-          compressedSize: currentBuffer.length,
-        };
-      }
-      compressedBuffer = currentBuffer;
-      quality -= 5;
+    let currentImage = sharp(imageBuffer);
+    let currentBuffer = imageBuffer;
+    let quality = 80;
+    let scale = 1.0;
+
+    // Iteratively reduce quality and then size until the target is met
+    while (currentBuffer.length > TARGET_SIZE_BYTES && (quality > 5 || scale > 0.5)) {
+        if (quality > 5) {
+            // First, try reducing quality
+            quality -= 5;
+        } else if (scale > 0.5) {
+            // If quality is at minimum, start reducing size
+            scale -= 0.1;
+            const metadata = await sharp(imageBuffer).metadata();
+            const newWidth = Math.round(metadata.width! * scale);
+            currentImage = sharp(imageBuffer).resize(newWidth);
+            quality = 75; // Reset quality for the new size
+        }
+
+        currentBuffer = await currentImage.clone().jpeg({ quality, mozjpeg: true }).toBuffer();
     }
     
-    // If JPEG compression is not enough, try WEBP
-    quality = 90;
-     while (quality >= 2) {
-      const currentBuffer = await originalImage.clone().webp({ quality }).toBuffer();
-       if (currentBuffer.length <= TARGET_SIZE_BYTES) {
-        const compressedImageUri = `data:image/webp;base64,${currentBuffer.toString('base64')}`;
-        return {
-          compressedImageUri,
-          originalSize,
-          compressedSize: currentBuffer.length,
-        };
-      }
-      compressedBuffer = currentBuffer;
-      quality -= 5;
+    // If it's still too large, one final aggressive attempt with WEBP
+    if (currentBuffer.length > TARGET_SIZE_BYTES) {
+        currentBuffer = await currentImage.clone().webp({ quality: 50, effort: 6 }).toBuffer();
     }
 
-    // If still too large, return the smallest buffer we generated as a last resort.
-    // This will be the one with the lowest quality (quality=2 from the webp loop).
-    const finalBuffer = compressedBuffer || await originalImage.clone().webp({ quality: 2 }).toBuffer();
-    const compressedImageUri = `data:image/webp;base64,${finalBuffer.toString('base64')}`;
+    const compressedImageUri = `data:image/jpeg;base64,${currentBuffer.toString('base64')}`;
      return {
         compressedImageUri,
         originalSize,
-        compressedSize: finalBuffer.length,
+        compressedSize: currentBuffer.length,
     };
 }
