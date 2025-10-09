@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const ConvertImagesToPdfInputSchema = z.object({
@@ -32,6 +33,7 @@ export const CompressImageInputSchema = z.object({
     .describe(
       "An image as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  quality: z.number().optional().describe('The quality of the compressed image (1-100).'),
 });
 export type CompressImageInput = z.infer<typeof CompressImageInputSchema>;
 

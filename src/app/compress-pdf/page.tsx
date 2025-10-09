@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -15,6 +16,8 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Link from 'next/link';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +85,7 @@ export default function CompressPdfPage() {
   const [result, setResult] = useState<CompressPdfOutput | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState>('idle');
   const [progress, setProgress] = useState(0);
+  const [quality, setQuality] = useState(75);
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,7 +150,7 @@ export default function CompressPdfPage() {
       setProcessingState('compressing');
       const compressedImageUris: string[] = [];
       for (let i = 0; i < imageUris.length; i++) {
-        const compressedResult = await compressImage({ imageUri: imageUris[i] });
+        const compressedResult = await compressImage({ imageUri: imageUris[i], quality: quality });
         compressedImageUris.push(compressedResult.compressedImageUri);
         setProgress(10 + (70 * (i + 1)) / imageUris.length);
       }
@@ -256,6 +260,17 @@ export default function CompressPdfPage() {
                     <FileType className="w-16 h-16 text-primary" />
                     <p className="mt-2 text-sm font-semibold text-muted-foreground">{file.name}</p>
                     <Badge variant="outline" className="mt-2">{formatBytes(file.file.size)}</Badge>
+                </div>
+                 <div className="w-full space-y-4">
+                    <Label htmlFor="quality">Compression Quality: {quality}%</Label>
+                    <Slider 
+                        id="quality"
+                        value={[quality]}
+                        onValueChange={([v]) => setQuality(v)}
+                        min={10}
+                        max={100}
+                        step={1}
+                    />
                 </div>
                 <Button 
                   size="lg" 
