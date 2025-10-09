@@ -42,21 +42,6 @@ export const CompressImageOutputSchema = z.object({
 });
 export type CompressImageOutput = z.infer<typeof CompressImageOutputSchema>;
 
-export const MaskAadharInPdfInputSchema = z.object({
-  pdfUri: z
-    .string()
-    .describe(
-      "A PDF of an Aadhar card as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."
-    ),
-});
-export type MaskAadharInPdfInput = z.infer<typeof MaskAadharInPdfInputSchema>;
-
-export const MaskAadharInPdfOutputSchema = z.object({
-  maskedPdfUri: z.string().describe('The masked Aadhar PDF as a data URI.'),
-});
-export type MaskAadharInPdfOutput = z.infer<typeof MaskAadharInPdfOutputSchema>;
-
-
 export const UnlockPdfInputSchema = z.object({
   pdfUri: z
     .string()
@@ -76,24 +61,6 @@ export const UnlockPdfOutputSchema = z.object({
 });
 export type UnlockPdfOutput = z.infer<typeof UnlockPdfOutputSchema>;
 
-export const MaskAadharInImageInputSchema = z.object({
-  imageUri: z
-    .string()
-    .describe(
-      "An image of an Aadhar card as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-export type MaskAadharInImageInput = z.infer<
-  typeof MaskAadharInImageInputSchema
->;
-
-export const MaskAadharInImageOutputSchema = z.object({
-  maskedImageUri: z.string().describe('The masked Aadhar image as a data URI.'),
-});
-export type MaskAadharInImageOutput = z.infer<
-  typeof MaskAadharInImageOutputSchema
->;
-
 export const ProtectPdfInputSchema = z.object({
   pdfUri: z
     .string()
@@ -112,25 +79,6 @@ export const ProtectPdfOutputSchema = z.object({
     ),
 });
 export type ProtectPdfOutput = z.infer<typeof ProtectPdfOutputSchema>;
-
-
-export const BlurFaceInImageInputSchema = z.object({
-  imageUri: z
-    .string()
-    .describe(
-      "An image as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-export type BlurFaceInImageInput = z.infer<typeof BlurFaceInImageInputSchema>;
-
-export const BlurFaceInImageOutputSchema = z.object({
-  blurredImageUri: z.string().describe('The image with blurred faces as a data URI.'),
-  faceCount: z.number().describe('The number of faces detected and blurred.'),
-});
-export type BlurFaceInImageOutput = z.infer<
-  typeof BlurFaceInImageOutputSchema
->;
-
 
 export const OrganiseWhatsappChatInputSchema = z.object({
   chatContent: z
@@ -360,30 +308,6 @@ export const CropVideoOutputSchema = z.object({
 });
 export type CropVideoOutput = z.infer<typeof CropVideoOutputSchema>;
 
-// Remove Watermark in Video
-export const RemoveWatermarkInputSchema = z.object({
-  videoUri: z.string().describe("A video file as a data URI."),
-});
-export type RemoveWatermarkInput = z.infer<typeof RemoveWatermarkInputSchema>;
-
-export const RemoveWatermarkOutputSchema = z.object({
-  processedVideoUri: z.string().describe("The processed video file without a watermark as a data URI."),
-});
-export type RemoveWatermarkOutput = z.infer<typeof RemoveWatermarkOutputSchema>;
-
-// Blur Face in Video
-export const BlurFaceInVideoInputSchema = z.object({
-  videoUri: z.string().describe("A video file as a data URI."),
-});
-export type BlurFaceInVideoInput = z.infer<typeof BlurFaceInVideoInputSchema>;
-
-export const BlurFaceInVideoOutputSchema = z.object({
-  processedVideoUri: z.string().describe("The processed video file with blurred faces as a data URI."),
-  faceCount: z.number().describe('The number of faces detected and blurred.'),
-});
-export type BlurFaceInVideoOutput = z.infer<typeof BlurFaceInVideoOutputSchema>;
-
-
 export const ConvertPdfToImagesInputSchema = z.object({
   pdfUri: z.string().describe("A PDF as a data URI."),
 });
@@ -475,27 +399,6 @@ export const EnhancePhotoOutputSchema = z.object({
   enhancedPhotoUri: z.string().describe('The enhanced photo as a data URI.'),
 });
 export type EnhancePhotoOutput = z.infer<typeof EnhancePhotoOutputSchema>;
-
-// Remove Background
-export const RemoveBackgroundInputSchema = z.object({
-  imageUri: z
-    .string()
-    .describe(
-      "An image as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-export type RemoveBackgroundInput = z.infer<
-  typeof RemoveBackgroundInputSchema
->;
-
-export const RemoveBackgroundOutputSchema = z.object({
-  imageUri: z
-    .string()
-    .describe('The image with the background removed as a data URI.'),
-});
-export type RemoveBackgroundOutput = z.infer<
-  typeof RemoveBackgroundOutputSchema
->;
 
 // PDF Page Organizer
 export const OrganizePdfInputSchema = z.object({

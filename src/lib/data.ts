@@ -213,22 +213,6 @@ export const tools = [
     category: 'edit',
     color: '#0ea5e9' // sky blue
   },
-   {
-    title: "Remove Watermark",
-    description: "Remove watermarks from videos.",
-    icon: Eraser,
-    href: "/remove-watermark",
-    category: 'edit',
-    color: '#0ea5e9' // sky blue
-  },
-  {
-    title: "Blur Face in Video",
-    description: "Blur faces in videos.",
-    icon: UserX,
-    href: "/blur-face-in-video",
-    category: 'edit',
-    color: '#0ea5e9' // sky blue
-  },
     {
     title: "Crop Video",
     description: "Crop to desired dimensions.",
@@ -273,22 +257,6 @@ export const tools = [
     category: 'security',
     color: '#ec4899' // pink
   },
-  {
-    title: "Mask Aadhar",
-    description: "Mask Aadhar in PDF or Image.",
-    icon: ShieldOff,
-    href: "/unmask-aadhar",
-    category: 'security',
-    color: '#ec4899' // pink
-  },
-  {
-    title: "Blur Face in Image",
-    description: "Blur faces in any photo.",
-    icon: UserX,
-    href: "/blur-face",
-    category: 'security',
-    color: '#ec4899' // pink
-  },
 
   // AI Tools
    {
@@ -298,14 +266,6 @@ export const tools = [
     href: "/whatsapp-chat-organiser",
     category: 'ai_tools',
     color: '#10b981' // emerald
-  },
-  {
-    title: "Remove Background",
-    description: "Remove background from an image.",
-    icon: Eraser,
-    href: "/remove-background",
-    category: 'ai_tools',
-    color: '#10b981'
   },
     {
     title: "Photo Enhancer",
