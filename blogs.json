@@ -1,0 +1,59 @@
+
+[
+  {
+    "slug": "how-to-circle-something-in-a-pdf",
+    "title": "How to Circle Something in a PDF",
+    "content": "You can circle anything in a PDF with SmartPDFx's PDF Annotator, then customize color, thickness, and size before saving your updated file. It's a simple process that gives you full control over your annotations, making it easy to highlight important information or collaborate with others. Whether you're a student, a professional, or just someone who works with PDFs, this tool is designed to be intuitive and efficient.",
+    "author": "Manish",
+    "date": "2025-10-09T08:28:40.755Z",
+    "imageUrl": "https://placehold.co/800x450/a7f3d0/14532d?text=How-To+Guide",
+    "published": true,
+    "seoTitle": "How to Easily Circle and Annotate PDFs Online",
+    "metaDescription": "Learn how to circle, highlight, and annotate anything in a PDF document for free online. Customize color, thickness, and size with our easy-to-use tool.",
+    "category": "How-To Guides",
+    "popular": true,
+    "faqs": []
+  },
+  {
+    "slug": "how-to-edit-a-pdf-for-free",
+    "title": "How to Edit a PDF for Free",
+    "content": "Discover the best ways to edit a PDF document without paying for expensive software. Our free online tools allow you to add text, images, and shapes, making it easy to update your documents on the fly. From correcting typos to filling out forms, we provide a seamless editing experience right in your browser.",
+    "author": "Jane Doe",
+    "date": "2025-10-08T10:00:00.000Z",
+    "imageUrl": "https://placehold.co/800x450/d8b4fe/4a044e?text=Free+PDF+Editing",
+    "published": true,
+    "seoTitle": "Free PDF Editing: The Ultimate Guide",
+    "metaDescription": "A comprehensive guide on how to edit PDF files for free online. Learn to add text, images, and annotations without any special software.",
+    "category": "How-To Guides",
+    "popular": false,
+    "faqs": []
+  },
+  {
+    "slug": "how-to-resize-pdf-online",
+    "title": "How to Resize PDF Online",
+    "content": "Are you having trouble sending and storing PDFs? With SmartPDFx, you can resize PDF documents and access other powerful features.",
+    "author": "John Smith",
+    "date": "2025-10-07T14:30:00.000Z",
+    "imageUrl": "https://placehold.co/100x60/e0e7ff/312e81?text=Resize",
+    "published": true,
+    "seoTitle": "Resize Your PDFs Online for Free",
+    "metaDescription": "Quickly and easily resize your PDF documents online for free to make them easier to send and store.",
+    "category": "How to Compress PDF",
+    "popular": true,
+    "faqs": []
+  },
+    {
+    "slug": "free-text-to-pdf-converter",
+    "title": "Free Text to PDF Converter—Convert Text Files in Seconds",
+    "content": "Save editable text files into PDF format with a simple drag and drop with SmartPDFx—a free online tool with no signup required.",
+    "author": "Emily White",
+    "date": "2025-10-06T11:00:00.000Z",
+    "imageUrl": "https://placehold.co/100x60/f0fdf4/166534?text=Text-to-PDF",
+    "published": true,
+    "seoTitle": "Convert Text Files to PDF for Free in Seconds",
+    "metaDescription": "A simple and free online tool to convert your text files into professional PDF documents without any signup.",
+    "category": "How to Convert Word to PDF",
+    "popular": true,
+    "faqs": []
+  }
+]
