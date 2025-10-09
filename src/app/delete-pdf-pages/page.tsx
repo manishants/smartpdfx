@@ -161,6 +161,14 @@ export default function DeletePdfPagesPage() {
         );
     };
 
+    const handleSelectAll = (checked: boolean | 'indeterminate') => {
+        if (checked) {
+            setSelectedPages(pages.map(p => p.pageNumber));
+        } else {
+            setSelectedPages([]);
+        }
+    };
+
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -249,9 +257,19 @@ export default function DeletePdfPagesPage() {
             )
             case 'select': return (
                 <div>
-                    <div className="text-center mb-6">
-                        <h2 className="text-xl font-semibold">Select Pages to Delete</h2>
-                        <p className="text-muted-foreground">Click on pages to select them for removal.</p>
+                     <div className="flex justify-between items-center mb-6">
+                        <div className="text-center flex-1">
+                            <h2 className="text-xl font-semibold">Select Pages to Delete</h2>
+                            <p className="text-muted-foreground">Click on pages to select them for removal.</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                           <Checkbox 
+                             id="select-all" 
+                             checked={selectedPages.length > 0 && selectedPages.length === pages.length}
+                             onCheckedChange={handleSelectAll}
+                           />
+                           <Label htmlFor="select-all">Select All</Label>
+                        </div>
                     </div>
                     <ScrollArea className="h-[60vh] w-full border rounded-md p-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
