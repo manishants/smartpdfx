@@ -24,8 +24,9 @@ const extractVotersPrompt = ai.definePrompt({
     name: 'extractVotersPrompt',
     input: { schema: z.object({ fileUri: z.string() }) },
     output: { schema: ExtractVotersOutputSchema },
-    prompt: `You are an expert at extracting structured data from Indian Electoral Rolls (voter lists). Analyze the provided document, which could be an image or a PDF. Your task is to identify every voter entry and extract the following information for each one:
+    prompt: `You are an expert at extracting structured data from Indian Electoral Rolls (voter lists). Analyze the provided document, which could be an image or a PDF. Your task is to identify and extract every single voter entry from all pages of the document.
 
+For each voter, extract the following details:
 1.  **id**: The serial number of the voter in the list.
 2.  **voterId**: The voter's ID card number (e.g., "UYA0837520").
 3.  **name**: The voter's full name.
@@ -33,9 +34,9 @@ const extractVotersPrompt = ai.definePrompt({
 5.  **age**: The voter's age.
 6.  **gender**: The voter's gender (Male, Female, or Other).
 
-Pay close attention to the layout. Each voter entry is typically in a box. Extract information from every single box on every page of the document. Do not stop until all voters have been extracted. A partial list is a failure.
+Pay close attention to the layout. Each voter entry is typically in its own box or section. You must process every page and extract every voter. Do not stop until the entire document has been processed. A partial list is considered a failure.
 
-Return the data as a JSON object with a single key "voters", which is an array of voter objects.
+Return the data as a JSON object with a single key "voters", which is an array of all the voter objects you have found.
 
 Document:
 {{media url=fileUri}}

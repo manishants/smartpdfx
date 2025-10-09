@@ -5,11 +5,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, Loader2, RefreshCw, Wand2, FileText, Users } from "lucide-react";
+import { UploadCloud, Loader2, RefreshCw, Wand2, FileText, Users, FileDown } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { extractVoters } from '@/ai/flows/extract-voter-list';
 import type { ExtractVotersInput, ExtractVotersOutput, Voter } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
+import * as XLSX from 'xlsx';
 import {
   Table,
   TableBody,
@@ -82,6 +83,18 @@ export default function VoterListExtractorPage() {
     setResult(null);
     setIsAnalyzing(false);
   };
+  
+    const handleDownloadExcel = () => {
+    if (!result || result.voters.length === 0) {
+      toast({ title: "No data to download", description: "Please extract voter data first." });
+      return;
+    }
+    const worksheet = XLSX.utils.json_to_sheet(result.voters);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Voters");
+    XLSX.writeFile(workbook, "voter-list.xlsx");
+  };
+
 
   return (
     <>
@@ -145,14 +158,19 @@ export default function VoterListExtractorPage() {
                             <Users className="h-6 w-6 text-primary"/>
                             <h2 className="text-2xl font-bold">Extracted Voters ({result.voters.length})</h2>
                         </div>
-                        <Button variant="outline" onClick={handleReset}>
-                            <RefreshCw className="mr-2"/>Start Over
-                        </Button>
+                        <div className="flex gap-2">
+                           <Button variant="secondary" onClick={handleDownloadExcel}>
+                              <FileDown className="mr-2"/>Download Excel
+                           </Button>
+                           <Button variant="outline" onClick={handleReset}>
+                                <RefreshCw className="mr-2"/>Start Over
+                           </Button>
+                        </div>
                     </div>
 
-                    <div className="border rounded-lg">
+                    <div className="border rounded-lg max-h-[60vh] overflow-y-auto">
                         <Table>
-                            <TableHeader>
+                            <TableHeader className="sticky top-0 bg-background">
                                 <TableRow>
                                     <TableHead>ID</TableHead>
                                     <TableHead>Voter ID</TableHead>
