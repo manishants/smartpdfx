@@ -70,7 +70,6 @@
     "sharp": "^0.33.4",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "tesseract.js": "^5.1.0",
     "to-ico": "^1.1.5",
     "xlsx": "^0.18.5",
     "zod": "^3.24.2"
@@ -90,3 +89,5 @@
     "typescript": "^5"
   }
 }
+
+    
