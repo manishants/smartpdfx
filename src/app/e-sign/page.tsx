@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
 import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import * as pdfjsLib from 'pdf-js-dist';
+import * as pdfjsLib from 'pdfjs-dist';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
 
@@ -432,5 +432,7 @@ export default function ESignPage() {
         </div>
     )
 }
+
+    
 
     
