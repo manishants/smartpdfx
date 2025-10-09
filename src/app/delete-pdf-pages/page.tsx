@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,7 +66,7 @@ const FAQ = () => (
              <AccordionItem value="item-4">
                 <AccordionTrigger>Is there a file size limit?</AccordionTrigger>
                 <AccordionContent>
-                    While there is no strict limit, performance is best with reasonably sized PDFs (e.g., under 100MB). Very large files may take longer to upload and process.
+                    While there is no strict limit, performance is best with reasonably sized PDFs (e.g., under 100MB). Very large files may take longer to process.
                 </AccordionContent>
             </AccordionItem>
              <AccordionItem value="item-5">
@@ -315,3 +315,5 @@ export default function DeletePdfPagesPage() {
         </div>
     )
 }
+
+    
