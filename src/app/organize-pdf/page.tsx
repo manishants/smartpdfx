@@ -88,7 +88,7 @@ export default function OrganizePdfPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${'${pdfjsLib.version}'}/pdf.worker.min.mjs`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {
@@ -198,7 +198,7 @@ export default function OrganizePdfPage() {
      const handleDownload = () => {
         if (organizedPdfUri && file) {
             const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
-            const newFilename = `${'${originalFilename}'}-organized.pdf`;
+            const newFilename = `${originalFilename}-organized.pdf`;
             
             const a = document.createElement('a');
             a.href = organizedPdfUri;
@@ -251,7 +251,7 @@ export default function OrganizePdfPage() {
                         {pages.map((page, index) => (
                             <div key={page.originalPageNumber} className="relative group">
                                 <Card className="overflow-hidden">
-                                    <Image src={page.src} alt={`Page ${'${page.originalPageNumber}'}`} width={200} height={280} className="w-full h-auto" />
+                                    <Image src={page.src} alt={`Page ${page.originalPageNumber}`} width={200} height={280} className="w-full h-auto" />
                                 </Card>
                                 <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeletePage(index)}>
@@ -309,5 +309,3 @@ export default function OrganizePdfPage() {
         </div>
     )
 }
-
-    
