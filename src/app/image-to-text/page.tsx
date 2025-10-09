@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,10 @@ import { UploadCloud, Loader2, RefreshCw, Wand2, Clipboard, ClipboardCheck, File
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { createWorker } from 'tesseract.js';
-import type { ImageToTextInput } from '@/lib/types';
+import type { ImageToTextInput, ImageToTextOutput } from '@/lib/types';
+import { imageToText } from '@/ai/flows/image-to-text';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,19 +30,19 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>What is OCR?</AccordionTrigger>
                 <AccordionContent>
-                    OCR stands for Optical Character Recognition. It's a technology that uses AI to convert different types of documents, such as scanned paper documents, PDF files, or images captured by a digital camera into editable and searchable data. This tool runs OCR entirely in your browser.
+                    OCR stands for Optical Character Recognition. It's a technology that uses AI to convert different types of documents, such as scanned paper documents, PDF files, or images captured by a digital camera into editable and searchable data.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
                 <AccordionTrigger>What kind of images work best?</AccordionTrigger>
                 <AccordionContent>
-                    For the best results, use high-quality images with clear text. The text should be well-lit and not heavily distorted. The Tesseract engine is powerful and can handle various fonts, but clarity is key.
+                    For the best results, use high-quality images with clear text. The AI is powerful and can handle various fonts and even handwriting, but clarity is key for accuracy.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
                 <AccordionTrigger>Is my data secure?</AccordionTrigger>
                 <AccordionContent>
-                    Yes, your privacy is guaranteed. This tool performs all processing directly in your web browser. Your images are never uploaded to our servers.
+                    Yes, your privacy is guaranteed. Your images are securely uploaded to our servers for processing and are deleted one hour later. We do not store or share your data.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -55,10 +54,8 @@ export default function ImageToTextPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedText, setExtractedText] = useState<string | null>(null);
-  const [language, setLanguage] = useState('eng');
+  const [language, setLanguage] = useState('English');
   const [hasCopied, setHasCopied] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [progressLabel, setProgressLabel] = useState('');
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +72,15 @@ export default function ImageToTextPage() {
       }
     }
   };
+  
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleExtract = async () => {
     if (!file) {
@@ -83,24 +89,13 @@ export default function ImageToTextPage() {
     }
     setIsExtracting(true);
     setExtractedText(null);
-    setProgress(0);
-    setProgressLabel('Initializing OCR engine...');
-
-    const worker = await createWorker({
-        logger: m => {
-            setProgressLabel(m.status);
-            if (m.status === 'recognizing text') {
-                setProgress(m.progress * 100);
-            }
-        }
-    });
-
+    
     try {
-        await worker.loadLanguage(language);
-        await worker.initialize(language);
-        const { data: { text } } = await worker.recognize(file.file);
-        setExtractedText(text);
-        await worker.terminate();
+        const imageUri = await fileToDataUri(file.file);
+        const input: ImageToTextInput = { imageUri, language };
+        const result = await imageToText(input);
+        setExtractedText(result.text);
+
     } catch (error: any) {
       console.error("Extraction failed:", error);
       toast({
@@ -110,7 +105,6 @@ export default function ImageToTextPage() {
       });
     } finally {
       setIsExtracting(false);
-      setProgressLabel('');
     }
   };
 
@@ -119,8 +113,6 @@ export default function ImageToTextPage() {
     setExtractedText(null);
     setIsExtracting(false);
     setHasCopied(false);
-    setProgress(0);
-    setProgressLabel('');
   };
   
   const handleCopyToClipboard = () => {
@@ -149,7 +141,7 @@ export default function ImageToTextPage() {
       <header className="text-center">
         <h1 className="text-4xl font-bold font-headline">Image to Text (OCR)</h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Extract text from any image using the Tesseract OCR engine.
+          Extract text, including handwriting, from any image using AI.
         </p>
       </header>
       
@@ -187,9 +179,9 @@ export default function ImageToTextPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="eng">English</SelectItem>
-                                    <SelectItem value="hin">Hindi</SelectItem>
-                                    <SelectItem value="eng+hin">English + Hindi</SelectItem>
+                                    <SelectItem value="English">English</SelectItem>
+                                    <SelectItem value="Hindi">Hindi</SelectItem>
+                                    <SelectItem value="English and Hindi">English + Hindi</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -206,12 +198,6 @@ export default function ImageToTextPage() {
                             </>
                            ) : <><Wand2 className="mr-2"/>Extract Text</>}
                         </Button>
-                        {isExtracting && (
-                            <div className="space-y-2 text-center">
-                                <Progress value={progress} />
-                                <p className="text-sm text-muted-foreground capitalize">{progressLabel}</p>
-                            </div>
-                        )}
                     </div>
                  )}
               </div>
@@ -268,3 +254,5 @@ export default function ImageToTextPage() {
     </>
   );
 }
+
+    
