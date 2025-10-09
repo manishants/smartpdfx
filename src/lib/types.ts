@@ -262,12 +262,6 @@ export const PdfToPptOutputSchema = z.object({
 });
 export type PdfToPptOutput = z.infer<typeof PdfToPptOutputSchema>;
 
-// This type is no longer needed as the new flow is more interactive
-export const PdfToExcelInputSchema = z.object({});
-export type PdfToExcelInput = z.infer<typeof PdfToExcelInputSchema>;
-export const PdfToExcelOutputSchema = z.object({});
-export type PdfToExcelOutput = z.infer<typeof PdfToExcelOutputSchema>;
-
 
 // Trim Video
 export const TrimVideoInputSchema = z.object({
@@ -340,6 +334,8 @@ export const BlogPostSchema = z.object({
     seoTitle: z.string().optional(),
     metaDescription: z.string().optional(),
     faqs: z.array(FaqSchema).optional(),
+    category: z.string().optional(),
+    popular: z.boolean().optional(),
 });
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 

@@ -124,7 +124,7 @@ export const tools = [
     color: '#f97316' // orange
   },
   {
-    title: "Extract Data from PDF to Excel",
+    title: "PDF to Excel",
     description: "Visually select data to export.",
     icon: FileUp,
     href: "/pdf-to-excel",
