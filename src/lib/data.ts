@@ -109,14 +109,6 @@ export const tools = [
   
   // Convert
   {
-    title: "PDF to Word",
-    description: "Convert PDF to editable Word.",
-    icon: FileUp,
-    href: "/pdf-to-word",
-    category: 'convert',
-    color: '#3b82f6' // blue
-  },
-  {
     title: "PDF to PPT",
     description: "Convert PDF to PowerPoint.",
     icon: FileUp,
@@ -131,14 +123,6 @@ export const tools = [
     href: "/pdf-to-jpg",
     category: 'convert',
     color: '#ca8a04' // mud yellow
-  },
-  {
-    title: "Word to PDF",
-    description: "Convert Word to PDF.",
-    icon: FileImage,
-    href: "/word-to-pdf",
-    category: 'convert',
-    color: '#3b82f6' // blue
   },
   {
     title: "PPT to PDF",
