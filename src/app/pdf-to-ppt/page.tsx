@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
+import { UploadCloud, FileUp, Loader2, RefreshCw, FileType } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -13,7 +13,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import PptxGenJS from 'pptxgenjs';
 import { saveAs } from 'file-saver';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 const FAQ = () => (
     <div className="max-w-4xl mx-auto mt-12">
@@ -22,13 +22,13 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>How does the PDF to PowerPoint conversion work?</AccordionTrigger>
                 <AccordionContent>
-                    Our tool works entirely in your browser. It renders each page of your PDF as a high-quality image and then inserts each image onto a separate slide in a new PowerPoint (.pptx) file. This ensures your layout and content are visually preserved.
+                    Our tool works entirely in your browser. It analyzes your PDF to extract text, images, and their layouts. It then reconstructs this content as editable text boxes and images on slides in a new PowerPoint (.pptx) file, preserving the original look and feel as closely as possible.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-                <AccordionTrigger>Will the text and images be editable in the final PPTX file?</AccordionTrigger>
+                <AccordionTrigger>Is the text and images editable in the final PPTX file?</AccordionTrigger>
                 <AccordionContent>
-                    No. Because each PDF page is converted into a single image, the text and other elements on the slide will not be editable. This method is best for preserving the exact look of your PDF in a presentation format.
+                    Yes. The tool converts PDF text into native PowerPoint text boxes and embeds PDF images as regular images. This means you can edit the text, move elements around, and resize images directly in PowerPoint. However, complex layouts may sometimes be challenging to replicate perfectly.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
@@ -72,28 +72,96 @@ export default function PdfToPptPage() {
         const numPages = pdf.numPages;
         
         const pptx = new PptxGenJS();
-        
+
         for (let i = 1; i <= numPages; i++) {
             const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 2.0 }); // High scale for better quality
+            const viewport = page.getViewport({ scale: 1.0 }); // Use scale 1.0 for true dimensions
+            const { width: pageWidth, height: pageHeight } = viewport;
 
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
+            // Set slide dimensions based on PDF page dimensions
+            pptx.layout = 'LAYOUT_16x9'; // Default layout
+             // PPTXGenJS uses inches, PDF uses points (72 points = 1 inch)
+            const slideWidth = pageWidth / 72;
+            const slideHeight = pageHeight / 72;
+            pptx.defineLayout({ name: `PDF_Page_${i}`, width: slideWidth, height: slideHeight });
+            const slide = pptx.addSlide({ masterName: `PDF_Page_${i}` });
             
-            if (context) {
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                const imageUri = canvas.toDataURL('image/png');
+            // --- Process Text ---
+            const textContent = await page.getTextContent();
+            for (const item of textContent.items as any[]) {
+                if (item.str.trim().length === 0) continue;
+
+                const tx = item.transform;
+                const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
                 
-                const slide = pptx.addSlide();
-                slide.addImage({
-                    data: imageUri,
-                    x: 0,
-                    y: 0,
-                    w: '100%',
-                    h: '100%',
+                const textX = tx[4] / 72; // Convert to inches
+                const textY = (pageHeight - tx[5] - fontHeight) / 72; // Convert to inches
+                const textW = item.width / 72;
+                
+                const style = textContent.styles[item.fontName];
+                const isBold = style.fontWeight >= 700 || style.fontFamily.toLowerCase().includes('bold');
+                const isItalic = style.fontFamily.toLowerCase().includes('italic');
+                
+                slide.addText(item.str, {
+                    x: textX,
+                    y: textY,
+                    w: textW,
+                    h: fontHeight / 72,
+                    fontFace: style.fontFamily.split(',')[0],
+                    fontSize: fontHeight * 0.75, // Approximate conversion from points to PowerPoint points
+                    color: '000000',
+                    bold: isBold,
+                    italic: isItalic,
+                    valign: 'top'
                 });
+            }
+
+            // --- Process Images ---
+            const operatorList = await page.getOperatorList();
+            const validImgOperators = ["paintImageXObject", "paintImageXObjectRepeat", "paintInlineImageXObject"];
+            
+            for(let j=0; j < operatorList.fnArray.length; j++) {
+                const op = operatorList.fnArray[j];
+                if (validImgOperators.includes(pdfjsLib.OPS[op])) {
+                    const opName = pdfjsLib.OPS[op];
+                    const opArgs = operatorList.argsArray[j];
+                    const imgKey = opArgs[0];
+                    try {
+                        const imgData = await page.objs.get(imgKey);
+                        
+                        if (imgData && imgData.data) {
+                            const { width: imgW, height: imgH } = imgData;
+                            
+                            let imageBase64 = '';
+                            if (imgData.kind === pdfjsLib.ImageKind.JPEG) {
+                                imageBase64 = 'data:image/jpeg;base64,' + btoa(String.fromCharCode.apply(null, Array.from(imgData.data)));
+                            } else if (imgData.kind === pdfjsLib.ImageKind.RGBA_32BPP || imgData.kind === pdfjsLib.ImageKind.RGB_24BPP) {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = imgW;
+                                canvas.height = imgH;
+                                const ctx = canvas.getContext('2d');
+                                if(ctx) {
+                                    const imgBitmap = ctx.createImageData(imgW, imgH);
+                                    imgBitmap.data.set(imgData.data);
+                                    ctx.putImageData(imgBitmap, 0, 0);
+                                    imageBase64 = canvas.toDataURL();
+                                }
+                            }
+
+                            if(imageBase64) {
+                                slide.addImage({ 
+                                    data: imageBase64, 
+                                    x: 0, 
+                                    y: 0, 
+                                    w: '100%', 
+                                    h: '100%',
+                                });
+                            }
+                        }
+                    } catch (e) {
+                      console.log('could not get image', e)
+                    }
+                }
             }
         }
 
@@ -110,7 +178,7 @@ export default function PdfToPptPage() {
       console.error("Conversion failed:", error);
       toast({
         title: "Conversion Failed",
-        description: error.message || "Something went wrong while converting your PDF.",
+        description: error.message || "Something went wrong while converting your PDF. The file might be too complex for editable conversion.",
         variant: "destructive"
       });
     } finally {
@@ -188,3 +256,5 @@ export default function PdfToPptPage() {
     </>
   );
 }
+
+    
