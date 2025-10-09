@@ -7,13 +7,13 @@ import SignatureCanvas from 'react-signature-canvas';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Wand2, FileSignature, Trash2 } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Wand2, FileSignature, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
 import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdf-js-dist';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +42,7 @@ export default function ESignPage() {
     const [placedSignatures, setPlacedSignatures] = useState<PlacedSignature[]>([]);
     const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
     const [activeSignatureId, setActiveSignatureId] = useState<string | null>(null);
+    const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
 
     const sigCanvas = useRef<SignatureCanvas>(null);
@@ -111,7 +112,7 @@ export default function ESignPage() {
             if (images.length > 0) {
                 setPdfImages(images);
                 setPageDimensions(dimensions);
-                setStage('sign');
+                setStage('place');
             } else {
                 throw new Error("Failed to render PDF pages.");
             }
@@ -149,7 +150,7 @@ export default function ESignPage() {
                 setSignature(canvas.toDataURL('image/png'));
             }
         }
-        setStage('place');
+        handlePdfUpload();
     }
 
     const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,7 +159,7 @@ export default function ESignPage() {
             if (sigFile.type.startsWith('image/')) {
                 const sigUri = await fileToDataUri(sigFile);
                 setSignature(sigUri);
-                setStage('place');
+                handlePdfUpload();
             } else {
                 toast({ title: "Invalid file type", description: "Please upload an image file for your signature.", variant: "destructive" });
             }
@@ -260,7 +261,7 @@ export default function ESignPage() {
                     {file && (
                         <div className="mt-6 flex flex-col items-center gap-4">
                             <p className="font-semibold">Selected: {file.name}</p>
-                            <Button size="lg" onClick={handlePdfUpload} disabled={isLoading}>
+                            <Button size="lg" onClick={() => setStage('sign')} disabled={isLoading}>
                                 {isLoading ? <><Loader2 className="mr-2 animate-spin" />Processing...</> : "Proceed to Sign"}
                             </Button>
                         </div>
@@ -313,7 +314,10 @@ export default function ESignPage() {
                     </div>
                 </div>
             )
-            case 'place': return (
+            case 'place':
+                const currentPageImage = pdfImages[currentPageIndex];
+                const currentPageDimension = pageDimensions[currentPageIndex];
+                return (
                 <div className="grid md:grid-cols-12 gap-6 h-[80vh]">
                     <aside className="md:col-span-3 flex flex-col items-center gap-4 p-4 border-r">
                         <h3 className="font-semibold text-lg">Your Signature</h3>
@@ -341,47 +345,52 @@ export default function ESignPage() {
                             {isLoading ? <><Loader2 className="mr-2 animate-spin" />Applying...</> : <><Wand2 className="mr-2"/>Apply Signatures</>}
                         </Button>
                     </aside>
-                    <main className="md:col-span-9 bg-muted/50">
-                        <ScrollArea className="h-full w-full">
-                            <div className="p-4 space-y-4 flex flex-col items-center">
-                            {pdfImages.map((src, index) => (
-                                <div key={index} className="relative shadow-lg" onDragOver={(e) => e.preventDefault()} onDrop={(e) => handlePageDrop(e, index)} onClick={() => setActiveSignatureId(null)}>
-                                    <Image id={`pdf-page-${index}`} src={src} alt={`PDF Page ${index + 1}`} width={pageDimensions[index]?.width || 800} height={pageDimensions[index]?.height || 1100} className="w-full h-auto" />
-                                    {placedSignatures.filter(ps => ps.pageIndex === index).map(ps => (
-                                        <Rnd
-                                            key={ps.id}
-                                            size={{ width: ps.width, height: ps.height }}
-                                            position={{ x: ps.x, y: ps.y }}
-                                            onDragStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
-                                            onDragStop={(e, d) => {
-                                                const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {...s, x: d.x, y: d.y} : s);
-                                                setPlacedSignatures(updatedSigs);
-                                            }}
-                                            onResizeStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
-                                            onResizeStop={(e, direction, ref, delta, position) => {
-                                                const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {
-                                                    ...s,
-                                                    width: parseFloat(ref.style.width),
-                                                    height: parseFloat(ref.style.height),
-                                                    ...position
-                                                } : s);
-                                                setPlacedSignatures(updatedSigs);
-                                            }}
-                                            onClick={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
-                                            className={cn("border border-dashed", activeSignatureId === ps.id ? "border-primary" : "border-transparent")}
-                                        >
-                                            <Image
-                                                src={signature!}
-                                                alt="Placed signature"
-                                                layout="fill"
-                                                className="cursor-move object-contain"
-                                            />
-                                        </Rnd>
-                                    ))}
-                                </div>
-                            ))}
+                    <main className="md:col-span-9 bg-muted/50 flex flex-col justify-between items-center p-4">
+                        <div className="relative shadow-lg flex-1 w-full flex items-center justify-center">
+                            <div className="relative" onDragOver={(e) => e.preventDefault()} onDrop={(e) => handlePageDrop(e, currentPageIndex)} onClick={() => setActiveSignatureId(null)}>
+                                <Image id={`pdf-page-${currentPageIndex}`} src={currentPageImage} alt={`PDF Page ${currentPageIndex + 1}`} width={currentPageDimension?.width || 800} height={currentPageDimension?.height || 1100} className="w-full h-auto max-h-[70vh] object-contain" />
+                                {placedSignatures.filter(ps => ps.pageIndex === currentPageIndex).map(ps => (
+                                    <Rnd
+                                        key={ps.id}
+                                        size={{ width: ps.width, height: ps.height }}
+                                        position={{ x: ps.x, y: ps.y }}
+                                        onDragStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
+                                        onDragStop={(e, d) => {
+                                            const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {...s, x: d.x, y: d.y} : s);
+                                            setPlacedSignatures(updatedSigs);
+                                        }}
+                                        onResizeStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
+                                        onResizeStop={(e, direction, ref, delta, position) => {
+                                            const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {
+                                                ...s,
+                                                width: parseFloat(ref.style.width),
+                                                height: parseFloat(ref.style.height),
+                                                ...position
+                                            } : s);
+                                            setPlacedSignatures(updatedSigs);
+                                        }}
+                                        onClick={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
+                                        className={cn("border border-dashed", activeSignatureId === ps.id ? "border-primary" : "border-transparent")}
+                                    >
+                                        <Image
+                                            src={signature!}
+                                            alt="Placed signature"
+                                            layout="fill"
+                                            className="cursor-move object-contain"
+                                        />
+                                    </Rnd>
+                                ))}
                             </div>
-                        </ScrollArea>
+                        </div>
+                        <div className="flex items-center justify-center gap-4 mt-4">
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPageIndex(p => Math.max(0, p - 1))} disabled={currentPageIndex === 0}>
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm font-medium">Page {currentPageIndex + 1} of {pdfImages.length}</span>
+                            <Button variant="outline" size="icon" onClick={() => setCurrentPageIndex(p => Math.min(pdfImages.length - 1, p + 1))} disabled={currentPageIndex === pdfImages.length - 1}>
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </main>
                 </div>
             )
@@ -423,3 +432,5 @@ export default function ESignPage() {
         </div>
     )
 }
+
+    
