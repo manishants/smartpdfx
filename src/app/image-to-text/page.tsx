@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { UploadCloud, Loader2, RefreshCw, Wand2, Clipboard, ClipboardCheck, File
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import Tesseract from 'tesseract.js';
+import Tesseract, { createWorker } from 'tesseract.js';
 import { Progress } from '@/components/ui/progress';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +57,8 @@ export default function ImageToTextPage() {
   const [status, setStatus] = useState('');
   const { toast } = useToast();
 
+  const worker = createWorker();
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
@@ -83,18 +85,16 @@ export default function ImageToTextPage() {
     setStatus('Initializing OCR engine...');
 
     try {
-      const worker = await Tesseract.createWorker({
-        logger: m => {
-          setStatus(m.status);
-          setProgress(Math.round(m.progress * 100));
-        },
-      });
-
-      await worker.loadLanguage('eng');
-      await worker.initialize('eng');
-      const { data: { text } } = await worker.recognize(file.file);
-      setExtractedText(text);
-      await worker.terminate();
+        await worker.load();
+        await worker.loadLanguage('eng');
+        await worker.initialize('eng');
+        worker.setParameters({
+            tessjs_create_hocr: '0',
+            tessjs_create_tsv: '0',
+        });
+        
+        const { data: { text } } = await worker.recognize(file.file);
+        setExtractedText(text);
 
     } catch (error: any) {
       console.error("Extraction failed:", error);
@@ -107,8 +107,30 @@ export default function ImageToTextPage() {
       setIsExtracting(false);
       setProgress(0);
       setStatus('');
+      await worker.terminate();
     }
   };
+  
+    useEffect(() => {
+    if (isExtracting) {
+      const handleProgress = (m: Tesseract.RecognizeResult) => {
+        setStatus(m.status);
+        setProgress(Math.round(m.progress * 100));
+      };
+      
+      (async () => {
+          // This is a bit of a hack to listen to progress because the main recognize call awaits.
+          // Tesseract.js doesn't have a clean way to get progress with async/await.
+          // For a real production app, a more robust event-based system would be better.
+          const interval = setInterval(async () => {
+              const m = await worker.getHOCR(); // This is just to trigger a status message
+          }, 500);
+
+          return () => clearInterval(interval);
+      })();
+    }
+  }, [isExtracting, worker]);
+
 
   const handleReset = () => {
     setFile(null);
