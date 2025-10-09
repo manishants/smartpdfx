@@ -1,3 +1,4 @@
+
 import { FileSignature, Scissors, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Crop, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact } from "lucide-react";
 
 export const toolCategories = [
@@ -272,6 +273,14 @@ export const tools = [
     description: "Extract data from voter lists.",
     icon: Users,
     href: "/voter-list-extractor",
+    category: 'ai_tools',
+    color: '#10b981'
+  },
+  {
+    title: "Extract Data from PDF to Excel",
+    description: "Visually extract data to Excel.",
+    icon: Users,
+    href: "/extract-pdf-data-to-excel",
     category: 'ai_tools',
     color: '#10b981'
   },
