@@ -14,6 +14,7 @@ import { splitPdf } from '@/lib/actions/split-pdf';
 import type { SplitPdfInput, SplitPdfOutput, PageRange } from '@/lib/types';
 import * as pdfjsLib from 'pdfjs-dist';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 type Stage = 'upload' | 'select' | 'download';
 
@@ -21,6 +22,33 @@ interface PageToRender {
   src: string;
   pageNumber: number;
 }
+
+const FAQ = () => (
+    <div className="mt-12">
+        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
+        <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+                <AccordionTrigger>Why would I need to split a PDF?</AccordionTrigger>
+                <AccordionContent>
+                    Splitting a PDF is useful for several reasons. You might want to extract specific pages to send to someone, separate chapters of a large book or report into individual files, or reduce the file size of a document by breaking it into smaller parts.
+                </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+                <AccordionTrigger>How are the selected pages split?</AccordionTrigger>
+                <AccordionContent>
+                    When you select pages, our tool groups consecutive pages into a single new PDF. For example, if you select pages 1, 2, 4, 5, and 7, the tool will create three separate PDF files: one with pages 1-2, one with pages 4-5, and one with just page 7.
+                </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+                <AccordionTrigger>Is it safe to upload my confidential documents?</AccordionTrigger>
+                <AccordionContent>
+                    Yes, your privacy is our priority. Your files are uploaded over a secure connection, processed automatically, and then permanently deleted from our servers one hour later. We never view, share, or store your documents.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
+    </div>
+);
+
 
 export default function SplitPdfPage() {
     const [stage, setStage] = useState<Stage>('upload');
@@ -103,6 +131,14 @@ export default function SplitPdfPage() {
             : [...prev, pageNumber].sort((a,b) => a - b)
         );
     };
+
+    const handleSelectAll = (checked: boolean | 'indeterminate') => {
+        if (checked) {
+            setSelectedPages(pages.map(p => p.pageNumber));
+        } else {
+            setSelectedPages([]);
+        }
+    }
 
     const pageRanges = useMemo((): PageRange[] => {
         if (selectedPages.length === 0) return [];
@@ -188,9 +224,19 @@ export default function SplitPdfPage() {
             )
             case 'select': return (
                 <div>
-                    <div className="text-center mb-6">
-                        <h2 className="text-xl font-semibold">Select Pages to Split</h2>
-                        <p className="text-muted-foreground">Select one or more pages to create new PDF files.</p>
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="text-center flex-1">
+                            <h2 className="text-xl font-semibold">Select Pages to Split</h2>
+                            <p className="text-muted-foreground">Select one or more pages to create new PDF files.</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                           <Checkbox 
+                             id="select-all" 
+                             checked={selectedPages.length === pages.length}
+                             onCheckedChange={handleSelectAll}
+                           />
+                           <Label htmlFor="select-all">Select All</Label>
+                        </div>
                     </div>
                     <ScrollArea className="h-[60vh] w-full border rounded-md p-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -259,6 +305,11 @@ export default function SplitPdfPage() {
                     </CardContent>
                 </Card>
             </div>
+            <div className="mt-12">
+              <FAQ />
+            </div>
         </div>
     )
 }
+
+    
