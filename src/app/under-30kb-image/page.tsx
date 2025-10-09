@@ -19,18 +19,18 @@ interface UploadedFile {
   preview: string;
 }
 
-const TARGET_KB = 30;
+const TARGET_KB = 29;
 
 const ToolDescription = () => (
     <div className="max-w-4xl mx-auto my-12 text-center">
         <Card className="p-6 md:p-8">
-            <CardTitle className="text-2xl font-bold mb-4">Compress Image to Under {TARGET_KB}KB</CardTitle>
+            <CardTitle className="text-2xl font-bold mb-4">Compress Image to Under {TARGET_KB + 1}KB</CardTitle>
             <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                    This tool is specifically designed to compress your images to a file size of less than {TARGET_KB} kilobytes. It's perfect for creating small avatars or signature images for online forums and application forms with very strict file size limits. The tool aggressively optimizes your image to meet the size requirement.
+                    This tool is specifically designed to compress your images to a file size of less than {TARGET_KB + 1} kilobytes. It's perfect for creating small avatars or signature images for online forums and application forms with very strict file size limits. The tool aggressively optimizes your image to meet the size requirement.
                 </p>
                 <p>
-                    <strong>Note:</strong> For images larger than 1MB, achieving the {TARGET_KB}KB target will likely cause a significant reduction in quality. The tool will do its best to get as close as possible.
+                    <strong>Note:</strong> For images larger than 1MB, achieving the {TARGET_KB + 1}KB target will likely cause a significant reduction in quality. The tool will do its best to get as close as possible.
                 </p>
             </CardContent>
         </Card>
@@ -123,7 +123,7 @@ export default function Under30kbPage() {
     if (result && file) {
       const originalFilename = file.file.name.substring(0, file.file.name.lastIndexOf('.'));
       const newExtension = getFileExtensionFromMimeType(result.compressedImageUri);
-      const newFilename = `${originalFilename}-under${TARGET_KB}kb.${newExtension}`;
+      const newFilename = `${originalFilename}-under${TARGET_KB + 1}kb.${newExtension}`;
       
       const a = document.createElement('a');
       a.href = result.compressedImageUri;
@@ -149,9 +149,9 @@ export default function Under30kbPage() {
     <>
     <div className="space-y-8 py-8 md:py-12">
       <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">Image Compressor to {TARGET_KB}KB</h1>
+        <h1 className="text-4xl font-bold font-headline">Image Compressor to {TARGET_KB + 1}KB</h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Reduce the file size of your images to under {TARGET_KB}KB.
+          Reduce the file size of your images to under {TARGET_KB + 1}KB.
         </p>
       </header>
       
@@ -194,7 +194,7 @@ export default function Under30kbPage() {
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Compressing...
                     </>
-                   ) : `Compress to under ${TARGET_KB}KB`}
+                   ) : `Compress to under ${TARGET_KB + 1}KB`}
                 </Button>
               </div>
             )}
