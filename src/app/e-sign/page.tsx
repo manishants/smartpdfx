@@ -7,13 +7,16 @@ import SignatureCanvas from 'react-signature-canvas';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Undo, Wand2, FileSignature } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Wand2, FileSignature, Trash2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
 import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import * as pdfjsLib from 'pdfjs-dist';
+import { Rnd } from 'react-rnd';
+import { cn } from '@/lib/utils';
+
 
 type Stage = 'upload' | 'sign' | 'place' | 'download';
 type SignatureMode = 'draw' | 'type' | 'upload';
@@ -38,6 +41,8 @@ export default function ESignPage() {
     const [typedSignature, setTypedSignature] = useState('');
     const [placedSignatures, setPlacedSignatures] = useState<PlacedSignature[]>([]);
     const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
+    const [activeSignatureId, setActiveSignatureId] = useState<string | null>(null);
+
 
     const sigCanvas = useRef<SignatureCanvas>(null);
     const { toast } = useToast();
@@ -174,7 +179,7 @@ export default function ESignPage() {
     };
     
     const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
-        const signatureData = JSON.stringify({ width: e.currentTarget.width, height: e.currentTarget.height });
+        const signatureData = JSON.stringify({ width: 150, height: 75 });
         e.dataTransfer.setData("application/json", signatureData);
     }
     
@@ -186,7 +191,6 @@ export default function ESignPage() {
         setIsLoading(true);
         try {
             const pdfUri = await fileToDataUri(file);
-            // We need original PDF dimensions, so we reload it.
             const pdfData = await arrayBufferFromFile(file);
             const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
 
@@ -194,11 +198,10 @@ export default function ESignPage() {
                 const page = await pdf.getPage(ps.pageIndex + 1);
                 const originalViewport = page.getViewport({ scale: 1.0 });
 
-                const imageEl = document.getElementById(`pdf-page-${ps.pageIndex}`) as HTMLImageElement;
-                if (!imageEl) return null;
+                const renderedPage = pageDimensions[ps.pageIndex];
+                if (!renderedPage) return null;
 
-                const renderedWidth = imageEl.clientWidth;
-                const scale = originalViewport.width / renderedWidth;
+                const scale = originalViewport.width / renderedPage.width;
                 
                 return {
                     pageIndex: ps.pageIndex,
@@ -224,6 +227,10 @@ export default function ESignPage() {
         } finally {
             setIsLoading(false);
         }
+    }
+    
+    const removeSignature = (id: string) => {
+        setPlacedSignatures(prev => prev.filter(s => s.id !== id));
     }
 
     const handleReset = () => {
@@ -307,8 +314,8 @@ export default function ESignPage() {
                 </div>
             )
             case 'place': return (
-                <div className="grid md:grid-cols-12 gap-6 h-[70vh]">
-                    <div className="md:col-span-3 flex flex-col items-center gap-4 p-4 border-r">
+                <div className="grid md:grid-cols-12 gap-6 h-[80vh]">
+                    <aside className="md:col-span-3 flex flex-col items-center gap-4 p-4 border-r">
                         <h3 className="font-semibold text-lg">Your Signature</h3>
                         {signature && (
                             <div className="p-2 border border-dashed rounded-md cursor-grab">
@@ -323,34 +330,59 @@ export default function ESignPage() {
                             </div>
                         )}
                         <p className="text-sm text-center text-muted-foreground">Drag your signature and drop it onto the document pages.</p>
+                        
+                        {activeSignatureId && (
+                           <Button variant="destructive" className="w-full mt-4" onClick={() => removeSignature(activeSignatureId)}>
+                               <Trash2 className="mr-2" /> Remove Selected
+                           </Button>
+                        )}
+
                         <Button className="w-full mt-auto" size="lg" onClick={handleApplySignatures} disabled={isLoading || placedSignatures.length === 0}>
                             {isLoading ? <><Loader2 className="mr-2 animate-spin" />Applying...</> : <><Wand2 className="mr-2"/>Apply Signatures</>}
                         </Button>
-                    </div>
-                    <div className="md:col-span-9">
-                        <ScrollArea className="h-full w-full bg-muted/50">
+                    </aside>
+                    <main className="md:col-span-9 bg-muted/50">
+                        <ScrollArea className="h-full w-full">
                             <div className="p-4 space-y-4 flex flex-col items-center">
                             {pdfImages.map((src, index) => (
-                                <div key={index} className="relative shadow-lg" onDragOver={(e) => e.preventDefault()} onDrop={(e) => handlePageDrop(e, index)}>
+                                <div key={index} className="relative shadow-lg" onDragOver={(e) => e.preventDefault()} onDrop={(e) => handlePageDrop(e, index)} onClick={() => setActiveSignatureId(null)}>
                                     <Image id={`pdf-page-${index}`} src={src} alt={`PDF Page ${index + 1}`} width={pageDimensions[index]?.width || 800} height={pageDimensions[index]?.height || 1100} className="w-full h-auto" />
                                     {placedSignatures.filter(ps => ps.pageIndex === index).map(ps => (
-                                        <Image
+                                        <Rnd
                                             key={ps.id}
-                                            src={signature!}
-                                            alt="Placed signature"
-                                            width={ps.width}
-                                            height={ps.height}
-                                            className="absolute cursor-pointer"
-                                            style={{ left: ps.x, top: ps.y }}
-                                            onClick={() => setPlacedSignatures(prev => prev.filter(p => p.id !== ps.id))}
-                                        />
+                                            size={{ width: ps.width, height: ps.height }}
+                                            position={{ x: ps.x, y: ps.y }}
+                                            onDragStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
+                                            onDragStop={(e, d) => {
+                                                const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {...s, x: d.x, y: d.y} : s);
+                                                setPlacedSignatures(updatedSigs);
+                                            }}
+                                            onResizeStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
+                                            onResizeStop={(e, direction, ref, delta, position) => {
+                                                const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {
+                                                    ...s,
+                                                    width: parseFloat(ref.style.width),
+                                                    height: parseFloat(ref.style.height),
+                                                    ...position
+                                                } : s);
+                                                setPlacedSignatures(updatedSigs);
+                                            }}
+                                            onClick={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
+                                            className={cn("border border-dashed", activeSignatureId === ps.id ? "border-primary" : "border-transparent")}
+                                        >
+                                            <Image
+                                                src={signature!}
+                                                alt="Placed signature"
+                                                layout="fill"
+                                                className="cursor-move object-contain"
+                                            />
+                                        </Rnd>
                                     ))}
                                 </div>
                             ))}
                             </div>
-                           <ScrollBar orientation="vertical" />
                         </ScrollArea>
-                    </div>
+                    </main>
                 </div>
             )
             case 'download': return (
@@ -383,7 +415,7 @@ export default function ESignPage() {
             </header>
             <div className="mt-8">
                 <Card>
-                    <CardContent className="p-6">
+                    <CardContent className="p-6 min-h-[70vh]">
                         {renderContent()}
                     </CardContent>
                 </Card>
