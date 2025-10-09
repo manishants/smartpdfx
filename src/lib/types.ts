@@ -252,15 +252,15 @@ export const PdfToWordOutputSchema = z.object({
 export type PdfToWordOutput = z.infer<typeof PdfToWordOutputSchema>;
 
 // PDF to PPT
-export const PdfToPptInputSchema = z.object({
-  pdfUri: z.string().describe("A PDF as a data URI."),
+export const PptToPdfInputSchema = z.object({
+  pptxUri: z.string().describe("A PPTX as a data URI."),
 });
-export type PdfToPptInput = z.infer<typeof PdfToPptInputSchema>;
+export type PptToPdfInput = z.infer<typeof PptToPdfInputSchema>;
 
-export const PdfToPptOutputSchema = z.object({
-  pptxUri: z.string().describe("The converted PowerPoint document as a data URI."),
+export const PptToPdfOutputSchema = z.object({
+  pdfUri: z.string().describe("The converted PDF document as a data URI."),
 });
-export type PdfToPptOutput = z.infer<typeof PdfToPptOutputSchema>;
+export type PptToPdfOutput = z.infer<typeof PptToPdfOutputSchema>;
 
 
 // Trim Video
@@ -573,3 +573,5 @@ export const ImageToTextOutputSchema = z.object({
   text: z.string().describe('The extracted text from the image.'),
 });
 export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
+
+    

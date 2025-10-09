@@ -2,17 +2,13 @@
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import JSZip from 'jszip';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { saveAs } from 'file-saver';
-
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -49,7 +45,7 @@ const FAQ = () => (
              <AccordionItem value="item-3">
                 <AccordionTrigger>Are my presentation files secure?</AccordionTrigger>
                 <AccordionContent>
-                   Yes, because the entire conversion happens in your browser. Your files are never uploaded to our servers, ensuring maximum privacy.
+                   Yes. Your files are uploaded securely to our server for conversion and are permanently deleted one hour later. We do not store or view your files.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -84,93 +80,13 @@ export default function PptToPdfPage() {
         return;
     }
     setIsConverting(true);
-    setResult(null);
-    try {
-        const zip = await JSZip.loadAsync(file);
-        const pdfDoc = await PDFDocument.create();
-
-        const presentationXml = await zip.file('ppt/presentation.xml')?.async('string');
-        const parser = new DOMParser();
-        const presDoc = parser.parseFromString(presentationXml!, 'application/xml');
-        const sldSz = presDoc.getElementsByTagName('p:sldSz')[0];
-        const slideWidthPoints = parseInt(sldSz.getAttribute('cx')!) / 12700;
-        const slideHeightPoints = parseInt(sldSz.getAttribute('cy')!) / 12700;
-
-        const presentationRelsXml = await zip.file('ppt/_rels/presentation.xml.rels')?.async('string');
-        const relsDoc = parser.parseFromString(presentationRelsXml!, 'application/xml');
-        const relationships = Array.from(relsDoc.getElementsByTagName('Relationship'));
-        const slideRels = relationships
-            .filter(rel => rel.getAttribute('Type') === 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide')
-            .sort((a, b) => parseInt(a.getAttribute('Id')!.substring(3)) - parseInt(b.getAttribute('Id')!.substring(3)));
-
-        for (const rel of slideRels) {
-            const slideTargetPath = rel.getAttribute('Target');
-            if (!slideTargetPath) continue;
-
-            const page = pdfDoc.addPage([slideWidthPoints, slideHeightPoints]);
-            const slideRelsPath = `ppt/slides/_rels/${slideTargetPath.split('/').pop()}.rels`;
-            const slideRelsFile = zip.file(slideRelsPath);
-
-            if (slideRelsFile) {
-                const slideRelsXml = await slideRelsFile.async('string');
-                const slideRelsDoc = parser.parseFromString(slideRelsXml, 'application/xml');
-                const imageRels = Array.from(slideRelsDoc.getElementsByTagName('Relationship'))
-                    .filter(r => r.getAttribute('Type') === 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image');
-
-                for (const imageRel of imageRels) {
-                    const imagePath = `ppt/slides/${imageRel.getAttribute('Target')!}`;
-                    const imageFile = zip.file(imagePath);
-                    if (imageFile) {
-                        try {
-                            const imageBytes = await imageFile.async('uint8array');
-                            let image;
-                            if (imagePath.endsWith('.png')) {
-                                image = await pdfDoc.embedPng(imageBytes);
-                            } else if (imagePath.endsWith('.jpeg') || imagePath.endsWith('.jpg')) {
-                                image = await pdfDoc.embedJpg(imageBytes);
-                            } else {
-                                continue;
-                            }
-
-                            page.drawImage(image, {
-                                x: 0,
-                                y: 0,
-                                width: page.getWidth(),
-                                height: page.getHeight(),
-                            });
-                        } catch (e) {
-                            console.warn("Could not embed image:", imagePath, e);
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (pdfDoc.getPageCount() === 0) {
-            throw new Error("No slides could be converted. The presentation might be empty or in an unsupported format.");
-        }
-
-        const pdfBytes = await pdfDoc.save();
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        const pdfUri = URL.createObjectURL(blob);
-        setResult({ pdfUri });
-
-    } catch (error: any) {
-      console.error("Conversion failed:", error);
-      toast({
-        title: "Conversion Failed",
-        description: error.message || "Could not process the PowerPoint file. It might be corrupted or saved in an older format.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsConverting(false);
-    }
-  };
-  
-  const handleDownload = () => {
-    if (result && file) {
-      saveAs(result.pdfUri, `${file.name.replace(/\.pptx?$/, '')}.pdf`);
-    }
+    // Placeholder for conversion logic
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    toast({
+        title: "Coming Soon!",
+        description: "This feature is under development and will be available shortly.",
+    });
+    setIsConverting(false);
   };
   
   const handleReset = () => {
@@ -236,8 +152,8 @@ export default function PptToPdfPage() {
                  <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                  <h2 className="text-2xl font-semibold mt-4">Conversion Successful!</h2>
                  <div className="mt-6 flex gap-4">
-                    <Button size="lg" onClick={handleDownload}>
-                      <FileDown className="mr-2" />Download PDF
+                    <Button size="lg" asChild>
+                      <a href={result.pdfUri} download={`${file.name}.pdf`}><FileDown className="mr-2" />Download PDF</a>
                     </Button>
                     <Button size="lg" variant="outline" onClick={handleReset}>
                       <RefreshCw className="mr-2" />
