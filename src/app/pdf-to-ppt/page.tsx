@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
-import { pdfToPpt } from '@/ai/flows/pdf-to-ppt';
-import type { PdfToPptInput, PdfToPptOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import * as pdfjsLib from 'pdfjs-dist';
+import PptxGenJS from 'pptxgenjs';
+import { saveAs } from 'file-saver';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 const FAQ = () => (
     <div className="max-w-4xl mx-auto mt-12">
@@ -19,19 +22,19 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>How does the PDF to PowerPoint conversion work?</AccordionTrigger>
                 <AccordionContent>
-                    Our tool uses an advanced AI model that analyzes your PDF page by page. It identifies text, images, and layout elements, and then reconstructs them into editable slides in a Microsoft PowerPoint (.pptx) file. Each page of the PDF becomes a separate slide in the presentation.
+                    Our tool works entirely in your browser. It renders each page of your PDF as a high-quality image and then inserts each image onto a separate slide in a new PowerPoint (.pptx) file. This ensures your layout and content are visually preserved.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
                 <AccordionTrigger>Will the text and images be editable in the final PPTX file?</AccordionTrigger>
                 <AccordionContent>
-                    Yes, absolutely. The goal of this tool is to create a fully editable PowerPoint presentation. Text will be in editable text boxes, and images will be individual elements that you can move, resize, or replace within PowerPoint.
+                    No. Because each PDF page is converted into a single image, the text and other elements on the slide will not be editable. This method is best for preserving the exact look of your PDF in a presentation format.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-                <AccordionTrigger>How accurate is the layout conversion?</AccordionTrigger>
+                <AccordionTrigger>Are my files secure?</AccordionTrigger>
                 <AccordionContent>
-                    The AI strives to preserve the original layout as closely as possible. For standard layouts, the conversion is highly accurate. However, for PDFs with very complex or unconventional designs, some manual adjustments in PowerPoint may be needed to perfect the final presentation.
+                   Yes. The entire conversion process happens in your web browser. Your PDF file is never uploaded to our servers, ensuring your data remains completely private.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -42,7 +45,6 @@ const FAQ = () => (
 export default function PdfToPptPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
-  const [result, setResult] = useState<PdfToPptOutput | null>(null);
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,21 +52,12 @@ export default function PdfToPptPage() {
       const selectedFile = event.target.files[0];
        if (selectedFile.type === 'application/pdf') {
         setFile(selectedFile);
-        setResult(null);
       } else {
         toast({ title: "Invalid file type", description: "Please select a PDF file.", variant: "destructive" });
       }
     }
   };
 
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
 
   const handleConvert = async () => {
     if (!file) {
@@ -72,23 +65,52 @@ export default function PdfToPptPage() {
         return;
     }
     setIsConverting(true);
-    setResult(null);
+    
     try {
-      const pdfUri = await fileToDataUri(file);
-      const input: PdfToPptInput = { pdfUri };
-      
-      const conversionResult = await pdfToPpt(input);
-      
-      if (conversionResult) {
-        setResult(conversionResult);
-      } else {
-        throw new Error("Conversion returned no data.");
-      }
+        const fileBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
+        const numPages = pdf.numPages;
+        
+        const pptx = new PptxGenJS();
+        
+        for (let i = 1; i <= numPages; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 2.0 }); // High scale for better quality
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            
+            if (context) {
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                const imageUri = canvas.toDataURL('image/png');
+                
+                const slide = pptx.addSlide();
+                slide.addImage({
+                    data: imageUri,
+                    x: 0,
+                    y: 0,
+                    w: '100%',
+                    h: '100%',
+                });
+            }
+        }
+
+        const blob = await pptx.write('blob');
+        const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
+        saveAs(blob, `${originalFilename}.pptx`);
+
+        toast({
+            title: "Conversion Successful!",
+            description: "Your PowerPoint file has been downloaded.",
+        });
+
     } catch (error: any) {
       console.error("Conversion failed:", error);
       toast({
         title: "Conversion Failed",
-        description: error.message || "Something went wrong while converting your PDF. Please try again.",
+        description: error.message || "Something went wrong while converting your PDF.",
         variant: "destructive"
       });
     } finally {
@@ -96,23 +118,8 @@ export default function PdfToPptPage() {
     }
   };
   
-  const handleDownload = () => {
-    if (result && file) {
-      const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
-      const newFilename = `${originalFilename}.pptx`;
-      
-      const a = document.createElement('a');
-      a.href = result.pptxUri;
-      a.download = newFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-  };
-
   const handleReset = () => {
     setFile(null);
-    setResult(null);
     setIsConverting(false);
   };
 
@@ -147,41 +154,29 @@ export default function PdfToPptPage() {
               </div>
             )}
 
-            {file && !result && (
+            {file && (
               <div className="flex flex-col items-center gap-6">
                 <div className="flex flex-col items-center justify-center bg-muted/50 border rounded-lg p-8 w-full">
                     <FileType className="w-16 h-16 text-primary" />
                     <p className="mt-2 text-sm font-semibold text-muted-foreground">{file.name}</p>
                 </div>
-                <Button 
-                  size="lg" 
-                  onClick={handleConvert}
-                  disabled={isConverting}
-                >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Converting...
-                    </>
-                   ) : <><FileUp className="mr-2"/>Convert to PPT</>}
-                </Button>
-              </div>
-            )}
-
-            {result && file && (
-               <div className="text-center flex flex-col items-center gap-4">
-                 <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                 <h2 className="text-2xl font-semibold mt-4">Conversion Successful!</h2>
-                 <div className="mt-6 flex gap-4">
-                    <Button size="lg" onClick={handleDownload}>
-                      <FileDown className="mr-2" />
-                      Download PPTX
+                <div className="flex gap-4">
+                    <Button 
+                    size="lg" 
+                    onClick={handleConvert}
+                    disabled={isConverting}
+                    >
+                    {isConverting ? (
+                        <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Converting...
+                        </>
+                    ) : <><FileUp className="mr-2"/>Convert to PPT & Download</>}
                     </Button>
                     <Button size="lg" variant="outline" onClick={handleReset}>
-                      <RefreshCw className="mr-2" />
-                      Convert Another
+                        <RefreshCw className="mr-2" /> Start Over
                     </Button>
-                 </div>
+                </div>
               </div>
             )}
           </CardContent>
