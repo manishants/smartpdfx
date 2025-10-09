@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -11,8 +10,10 @@ import { UploadCloud, Loader2, RefreshCw, Wand2, Clipboard, ClipboardCheck, File
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { createWorker, OEM } from 'tesseract.js';
-import { Progress } from '@/components/ui/progress';
+import { imageToText } from '@/ai/flows/image-to-text';
+import type { ImageToTextInput } from '@/ai/flows/image-to-text';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,19 +29,19 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>What is OCR?</AccordionTrigger>
                 <AccordionContent>
-                    OCR stands for Optical Character Recognition. It's a technology that converts different types of documents, such as scanned paper documents, PDF files, or images captured by a digital camera into editable and searchable data.
+                    OCR stands for Optical Character Recognition. It's a technology that uses AI to convert different types of documents, such as scanned paper documents, PDF files, or images captured by a digital camera into editable and searchable data.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
                 <AccordionTrigger>What kind of images work best?</AccordionTrigger>
                 <AccordionContent>
-                    For the best results, use high-quality images with clear, printed text. The text should be well-lit and not heavily distorted. The tool can handle various fonts, but standard, clean fonts work best. It may struggle with very stylized or messy handwriting.
+                    For the best results, use high-quality images with clear text. The text should be well-lit and not heavily distorted. Our AI model can handle various fonts and even handwriting, but clarity is key.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
                 <AccordionTrigger>Is my data secure?</AccordionTrigger>
                 <AccordionContent>
-                    Yes, your privacy is our top priority. The entire OCR process happens in your browser. Your image is never uploaded to our servers, ensuring your data remains completely private.
+                    Yes, your privacy is our top priority. Your image is securely uploaded to our servers for processing by our AI model and is permanently deleted one hour later. We do not store or use your data for any other purpose.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -52,9 +53,8 @@ export default function ImageToTextPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedText, setExtractedText] = useState<string | null>(null);
+  const [language, setLanguage] = useState('English and Hindi');
   const [hasCopied, setHasCopied] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState('');
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +71,15 @@ export default function ImageToTextPage() {
       }
     }
   };
+  
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleExtract = async () => {
     if (!file) {
@@ -79,20 +88,11 @@ export default function ImageToTextPage() {
     }
     setIsExtracting(true);
     setExtractedText(null);
-    setProgress(0);
-    setStatus('Initializing OCR engine...');
-
-    const worker = await createWorker('eng+hin', OEM.TESSERACT_LSTM_COMBINED, {
-      logger: (m) => {
-        setStatus(m.status);
-        if (m.status === 'recognizing text') {
-          setProgress(Math.round(m.progress * 100));
-        }
-      },
-    });
 
     try {
-        const { data: { text } } = await worker.recognize(file.file);
+        const imageUri = await fileToDataUri(file.file);
+        const input: ImageToTextInput = { imageUri, language };
+        const { text } = await imageToText(input);
         setExtractedText(text);
     } catch (error: any) {
       console.error("Extraction failed:", error);
@@ -103,9 +103,6 @@ export default function ImageToTextPage() {
       });
     } finally {
       setIsExtracting(false);
-      setProgress(0);
-      setStatus('');
-      await worker.terminate();
     }
   };
 
@@ -132,7 +129,7 @@ export default function ImageToTextPage() {
     }
 
     const { saveAs } = (await import('file-saver'));
-    const blob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([extractedText], { type: 'text/plain;charset=utf-t8' });
     saveAs(blob, "extracted-text.txt");
   };
 
@@ -142,7 +139,7 @@ export default function ImageToTextPage() {
       <header className="text-center">
         <h1 className="text-4xl font-bold font-headline">Image to Text (OCR)</h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Extract English and Hindi text from any image using client-side OCR.
+          Extract text from any image using powerful AI.
         </p>
       </header>
       
@@ -173,6 +170,19 @@ export default function ImageToTextPage() {
                         <div className="relative w-full border rounded-lg overflow-hidden shadow-md">
                            <Image src={file.preview} alt="Uploaded preview" width={800} height={600} className="w-full h-auto object-contain" />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="language">Language</Label>
+                            <Select value={language} onValueChange={setLanguage}>
+                                <SelectTrigger id="language">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="English and Hindi">English + Hindi</SelectItem>
+                                    <SelectItem value="English">English</SelectItem>
+                                    <SelectItem value="Hindi">Hindi</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <Button 
                           className="w-full"
                           size="lg" 
@@ -182,7 +192,7 @@ export default function ImageToTextPage() {
                           {isExtracting ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Extracting...
+                              Extracting with AI...
                             </>
                            ) : <><Wand2 className="mr-2"/>Extract Text</>}
                         </Button>
@@ -194,7 +204,7 @@ export default function ImageToTextPage() {
               <div className="flex flex-col gap-4">
                 <div className="relative">
                   <Textarea
-                    placeholder={isExtracting ? "Processing in your browser..." : "Extracted text will appear here..."}
+                    placeholder={isExtracting ? "AI is reading the image..." : "Extracted text will appear here..."}
                     value={extractedText || ''}
                     readOnly
                     className="h-80 text-base"
@@ -211,12 +221,6 @@ export default function ImageToTextPage() {
                      </Button>
                    )}
                 </div>
-                {isExtracting && (
-                    <div className="space-y-2">
-                        <p className="text-sm text-center text-muted-foreground capitalize">{status}</p>
-                        <Progress value={progress} />
-                    </div>
-                )}
                 <div className="grid grid-cols-2 gap-4">
                     <Button 
                         className="w-full"
