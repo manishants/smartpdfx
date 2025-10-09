@@ -66,7 +66,7 @@ export default function ESignPage() {
             const reader = new FileReader();
             reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
             reader.onerror = (error) => reject(error);
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         });
     }
 
@@ -291,7 +291,7 @@ export default function ESignPage() {
                                     <Input 
                                         placeholder="Type your full name" 
                                         className="text-4xl h-24 p-4" 
-                                        style={{fontFamily: '"Homemade Apple", cursive'}}
+                                        style={{fontFamily: '"Homemade+Apple", cursive'}}
                                         value={typedSignature}
                                         onChange={(e) => setTypedSignature(e.target.value)}
                                     />
@@ -388,7 +388,7 @@ export default function ESignPage() {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex items-center justify-center gap-4 mt-4">
+                        <div className="flex items-center justify-center gap-4 mt-4 bg-background p-2 rounded-lg border shadow-sm">
                             <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}><ZoomOut className="h-4 w-4" /></Button>
                             <span className="text-sm font-medium w-16 text-center">{Math.round(zoom * 100)}%</span>
                             <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.min(2, z + 0.25))}><ZoomIn className="h-4 w-4" /></Button>
