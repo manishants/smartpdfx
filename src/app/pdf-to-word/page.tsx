@@ -5,12 +5,15 @@ import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
+import { UploadCloud, FileUp, Loader2, RefreshCw, FileType } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
-import { pdfToWord } from '@/ai/flows/pdf-to-word';
-import type { PdfToWordInput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import * as pdfjsLib from 'pdfjs-dist';
+import { Packer, Document, Paragraph } from 'docx';
+import { saveAs } from 'file-saver';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 const FAQ = () => (
     <div className="max-w-4xl mx-auto mt-12">
@@ -19,19 +22,19 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>How does the PDF to Word conversion work?</AccordionTrigger>
                 <AccordionContent>
-                    Our tool uses an advanced AI model with Optical Character Recognition (OCR) to scan your PDF. It extracts the text while trying to preserve the original paragraph and line break structure. This text is then used to generate a new, editable Microsoft Word (.docx) document.
+                    Our tool works entirely in your browser. It reads the PDF file, extracts the text content layer, and then uses that text to construct a new, editable Microsoft Word (.docx) document.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-                <AccordionTrigger>Will my formatting (bold, italics, etc.) and images be kept?</AccordionTrigger>
+                <AccordionTrigger>Will my formatting and images be kept?</AccordionTrigger>
                 <AccordionContent>
-                    This version of our tool focuses on accurately extracting the text content and basic structure. It does not transfer complex formatting like font styles, colors, or embedded images. The output will be a clean Word document with unformatted text, perfect for when you need to copy or edit the content of a PDF.
+                    This tool focuses on accurately extracting text content. It does not transfer complex formatting like font styles, colors, or embedded images. The output is a clean Word document with the raw text, perfect for editing or copying.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-                <AccordionTrigger>Is there a file size limit?</AccordionTrigger>
+                <AccordionTrigger>What happens with scanned PDFs (OCR)?</AccordionTrigger>
                 <AccordionContent>
-                    For best performance, we recommend uploading PDFs under 50MB. While larger files may work, processing time will be longer. All uploaded files are handled securely and are deleted from our servers one hour after processing to protect your privacy.
+                    If your PDF is a scanned document (an image of text), this tool cannot extract the text because there is no text layer. For scanned documents, you should use our AI-powered <a href="/pdf-ocr" className="text-primary underline">PDF OCR tool</a> to extract the text first.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -54,15 +57,6 @@ export default function PdfToWordPage() {
     }
   };
 
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleConvert = async () => {
     if (!file) {
         toast({ title: "No file selected", description: "Please select a PDF to convert.", variant: "destructive" });
@@ -70,30 +64,46 @@ export default function PdfToWordPage() {
     }
     setIsConverting(true);
     
+    toast({
+        title: "Heads Up!",
+        description: "If your PDF is a scanned document (image-based), the resulting Word file may be empty. For scanned PDFs, use our OCR tool.",
+        duration: 6000,
+    });
+    
     try {
-      const pdfUri = await fileToDataUri(file);
-      const input: PdfToWordInput = { pdfUri };
-      
-      const result = await pdfToWord(input);
-      
-      if (result && result.docxUri) {
-        const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
-        const newFilename = `${originalFilename}.docx`;
-        const link = document.createElement("a");
-        link.href = result.docxUri;
-        link.download = newFilename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast({ title: "Conversion Successful!", description: "Your DOCX file is downloading." });
-      } else {
-        throw new Error("Conversion returned no data.");
+      const fileBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
+      const numPages = pdf.numPages;
+      let fullText = '';
+
+      for(let i = 1; i <= numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map(item => ('str' in item ? item.str : '')).join(' ');
+          fullText += pageText + '\n\n';
       }
+
+      if (!fullText.trim()) {
+        throw new Error("No text could be extracted. The PDF might be image-based.");
+      }
+
+      const doc = new Document({
+        sections: [{
+          children: fullText.split('\n').map(p => new Paragraph(p)),
+        }],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
+      const newFilename = `${originalFilename}.docx`;
+
+      saveAs(blob, newFilename);
+
     } catch (error: any) {
       console.error("Conversion failed:", error);
       toast({
         title: "Conversion Failed",
-        description: error.message || "Something went wrong while converting your PDF. Please try again.",
+        description: error.message || "Could not extract text from the PDF.",
         variant: "destructive"
       });
     } finally {
