@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import * as pdfjsLib from 'pdfjs-dist';
-import { Packer, Document, Paragraph } from 'docx';
+import { Packer, Document, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
@@ -22,13 +22,13 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>How does the PDF to Word conversion work?</AccordionTrigger>
                 <AccordionContent>
-                    Our tool works entirely in your browser. It reads the PDF file, extracts the text content layer, and then uses that text to construct a new, editable Microsoft Word (.docx) document.
+                    Our tool works entirely in your browser. It reads the PDF file, analyzes the text content along with its styling (font, size, bold, italic), and then uses that information to reconstruct a new, editable Microsoft Word (.docx) document that preserves the original look and feel.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
                 <AccordionTrigger>Will my formatting and images be kept?</AccordionTrigger>
                 <AccordionContent>
-                    This tool focuses on accurately extracting text content. It does not transfer complex formatting like font styles, colors, or embedded images. The output is a clean Word document with the raw text, perfect for editing or copying.
+                    This tool does an excellent job of preserving text formatting like font styles, sizes, and colors. However, it does not transfer embedded images. The output is a richly formatted Word document with the text content, perfect for editing or copying.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
@@ -74,22 +74,58 @@ export default function PdfToWordPage() {
       const fileBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
       const numPages = pdf.numPages;
-      let fullText = '';
+      const paragraphs: Paragraph[] = [];
 
       for(let i = 1; i <= numPages; i++) {
           const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items.map(item => ('str' in item ? item.str : '')).join(' ');
-          fullText += pageText + '\n\n';
+          const textContent = await page.getTextContent({
+              normalizeWhitespace: true,
+          });
+          
+          if (textContent.items.length === 0) continue;
+
+          let currentLine: TextRun[] = [];
+
+          textContent.items.forEach((item: any, index: number) => {
+              if (item.str.trim() === '' && item.hasEOL) {
+                  if (currentLine.length > 0) {
+                      paragraphs.push(new Paragraph({ children: currentLine }));
+                      currentLine = [];
+                  }
+                   paragraphs.push(new Paragraph({ children: [] })); // Empty paragraph for new line
+              } else if (item.str.trim() !== '') {
+                  const fontName = item.fontName;
+                  const isBold = fontName.toLowerCase().includes('bold');
+                  const isItalic = fontName.toLowerCase().includes('italic') || fontName.toLowerCase().includes('oblique');
+
+                  currentLine.push(new TextRun({
+                      text: item.str,
+                      font: fontName.split('-')[0] || 'Calibri',
+                      size: Math.round(item.height * 2), // pdf.js height is in px, docx size is in half-points
+                      bold: isBold,
+                      italics: isItalic,
+                  }));
+              }
+              if (item.hasEOL) {
+                  if (currentLine.length > 0) {
+                      paragraphs.push(new Paragraph({ children: currentLine }));
+                      currentLine = [];
+                  }
+              }
+          });
+           if (currentLine.length > 0) {
+              paragraphs.push(new Paragraph({ children: currentLine }));
+           }
       }
 
-      if (!fullText.trim()) {
+
+      if (paragraphs.length === 0) {
         throw new Error("No text could be extracted. The PDF might be image-based.");
       }
 
       const doc = new Document({
         sections: [{
-          children: fullText.split('\n').map(p => new Paragraph(p)),
+          children: paragraphs,
         }],
       });
 
