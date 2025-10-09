@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
@@ -50,7 +50,7 @@ const FAQ = () => (
                 <AccordionTrigger>Is there a file size limit?</AccordionTrigger>
                 <AccordionContent>
                     While there is no strict file size limit, we recommend uploading Word documents under 50MB for the best performance. Larger or more complex documents may take longer to convert.
-                AccordionContent>
+                </AccordionContent>
             </AccordionItem>
              <AccordionItem value="item-4">
                 <AccordionTrigger>Are my files secure?</AccordionTrigger>
