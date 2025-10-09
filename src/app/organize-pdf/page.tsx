@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, AppWindow, Trash2, CheckCircle } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, AppWindow, Trash2, CheckCircle, Move } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { organizePdf } from '@/lib/actions/organize-pdf';
 import type { OrganizePdfInput, OrganizePdfOutput } from '@/lib/types';
@@ -14,6 +14,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { cn } from '@/lib/utils';
 
 type Stage = 'upload' | 'organize' | 'download';
 
@@ -84,6 +85,9 @@ export default function OrganizePdfPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [pages, setPages] = useState<PageToRender[]>([]);
     const [organizedPdfUri, setOrganizedPdfUri] = useState<string | null>(null);
+    
+    const dragItem = useRef<number | null>(null);
+    const dragOverItem = useRef<number | null>(null);
 
     const { toast } = useToast();
     
@@ -209,6 +213,15 @@ export default function OrganizePdfPage() {
         }
     };
 
+    const handleDrop = () => {
+        if (dragItem.current === null || dragOverItem.current === null) return;
+        const newPages = [...pages];
+        const dragItemContent = newPages.splice(dragItem.current, 1)[0];
+        newPages.splice(dragOverItem.current, 0, dragItemContent);
+        dragItem.current = null;
+        dragOverItem.current = null;
+        setPages(newPages);
+    };
 
     const handleReset = () => {
         setStage('upload');
@@ -249,8 +262,16 @@ export default function OrganizePdfPage() {
                     <ScrollArea className="h-[60vh] w-full border rounded-md p-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {pages.map((page, index) => (
-                            <div key={page.originalPageNumber} className="relative group">
-                                <Card className="overflow-hidden">
+                            <div 
+                                key={`${page.originalPageNumber}-${index}`}
+                                className={cn("relative group cursor-grab", dragItem.current === index && "opacity-50")}
+                                draggable
+                                onDragStart={() => (dragItem.current = index)}
+                                onDragEnter={() => (dragOverItem.current = index)}
+                                onDragEnd={handleDrop}
+                                onDragOver={(e) => e.preventDefault()}
+                            >
+                                <Card className="overflow-hidden pointer-events-none">
                                     <Image src={page.src} alt={`Page ${page.originalPageNumber}`} width={200} height={280} className="w-full h-auto" />
                                 </Card>
                                 <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -259,6 +280,9 @@ export default function OrganizePdfPage() {
                                     </Button>
                                 </div>
                                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/80 px-2 py-1 rounded-full text-xs font-bold">{index + 1}</div>
+                                <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Move className="h-5 w-5 text-white bg-black/50 rounded-sm p-0.5" />
+                                </div>
                             </div>
                         ))}
                         </div>
