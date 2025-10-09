@@ -240,18 +240,18 @@ export const CompressPdfOutputSchema = z.object({
 });
 export type CompressPdfOutput = z.infer<typeof CompressPdfOutputSchema>;
 
-// PDF to Word
-export const PdfToWordInputSchema = z.object({
-  pdfUri: z.string().describe("A PDF as a data URI."),
+// Word to PDF
+export const WordToPdfInputSchema = z.object({
+  htmlContent: z.string().describe("The HTML content rendered from the DOCX file."),
 });
-export type PdfToWordInput = z.infer<typeof PdfToWordInputSchema>;
+export type WordToPdfInput = z.infer<typeof WordToPdfInputSchema>;
 
-export const PdfToWordOutputSchema = z.object({
-  docxUri: z.string().describe("The converted Word document as a data URI."),
+export const WordToPdfOutputSchema = z.object({
+  pdfUri: z.string().describe("The converted PDF document as a data URI."),
 });
-export type PdfToWordOutput = z.infer<typeof PdfToWordOutputSchema>;
+export type WordToPdfOutput = z.infer<typeof WordToPdfOutputSchema>;
 
-// PDF to PPT
+// PPT to PDF
 export const PptToPdfInputSchema = z.object({
   pptxUri: z.string().describe("A PPTX as a data URI."),
 });

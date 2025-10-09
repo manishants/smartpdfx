@@ -2,33 +2,16 @@
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-
-// Placeholder for the flow
-// import { wordToPdf } from '@/ai/flows/word-to-pdf';
-
-
-const ToolDescription = () => (
-    <div className="mt-12">
-        <Card className="p-6 md:p-8">
-            <CardTitle className="text-2xl font-bold mb-4">High-Fidelity Word to PDF Converter</CardTitle>
-            <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                    Convert your Microsoft Word documents (.doc, .docx) to PDF with our easy-to-use tool. The converter is designed to faithfully preserve your original document's layout, formatting, fonts, and images, ensuring your PDF looks exactly like your Word file.
-                </p>
-                <p>
-                    This is the perfect way to create professional-looking documents for sharing, printing, or archiving. PDFs are a universal standard, meaning anyone can view your file on any device without needing Microsoft Word.
-                </p>
-            </CardContent>
-        </Card>
-    </div>
-);
+import * as docx from 'docx-preview';
+import { saveAs } from 'file-saver';
+import { wordToPdf } from '@/lib/actions/word-to-pdf';
 
 const FAQ = () => (
     <div className="mt-12">
@@ -37,7 +20,7 @@ const FAQ = () => (
             <AccordionItem value="item-1">
                 <AccordionTrigger>Will my formatting and fonts be preserved?</AccordionTrigger>
                 <AccordionContent>
-                    Yes. Our converter is designed to create a PDF that is a perfect replica of your Word document. This includes fonts, images, tables, headers, footers, and page layout.
+                    Yes. Our converter uses a high-fidelity rendering engine to create a PDF that is a near-perfect replica of your Word document. This includes fonts, images, tables, headers, footers, and page layout.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
@@ -58,12 +41,6 @@ const FAQ = () => (
                     Yes. We use a secure HTTPS connection for all uploads. Your files are automatically and permanently deleted from our servers one hour after conversion.
                 </AccordionContent>
             </AccordionItem>
-             <AccordionItem value="item-5">
-                <AccordionTrigger>Can I convert a PDF back to Word?</AccordionTrigger>
-                <AccordionContent>
-                    Yes, you can use our dedicated <a href="/pdf-to-word" className="text-primary underline">PDF to Word Converter</a> to turn your PDFs into editable DOCX files.
-                </AccordionContent>
-            </AccordionItem>
         </Accordion>
     </div>
 );
@@ -82,7 +59,7 @@ export default function WordToPdfPage() {
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       ];
-       if (allowedTypes.includes(selectedFile.type)) {
+       if (allowedTypes.includes(selectedFile.type) || selectedFile.name.endsWith('.doc') || selectedFile.name.endsWith('.docx')) {
         setFile(selectedFile);
         setResult(null);
       } else {
@@ -99,20 +76,31 @@ export default function WordToPdfPage() {
     setIsConverting(true);
     setResult(null);
     try {
-      // const wordUri = await fileToDataUri(file);
-      // const input = { wordUri };
-      // const conversionResult = await wordToPdf(input);
+        const fileBuffer = await file.arrayBuffer();
+        
+        // Render docx to HTML in a hidden div
+        const hiddenContainer = document.createElement('div');
+        hiddenContainer.style.display = 'none';
+        document.body.appendChild(hiddenContainer);
+
+        await docx.renderAsync(fileBuffer, hiddenContainer);
+        
+        const htmlContent = hiddenContainer.innerHTML;
+        
+        // Clean up the hidden container
+        document.body.removeChild(hiddenContainer);
+
+        if (!htmlContent) {
+            throw new Error("Could not render the Word document.");
+        }
+
+        const conversionResult = await wordToPdf({ htmlContent });
       
-      // Placeholder logic
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const conversionResult = { pdfUri: "data:application/pdf;base64," };
-      
-      if (conversionResult) {
-        // setResult(conversionResult);
-        toast({ title: "Coming Soon!", description: "This feature is not yet implemented.", variant: "default" });
-      } else {
-        throw new Error("Conversion returned no data.");
-      }
+        if (conversionResult && conversionResult.pdfUri) {
+            setResult(conversionResult);
+        } else {
+            throw new Error("Conversion returned no data.");
+        }
     } catch (error: any) {
       console.error("Conversion failed:", error);
       toast({
@@ -122,6 +110,14 @@ export default function WordToPdfPage() {
       });
     } finally {
       setIsConverting(false);
+    }
+  };
+  
+  const handleDownload = () => {
+    if (result && file) {
+      const originalFilename = file.name;
+      const newFilename = `${originalFilename.substring(0, originalFilename.lastIndexOf('.'))}.pdf`;
+      saveAs(result.pdfUri, newFilename);
     }
   };
   
@@ -151,7 +147,7 @@ export default function WordToPdfPage() {
               >
                 <UploadCloud className="mx-auto h-12 w-12 text-primary" />
                 <p className="mt-4 font-semibold text-primary">Drag & drop a Word file here</p>
-                <p className="text-sm text-muted-foreground mt-1">or click to select a file</p>
+                <p className="text-sm text-muted-foreground mt-1">or click to select a file (.doc, .docx)</p>
                 <Input 
                   id="file-upload"
                   type="file" 
@@ -188,9 +184,7 @@ export default function WordToPdfPage() {
                  <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                  <h2 className="text-2xl font-semibold mt-4">Conversion Successful!</h2>
                  <div className="mt-6 flex gap-4">
-                    <Button size="lg" asChild>
-                      <a href={result.pdfUri} download={`${file.name}.pdf`}><FileDown className="mr-2" />Download PDF</a>
-                    </Button>
+                    <Button size="lg" onClick={handleDownload}><FileDown className="mr-2" />Download PDF</Button>
                     <Button size="lg" variant="outline" onClick={handleReset}>
                       <RefreshCw className="mr-2" />
                       Convert Another
@@ -201,7 +195,19 @@ export default function WordToPdfPage() {
           </CardContent>
         </Card>
       </div>
-      <ToolDescription />
+      <div className="mt-12">
+        <Card className="p-6 md:p-8">
+            <CardTitle className="text-2xl font-bold mb-4">High-Fidelity Word to PDF Converter</CardTitle>
+            <CardContent className="space-y-4 text-muted-foreground">
+                <p>
+                    Convert your Microsoft Word documents (.doc, .docx) to PDF with our easy-to-use tool. The converter is designed to faithfully preserve your original document's layout, formatting, fonts, and images, ensuring your PDF looks exactly like your Word file.
+                </p>
+                <p>
+                    This is the perfect way to create professional-looking documents for sharing, printing, or archiving. PDFs are a universal standard, meaning anyone can view your file on any device without needing Microsoft Word.
+                </p>
+            </CardContent>
+        </Card>
+    </div>
       <FAQ />
     </main>
     <AllTools />
