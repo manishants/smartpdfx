@@ -66,7 +66,7 @@ export default function ESignPage() {
             const reader = new FileReader();
             reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
             reader.onerror = (error) => reject(error);
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         });
     }
 
