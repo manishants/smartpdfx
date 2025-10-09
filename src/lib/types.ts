@@ -571,3 +571,19 @@ export const ExtractVotersOutputSchema = z.object({
   voters: z.array(VoterSchema),
 });
 export type ExtractVotersOutput = z.infer<typeof ExtractVotersOutputSchema>;
+
+// Image to Text (OCR)
+export const ImageToTextInputSchema = z.object({
+  imageUri: z
+    .string()
+    .describe(
+      "The image to extract text from, as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+  language: z.string().optional().describe('The language of the text in the image (e.g., "English", "Hindi", "English and Hindi").'),
+});
+export type ImageToTextInput = z.infer<typeof ImageToTextInputSchema>;
+
+export const ImageToTextOutputSchema = z.object({
+  text: z.string().describe('The extracted text from the image.'),
+});
+export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;

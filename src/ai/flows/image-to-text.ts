@@ -10,22 +10,12 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-export const ImageToTextInputSchema = z.object({
-  imageUri: z
-    .string()
-    .describe(
-      "The image to extract text from, as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-  language: z.string().optional().describe('The language of the text in the image (e.g., "English", "Hindi", "English and Hindi").'),
-});
-export type ImageToTextInput = z.infer<typeof ImageToTextInputSchema>;
-
-export const ImageToTextOutputSchema = z.object({
-  text: z.string().describe('The extracted text from the image.'),
-});
-export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
+import {
+    ImageToTextInputSchema,
+    ImageToTextOutputSchema,
+    type ImageToTextInput,
+    type ImageToTextOutput,
+} from '@/lib/types';
 
 
 const imageToTextPrompt = ai.definePrompt({

@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { imageToText } from '@/ai/flows/image-to-text';
-import type { ImageToTextInput } from '@/ai/flows/image-to-text';
+import type { ImageToTextInput } from '@/lib/types';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -53,7 +53,7 @@ export default function ImageToTextPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedText, setExtractedText] = useState<string | null>(null);
-  const [language, setLanguage] = useState('English and Hindi');
+  const [language, setLanguage] = useState('English');
   const [hasCopied, setHasCopied] = useState(false);
   const { toast } = useToast();
 
@@ -177,9 +177,9 @@ export default function ImageToTextPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="English and Hindi">English + Hindi</SelectItem>
                                     <SelectItem value="English">English</SelectItem>
                                     <SelectItem value="Hindi">Hindi</SelectItem>
+                                    <SelectItem value="English and Hindi">English + Hindi</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
