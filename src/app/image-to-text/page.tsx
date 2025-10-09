@@ -11,7 +11,7 @@ import { UploadCloud, Loader2, RefreshCw, Wand2, Clipboard, ClipboardCheck, File
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { createWorker } from 'tesseract.js';
+import { createWorker, OEM } from 'tesseract.js';
 import { Progress } from '@/components/ui/progress';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ const FAQ = () => (
             <AccordionItem value="item-2">
                 <AccordionTrigger>What kind of images work best?</AccordionTrigger>
                 <AccordionContent>
-                    For the best results, use high-quality images with clear, printed text. The text should be well-lit and not heavily distorted. The tool can handle various fonts, but standard, clean fonts work best. It may struggle with very stylized or handwritten text.
+                    For the best results, use high-quality images with clear, printed text. The text should be well-lit and not heavily distorted. The tool can handle various fonts, but standard, clean fonts work best. It may struggle with very stylized or messy handwriting.
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
@@ -82,7 +82,7 @@ export default function ImageToTextPage() {
     setProgress(0);
     setStatus('Initializing OCR engine...');
 
-    const worker = await createWorker('eng+hin', 1, {
+    const worker = await createWorker('eng+hin', OEM.TESSERACT_LSTM_COMBINED, {
       logger: (m) => {
         setStatus(m.status);
         if (m.status === 'recognizing text') {
