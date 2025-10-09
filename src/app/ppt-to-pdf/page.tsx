@@ -20,7 +20,7 @@ const ToolDescription = () => (
             <CardTitle className="text-2xl font-bold mb-4">Reliable PowerPoint to PDF Conversion</CardTitle>
             <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                    Convert your Microsoft PowerPoint presentations (.ppt, .pptx) into high-quality PDF files. Our converter ensures that your slides, images, text, and formatting are perfectly preserved, making it easy to share, archive, or print your presentations.
+                    Convert your Microsoft PowerPoint presentations (.pptx) into high-quality PDF files. Our converter ensures that your slides, images, text, and formatting are perfectly preserved by converting each slide into an image, making it easy to share, archive, or print your presentations.
                 </p>
                 <p>
                     PDFs are a universal format that can be opened on any device, ensuring your presentation looks exactly as you intended, every time. Protect your layout and fonts by converting to PDF before sharing.
@@ -43,25 +43,13 @@ const FAQ = () => (
             <AccordionItem value="item-2">
                 <AccordionTrigger>How is the quality of the final PDF?</AccordionTrigger>
                 <AccordionContent>
-                    Our tool is optimized to create high-quality PDFs that preserve the original resolution of your images and the clarity of your text, making it suitable for both digital viewing and professional printing.
+                    Our tool creates a high-quality PDF that preserves the original resolution of your images and the clarity of your text by rendering each slide as an image. This is suitable for both digital viewing and professional printing.
                 </AccordionContent>
             </AccordionItem>
              <AccordionItem value="item-3">
                 <AccordionTrigger>Are my presentation files secure?</AccordionTrigger>
                 <AccordionContent>
                    Yes, because the entire conversion happens in your browser. Your files are never uploaded to our servers, ensuring maximum privacy.
-                </AccordionContent>
-            </AccordionItem>
-             <AccordionItem value="item-4">
-                <AccordionTrigger>Can I convert a password-protected PowerPoint file?</AccordionTrigger>
-                <AccordionContent>
-                    No, this client-side tool cannot open password-protected presentations. You must remove the password before uploading.
-                </AccordionContent>
-            </AccordionItem>
-             <AccordionItem value="item-5">
-                <AccordionTrigger>Can I convert a PDF back to PowerPoint?</AccordionTrigger>
-                <AccordionContent>
-                    Yes! For that, you can use our dedicated <a href="/pdf-to-ppt" className="text-primary underline">PDF to PowerPoint Converter</a>, which uses AI to reconstruct editable slides from your PDF.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -79,14 +67,13 @@ export default function PptToPdfPage() {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
       const allowedTypes = [
-        'application/vnd.ms-powerpoint',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation'
       ];
        if (allowedTypes.includes(selectedFile.type) || selectedFile.name.endsWith('.pptx')) {
         setFile(selectedFile);
         setResult(null);
       } else {
-        toast({ title: "Invalid file type", description: "Please select a PPTX file.", variant: "destructive" });
+        toast({ title: "Invalid file type", description: "Please select a .pptx file.", variant: "destructive" });
       }
     }
   };
@@ -102,33 +89,28 @@ export default function PptToPdfPage() {
         const zip = await JSZip.loadAsync(file);
         const pdfDoc = await PDFDocument.create();
 
-        // Get slide dimensions from presentation.xml
         const presentationXml = await zip.file('ppt/presentation.xml')?.async('string');
         const parser = new DOMParser();
         const presDoc = parser.parseFromString(presentationXml!, 'application/xml');
         const sldSz = presDoc.getElementsByTagName('p:sldSz')[0];
-        const slideWidth = parseInt(sldSz.getAttribute('cx')!) / 12700;
-        const slideHeight = parseInt(sldSz.getAttribute('cy')!) / 12700;
-        
-        // Get list of slides
+        const slideWidthPoints = parseInt(sldSz.getAttribute('cx')!) / 12700;
+        const slideHeightPoints = parseInt(sldSz.getAttribute('cy')!) / 12700;
+
         const presentationRelsXml = await zip.file('ppt/_rels/presentation.xml.rels')?.async('string');
         const relsDoc = parser.parseFromString(presentationRelsXml!, 'application/xml');
         const relationships = Array.from(relsDoc.getElementsByTagName('Relationship'));
         const slideRels = relationships
             .filter(rel => rel.getAttribute('Type') === 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide')
-            .sort((a,b) => parseInt(a.getAttribute('Id')!.substring(3)) - parseInt(b.getAttribute('Id')!.substring(3)));
+            .sort((a, b) => parseInt(a.getAttribute('Id')!.substring(3)) - parseInt(b.getAttribute('Id')!.substring(3)));
 
         for (const rel of slideRels) {
-            const slidePath = `ppt/${rel.getAttribute('Target')}`;
-            const slideXml = await zip.file(slidePath)?.async('string');
-            const page = pdfDoc.addPage([slideWidth, slideHeight]);
-            const { width, height } = page.getSize();
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            
-            // This is a simplified parser. A full implementation would need to handle shapes, positions, fonts, etc.
-            // For now, we will add slide images as backgrounds if they exist.
-            const slideRelsPath = `ppt/slides/_rels/${slidePath.split('/').pop()}.rels`;
+            const slideTargetPath = rel.getAttribute('Target');
+            if (!slideTargetPath) continue;
+
+            const page = pdfDoc.addPage([slideWidthPoints, slideHeightPoints]);
+            const slideRelsPath = `ppt/slides/_rels/${slideTargetPath.split('/').pop()}.rels`;
             const slideRelsFile = zip.file(slideRelsPath);
+
             if (slideRelsFile) {
                 const slideRelsXml = await slideRelsFile.async('string');
                 const slideRelsDoc = parser.parseFromString(slideRelsXml, 'application/xml');
@@ -139,40 +121,35 @@ export default function PptToPdfPage() {
                     const imagePath = `ppt/slides/${imageRel.getAttribute('Target')!}`;
                     const imageFile = zip.file(imagePath);
                     if (imageFile) {
-                        const imageBytes = await imageFile.async('uint8array');
-                        let image;
                         try {
-                           if (imagePath.endsWith('.png')) {
-                              image = await pdfDoc.embedPng(imageBytes);
-                           } else if (imagePath.endsWith('.jpeg') || imagePath.endsWith('.jpg')) {
-                              image = await pdfDoc.embedJpg(imageBytes);
-                           }
+                            const imageBytes = await imageFile.async('uint8array');
+                            let image;
+                            if (imagePath.endsWith('.png')) {
+                                image = await pdfDoc.embedPng(imageBytes);
+                            } else if (imagePath.endsWith('.jpeg') || imagePath.endsWith('.jpg')) {
+                                image = await pdfDoc.embedJpg(imageBytes);
+                            } else {
+                                continue;
+                            }
 
-                           if(image) {
-                               const dims = image.scaleToFit(width, height);
-                               page.drawImage(image, {
-                                   x: (width - dims.width) / 2,
-                                   y: (height - dims.height) / 2,
-                                   width: dims.width,
-                                   height: dims.height
-                               });
-                           }
+                            page.drawImage(image, {
+                                x: 0,
+                                y: 0,
+                                width: page.getWidth(),
+                                height: page.getHeight(),
+                            });
                         } catch (e) {
                             console.warn("Could not embed image:", imagePath, e);
                         }
                     }
                 }
             }
-
-            page.drawText(`Slide ${slideRels.indexOf(rel) + 1}`, {
-                x: 10,
-                y: 10,
-                font,
-                size: 8,
-                color: rgb(0.8, 0.8, 0.8),
-            });
         }
         
+        if (pdfDoc.getPageCount() === 0) {
+            throw new Error("No slides could be converted. The presentation might be empty or in an unsupported format.");
+        }
+
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const pdfUri = URL.createObjectURL(blob);
@@ -182,7 +159,7 @@ export default function PptToPdfPage() {
       console.error("Conversion failed:", error);
       toast({
         title: "Conversion Failed",
-        description: error.message || "Could not process the PowerPoint file. It might be in an old format (.ppt) or corrupted.",
+        description: error.message || "Could not process the PowerPoint file. It might be corrupted or saved in an older format.",
         variant: "destructive"
       });
     } finally {
@@ -227,7 +204,7 @@ export default function PptToPdfPage() {
                   id="file-upload"
                   type="file" 
                   className="hidden" 
-                  accept=".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                  accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
                   onChange={handleFileChange}
                 />
               </div>
