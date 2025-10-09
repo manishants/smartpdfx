@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { createWorker } from 'tesseract.js';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +57,7 @@ export default function ImageToTextPage() {
   const [hasCopied, setHasCopied] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState('');
+  const [language, setLanguage] = useState('eng');
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +85,7 @@ export default function ImageToTextPage() {
     setProgress(0);
     setStatus('Initializing OCR engine...');
 
-    const worker = await createWorker('eng', 1, {
+    const worker = await createWorker(language, 1, {
       logger: (m) => {
         setStatus(m.status);
         if (m.status === 'recognizing text') {
@@ -172,6 +175,18 @@ export default function ImageToTextPage() {
                     <div className="space-y-4">
                         <div className="relative w-full border rounded-lg overflow-hidden shadow-md">
                            <Image src={file.preview} alt="Uploaded preview" width={800} height={600} className="w-full h-auto object-contain" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="language">Language</Label>
+                            <Select value={language} onValueChange={setLanguage}>
+                                <SelectTrigger id="language">
+                                    <SelectValue placeholder="Select language" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="eng">English</SelectItem>
+                                    <SelectItem value="hin">Hindi</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <Button 
                           className="w-full"
