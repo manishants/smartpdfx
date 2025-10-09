@@ -124,14 +124,6 @@ export const tools = [
     color: '#f97316' // orange
   },
   {
-    title: "Excel to PDF",
-    description: "Convert Excel to PDF.",
-    icon: FileUp,
-    href: "/excel-to-pdf",
-    category: 'convert',
-    color: '#22c55e' // green
-  },
-  {
     title: "PDF to JPG",
     description: "Convert PDF pages to JPG images.",
     icon: FileImage,
@@ -146,14 +138,6 @@ export const tools = [
     href: "/word-to-pdf",
     category: 'convert',
     color: '#3b82f6' // blue
-  },
-   {
-    title: "Excel to PDF",
-    description: "Convert Excel to PDF.",
-    icon: FileImage,
-    href: "/excel-to-pdf",
-    category: 'convert',
-    color: '#22c55e' // green
   },
   {
     title: "PPT to PDF",
