@@ -124,10 +124,10 @@ export const tools = [
     color: '#f97316' // orange
   },
   {
-    title: "PDF to Excel",
-    description: "Visually select data to export.",
+    title: "Excel to PDF",
+    description: "Convert Excel to PDF.",
     icon: FileUp,
-    href: "/pdf-to-excel",
+    href: "/excel-to-pdf",
     category: 'convert',
     color: '#22c55e' // green
   },
