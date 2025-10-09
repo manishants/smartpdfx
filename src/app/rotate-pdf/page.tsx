@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, RotateCcw, CheckCircle } from "lucide-react";
@@ -327,3 +327,5 @@ export default function RotatePdfPage() {
         </div>
     )
 }
+
+    
