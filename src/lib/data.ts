@@ -124,18 +124,10 @@ export const tools = [
     color: '#f97316' // orange
   },
   {
-    title: "PDF to Excel",
-    description: "Convert PDF tables to Excel.",
+    title: "Extract Data from PDF to Excel",
+    description: "Visually select data to export.",
     icon: FileUp,
     href: "/pdf-to-excel",
-    category: 'convert',
-    color: '#22c55e' // green
-  },
-  {
-    title: "Extract PDF Data to Excel",
-    description: "Extract specific data to Excel.",
-    icon: FileUp,
-    href: "/extract-pdf-data-to-excel",
     category: 'convert',
     color: '#22c55e' // green
   },

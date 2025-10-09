@@ -262,23 +262,11 @@ export const PdfToPptOutputSchema = z.object({
 });
 export type PdfToPptOutput = z.infer<typeof PdfToPptOutputSchema>;
 
-// PDF to Excel
-export const PdfToExcelInputSchema = z.object({
-  pdfUri: z.string().describe("A PDF as a data URI."),
-});
-export type PdfToExcelInput = z.infer<typeof PdfToExcelInputSchema>;
-
-export const PdfToExcelOutputSchema = z.object({
-  excelUri: z.string().describe("The converted Excel document as a data URI."),
-});
-export type PdfToExcelOutput = z.infer<typeof PdfToExcelOutputSchema>;
-
-
 // This type is no longer needed as the new flow is more interactive
-export const ExtractPdfDataToExcelInputSchema = z.object({});
-export type ExtractPdfDataToExcelInput = z.infer<typeof ExtractPdfDataToExcelInputSchema>;
-export const ExtractPdfDataToExcelOutputSchema = z.object({});
-export type ExtractPdfDataToExcelOutput = z.infer<typeof ExtractPdfDataToExcelOutputSchema>;
+export const PdfToExcelInputSchema = z.object({});
+export type PdfToExcelInput = z.infer<typeof PdfToExcelInputSchema>;
+export const PdfToExcelOutputSchema = z.object({});
+export type PdfToExcelOutput = z.infer<typeof PdfToExcelOutputSchema>;
 
 
 // Trim Video
