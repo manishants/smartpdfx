@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,10 @@ import { UploadCloud, Loader2, RefreshCw, Wand2, Clipboard, ClipboardCheck, File
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import type { ImageToTextInput, ImageToTextOutput } from '@/lib/types';
-import { imageToText } from '@/ai/flows/image-to-text';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import Tesseract from 'tesseract.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +42,7 @@ const FAQ = () => (
             <AccordionItem value="item-3">
                 <AccordionTrigger>Is my data secure?</AccordionTrigger>
                 <AccordionContent>
-                    Yes, your privacy is guaranteed. Your images are securely uploaded to our servers for processing and are deleted one hour later. We do not store or share your data.
+                    Yes, your privacy is guaranteed. Your images are processed entirely within your browser and are never sent to our servers.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -54,8 +54,10 @@ export default function ImageToTextPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedText, setExtractedText] = useState<string | null>(null);
-  const [language, setLanguage] = useState('English');
+  const [language, setLanguage] = useState('eng');
   const [hasCopied, setHasCopied] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState('');
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,15 +74,6 @@ export default function ImageToTextPage() {
       }
     }
   };
-  
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
 
   const handleExtract = async () => {
     if (!file) {
@@ -89,12 +82,25 @@ export default function ImageToTextPage() {
     }
     setIsExtracting(true);
     setExtractedText(null);
+    setProgress(0);
+    setProgressLabel('Initializing...');
     
     try {
-        const imageUri = await fileToDataUri(file.file);
-        const input: ImageToTextInput = { imageUri, language };
-        const result = await imageToText(input);
-        setExtractedText(result.text);
+        const { data: { text } } = await Tesseract.recognize(
+          file.file,
+          language,
+          {
+            logger: m => {
+              setProgressLabel(m.status);
+              if (m.status === 'recognizing text') {
+                setProgress(m.progress * 100);
+              }
+            }
+          }
+        );
+        setExtractedText(text);
+        setProgressLabel('Done');
+        setProgress(100);
 
     } catch (error: any) {
       console.error("Extraction failed:", error);
@@ -113,6 +119,8 @@ export default function ImageToTextPage() {
     setExtractedText(null);
     setIsExtracting(false);
     setHasCopied(false);
+    setProgress(0);
+    setProgressLabel('');
   };
   
   const handleCopyToClipboard = () => {
@@ -131,7 +139,7 @@ export default function ImageToTextPage() {
     }
 
     const { saveAs } = (await import('file-saver'));
-    const blob = new Blob([extractedText], { type: 'text/plain;charset=utf-t8' });
+    const blob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, "extracted-text.txt");
   };
 
@@ -179,9 +187,8 @@ export default function ImageToTextPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="English">English</SelectItem>
-                                    <SelectItem value="Hindi">Hindi</SelectItem>
-                                    <SelectItem value="English and Hindi">English + Hindi</SelectItem>
+                                    <SelectItem value="eng">English</SelectItem>
+                                    <SelectItem value="hin">Hindi</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -198,6 +205,12 @@ export default function ImageToTextPage() {
                             </>
                            ) : <><Wand2 className="mr-2"/>Extract Text</>}
                         </Button>
+                        {isExtracting && (
+                          <div className="space-y-2">
+                             <Progress value={progress} />
+                             <p className="text-sm text-center text-muted-foreground">{progressLabel} ({Math.round(progress)}%)</p>
+                          </div>
+                        )}
                     </div>
                  )}
               </div>
@@ -254,5 +267,3 @@ export default function ImageToTextPage() {
     </>
   );
 }
-
-    
