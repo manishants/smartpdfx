@@ -15,6 +15,7 @@ import type { SplitPdfInput, SplitPdfOutput, PageRange } from '@/lib/types';
 import * as pdfjsLib from 'pdfjs-dist';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AllTools } from '@/components/all-tools';
 
 type Stage = 'upload' | 'select' | 'download';
 
@@ -308,8 +309,7 @@ export default function SplitPdfPage() {
             <div className="mt-12">
               <FAQ />
             </div>
+            <AllTools />
         </div>
     )
 }
-
-    

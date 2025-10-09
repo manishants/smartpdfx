@@ -1,6 +1,33 @@
 
 [
   {
+    "slug": "how-to-split-a-pdf",
+    "title": "How to Split a PDF for Free",
+    "content": "Splitting a PDF allows you to break a large document into smaller, more manageable files. This is incredibly useful for separating chapters of a book, extracting specific pages for a report, or reducing file size for easier sharing. With our free online Split PDF tool, you can visually select the pages you want to extract and create new documents in seconds. Just upload your file, choose your pages, and our tool does the rest, all while keeping your data secure.",
+    "author": "Admin",
+    "date": "2025-10-10T12:00:00.000Z",
+    "imageUrl": "https://placehold.co/800x450/fecaca/7f1d1d?text=Split+PDF",
+    "published": true,
+    "seoTitle": "Easily Split Your PDF into Separate Files Online for Free",
+    "metaDescription": "Learn how to split a large PDF into multiple smaller files or extract specific pages. Our free online tool makes it fast and easy to manage your documents.",
+    "category": "How-To Guides",
+    "popular": false,
+    "faqs": [
+      {
+        "question": "Why would I need to split a PDF?",
+        "answer": "Splitting a PDF is useful for several reasons. You might want to extract specific pages to send to someone, separate chapters of a large book or report into individual files, or reduce the file size of a document by breaking it into smaller parts."
+      },
+      {
+        "question": "Is it safe to upload my confidential documents?",
+        "answer": "Yes, your privacy is our priority. Your files are uploaded over a secure connection, processed automatically, and then permanently deleted from our servers one hour later. We never view, share, or store your documents."
+      },
+      {
+        "question": "How are the selected pages split?",
+        "answer": "When you select pages, our tool groups consecutive pages into a single new PDF. For example, if you select pages 1, 2, 4, 5, and 7, the tool will create three separate PDF files: one with pages 1-2, one with pages 4-5, and one with just page 7."
+      }
+    ]
+  },
+  {
     "slug": "how-to-circle-something-in-a-pdf",
     "title": "How to Circle Something in a PDF",
     "content": "You can circle anything in a PDF with SmartPDFx's PDF Annotator, then customize color, thickness, and size before saving your updated file. It's a simple process that gives you full control over your annotations, making it easy to highlight important information or collaborate with others. Whether you're a student, a professional, or just someone who works with PDFs, this tool is designed to be intuitive and efficient.",
@@ -55,34 +82,5 @@
     "category": "How to Convert Word to PDF",
     "popular": true,
     "faqs": []
-  },
-  {
-    "slug": "how-to-split-a-pdf",
-    "title": "How to Split a PDF for Free",
-    "content": "Splitting a PDF allows you to break a large document into smaller, more manageable files. This is incredibly useful for separating chapters of a book, extracting specific pages for a report, or reducing file size for easier sharing. With our free online Split PDF tool, you can visually select the pages you want to extract and create new documents in seconds. Just upload your file, choose your pages, and our tool does the rest, all while keeping your data secure.",
-    "author": "Admin",
-    "date": "2025-10-10T12:00:00.000Z",
-    "imageUrl": "https://placehold.co/800x450/fecaca/7f1d1d?text=Split+PDF",
-    "published": true,
-    "seoTitle": "Easily Split Your PDF into Separate Files Online for Free",
-    "metaDescription": "Learn how to split a large PDF into multiple smaller files or extract specific pages. Our free online tool makes it fast and easy to manage your documents.",
-    "category": "How-To Guides",
-    "popular": false,
-    "faqs": [
-      {
-        "question": "Why would I need to split a PDF?",
-        "answer": "Splitting a PDF is useful for several reasons. You might want to extract specific pages to send to someone, separate chapters of a large book or report into individual files, or reduce the file size of a document by breaking it into smaller parts."
-      },
-      {
-        "question": "Is it safe to upload my confidential documents?",
-        "answer": "Yes, your privacy is our priority. Your files are uploaded over a secure connection, processed automatically, and then permanently deleted from our servers one hour later. We never view, share, or store your documents."
-      },
-      {
-        "question": "How are the selected pages split?",
-        "answer": "When you select pages, our tool groups consecutive pages into a single new PDF. For example, if you select pages 1, 2, 4, 5, and 7, the tool will create three separate PDF files: one with pages 1-2, one with pages 4-5, and one with just page 7."
-      }
-    ]
   }
 ]
-
-    
