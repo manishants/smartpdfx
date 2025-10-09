@@ -7,12 +7,11 @@ import SignatureCanvas from 'react-signature-canvas';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Wand2, FileSignature, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Wand2, FileSignature, Trash2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
 import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
@@ -43,6 +42,7 @@ export default function ESignPage() {
     const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
     const [activeSignatureId, setActiveSignatureId] = useState<string | null>(null);
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
+    const [zoom, setZoom] = useState(1);
 
 
     const sigCanvas = useRef<SignatureCanvas>(null);
@@ -66,7 +66,7 @@ export default function ESignPage() {
             const reader = new FileReader();
             reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
             reader.onerror = (error) => reject(error);
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataURL(file);
         });
     }
 
@@ -173,8 +173,8 @@ export default function ESignPage() {
 
         const { width, height } = JSON.parse(signatureData);
         const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left - (width / 2);
-        const y = e.clientY - rect.top - (height / 2);
+        const x = (e.clientX - rect.left - (width / 2)) / zoom;
+        const y = (e.clientY - rect.top - (height / 2)) / zoom;
         
         setPlacedSignatures(prev => [...prev, { id: `sig-${Date.now()}`, pageIndex, x, y, width, height }]);
     };
@@ -345,10 +345,16 @@ export default function ESignPage() {
                             {isLoading ? <><Loader2 className="mr-2 animate-spin" />Applying...</> : <><Wand2 className="mr-2"/>Apply Signatures</>}
                         </Button>
                     </aside>
-                    <main className="md:col-span-9 bg-muted/50 flex flex-col justify-between items-center p-4">
+                    <main className="md:col-span-9 bg-muted/50 flex flex-col justify-between items-center p-4 overflow-auto">
                         <div className="relative shadow-lg flex-1 w-full flex items-center justify-center">
-                            <div className="relative" onDragOver={(e) => e.preventDefault()} onDrop={(e) => handlePageDrop(e, currentPageIndex)} onClick={() => setActiveSignatureId(null)}>
-                                <Image id={`pdf-page-${currentPageIndex}`} src={currentPageImage} alt={`PDF Page ${currentPageIndex + 1}`} width={currentPageDimension?.width || 800} height={currentPageDimension?.height || 1100} className="w-full h-auto max-h-[70vh] object-contain" />
+                            <div 
+                                className="relative" 
+                                style={{ transform: `scale(${zoom})`, transformOrigin: 'center' }}
+                                onDragOver={(e) => e.preventDefault()} 
+                                onDrop={(e) => handlePageDrop(e, currentPageIndex)} 
+                                onClick={() => setActiveSignatureId(null)}
+                            >
+                                <Image id={`pdf-page-${currentPageIndex}`} src={currentPageImage} alt={`PDF Page ${currentPageIndex + 1}`} width={currentPageDimension?.width || 800} height={currentPageDimension?.height || 1100} className="w-full h-auto" />
                                 {placedSignatures.filter(ps => ps.pageIndex === currentPageIndex).map(ps => (
                                     <Rnd
                                         key={ps.id}
@@ -383,6 +389,10 @@ export default function ESignPage() {
                             </div>
                         </div>
                         <div className="flex items-center justify-center gap-4 mt-4">
+                            <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}><ZoomOut className="h-4 w-4" /></Button>
+                            <span className="text-sm font-medium w-16 text-center">{Math.round(zoom * 100)}%</span>
+                            <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.min(2, z + 0.25))}><ZoomIn className="h-4 w-4" /></Button>
+                            <div className="w-px h-6 bg-border mx-4"></div>
                             <Button variant="outline" size="icon" onClick={() => setCurrentPageIndex(p => Math.max(0, p - 1))} disabled={currentPageIndex === 0}>
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
@@ -432,7 +442,3 @@ export default function ESignPage() {
         </div>
     )
 }
-
-    
-
-    
