@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileUp } from "lucide-react";
@@ -83,11 +83,13 @@ export default function ExcelToPdfPage() {
     setIsConverting(true);
     setResult(null);
     try {
+      // Placeholder logic
       await new Promise(resolve => setTimeout(resolve, 2000));
       const conversionResult = { pdfUri: "data:application/pdf;base64," };
       
       if (conversionResult) {
-        toast({ title: "Coming Soon!", description: "This feature is under development and will be available shortly.", variant: "default" });
+        // setResult(conversionResult);
+        toast({ title: "Coming Soon!", description: "This feature is not yet implemented.", variant: "default" });
       } else {
         throw new Error("Conversion returned no data.");
       }
