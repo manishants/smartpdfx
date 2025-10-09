@@ -292,14 +292,6 @@ export const tools = [
     color: '#10b981'
   },
   {
-    title: "OCR PDF to Searchable PDF",
-    description: "Make scanned PDFs searchable.",
-    icon: SearchCheck,
-    href: "/ocr-pdf-to-searchable-pdf",
-    category: 'ai_tools',
-    color: '#10b981'
-  },
-  {
     title: "Voter List Extractor",
     description: "Extract data from voter lists.",
     icon: Users,

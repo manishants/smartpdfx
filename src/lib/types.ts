@@ -551,42 +551,6 @@ export const DeletePdfPagesOutputSchema = z.object({
 });
 export type DeletePdfPagesOutput = z.infer<typeof DeletePdfPagesOutputSchema>;
 
-// OCR PDF to Searchable PDF
-// This is the overall input for the client-side orchestration
-export const OcrPdfToSearchablePdfInputSchema = z.object({
-  pdfUri: z.string().describe("The PDF to process as a data URI."),
-  language: z.string().describe("The language of the document (e.g., 'eng', 'hin')."),
-});
-export type OcrPdfToSearchablePdfInput = z.infer<typeof OcrPdfToSearchablePdfInputSchema>;
-
-export const OcrPdfToSearchablePdfOutputSchema = z.object({
-  searchablePdfUri: z.string().describe("The searchable PDF as a data URI."),
-});
-export type OcrPdfToSearchablePdfOutput = z.infer<typeof OcrPdfToSearchablePdfOutputSchema>;
-
-// This is the input for the server-side action that processes one page at a time
-export const OcrPageInputSchema = z.object({
-  imageUri: z.string().describe("The image of a single PDF page to OCR."),
-  language: z.string().describe("The language of the document."),
-});
-export type OcrPageInput = z.infer<typeof OcrPageInputSchema>;
-
-const OcrResultSchema = z.object({
-    text: z.string(),
-    box: z.object({
-        x: z.number(),
-        y: z.number(),
-        width: z.number(),
-        height: z.number(),
-    }),
-});
-
-export const OcrPageOutputSchema = z.object({
-  ocrResults: z.array(OcrResultSchema),
-});
-export type OcrPageOutput = z.infer<typeof OcrPageOutputSchema>;
-
-
 // Voter List Extractor
 export const ExtractVotersInputSchema = z.object({
   fileUri: z.string().describe("The voter list file (PDF or image) as a data URI."),
