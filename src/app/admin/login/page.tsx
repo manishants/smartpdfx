@@ -16,12 +16,11 @@ export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
     const { toast } = useToast();
     const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
 
     useEffect(() => {
-        // Standard client-side initialization
+        // This is the standard and correct way to initialize the client-side Supabase client.
         setSupabase(createClient());
     }, []);
 
@@ -31,8 +30,8 @@ export default function AdminLoginPage() {
         
         if (!supabase) {
              toast({
-                title: "Not Ready",
-                description: "Supabase client is not yet initialized. Please wait a moment.",
+                title: "Client not ready",
+                description: "Supabase client is not initialized. Please wait a moment and try again.",
                 variant: "destructive",
             });
             return;
@@ -57,8 +56,6 @@ export default function AdminLoginPage() {
                 title: "Login Successful",
                 description: "Redirecting to the admin dashboard...",
             });
-            // Use window.location.href to force a full page reload
-            // This ensures the server session is updated correctly.
             window.location.href = '/admin/dashboard';
         }
     };
