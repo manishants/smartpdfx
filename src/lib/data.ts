@@ -82,14 +82,6 @@ export const tools = [
     color: '#10b981'
   },
   {
-    title: "Social Media Post Creator",
-    description: "Writes engaging social media posts from a topic.",
-    icon: Share2,
-    href: "#",
-    category: 'ai',
-    color: '#10b981'
-  },
-  {
     title: "Resume Assistant",
     description: "Reviews a resume and suggests improvements.",
     icon: UserRound,
