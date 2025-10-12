@@ -296,10 +296,24 @@ export function AppHeader() {
     const isMobile = useIsMobile();
     const [isClient, setIsClient] = useState(false);
     const [isDonateOpen, setIsDonateOpen] = useState(false);
+    const pathname = usePathname();
 
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    if (pathname.startsWith('/admin')) {
+      return (
+        <header className="sticky top-0 z-50 w-full border-b bg-background">
+          <div className="container flex h-14 items-center justify-end px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-end gap-2">
+              <ThemeSwitcher />
+              <AuthArea />
+            </div>
+          </div>
+        </header>
+      );
+    }
 
 
     return (

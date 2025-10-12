@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Eraser, LayoutDashboard, Megaphone, FileText, PlusCircle, ChevronDown } from "lucide-react";
+import { Eraser, LayoutDashboard, Megaphone, FileText, PlusCircle, ChevronDown, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -30,7 +30,7 @@ export function Sidebar() {
         <div className="hidden border-r bg-background md:block w-64">
             <div className="flex h-full max-h-screen flex-col gap-2">
                 <div className="flex h-14 items-center border-b px-6">
-                    <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+                    <Link href="/" className="flex items-center gap-2 font-semibold">
                         <Eraser className="h-6 w-6 text-primary" />
                         <span>SmartPDFx Admin</span>
                     </Link>
@@ -39,6 +39,9 @@ export function Sidebar() {
                     <nav className="grid items-start px-4 text-sm font-medium">
                         <NavLink href="/admin/dashboard" icon={LayoutDashboard}>
                             Dashboard
+                        </NavLink>
+                         <NavLink href="/admin/profile" icon={User}>
+                            Profile
                         </NavLink>
                         <NavLink href="/admin/ad-place" icon={Megaphone}>
                             Ad Place
