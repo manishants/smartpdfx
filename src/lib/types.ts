@@ -623,3 +623,15 @@ export const RemoveBackgroundOutputSchema = z.object({
   resultUri: z.string().describe('The resulting image with a transparent background as a data URI.'),
 });
 export type RemoveBackgroundOutput = z.infer<typeof RemoveBackgroundOutputSchema>;
+
+// AI Interior Designer
+export const RedesignRoomInputSchema = z.object({
+  photoUri: z.string().describe("A photo of a room as a data URI."),
+  style: z.string().describe("The desired design style (e.g., Modern, Minimalist)."),
+});
+export type RedesignRoomInput = z.infer<typeof RedesignRoomInputSchema>;
+
+export const RedesignRoomOutputSchema = z.object({
+  redesignedPhotoUri: z.string().describe("The redesigned room photo as a data URI."),
+});
+export type RedesignRoomOutput = z.infer<typeof RedesignRoomOutputSchema>;

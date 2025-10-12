@@ -18,6 +18,14 @@ export const toolCategories = [
 export const tools = [
   // AI Tools First
   {
+    title: "AI Interior Designer",
+    description: "Redesigns a room from a photo.",
+    icon: Home,
+    href: "/ai-interior-designer",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
     title: "AI Story Generator",
     description: "Writes a short story from a user's prompt.",
     icon: PenSquare,
@@ -46,14 +54,6 @@ export const tools = [
     description: "Automatically removes the background from an image.",
     icon: Eraser,
     href: "/remove-background",
-    category: 'ai',
-    color: '#10b981'
-  },
-  {
-    title: "AI Interior Designer",
-    description: "Redesigns a room from a photo.",
-    icon: Home,
-    href: "#",
     category: 'ai',
     color: '#10b981'
   },
