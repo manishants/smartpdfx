@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Menu, Eraser, Grid, Heart, ChevronDown, LogIn, Star, Wand2 } from 'lucide-react';
+import { Menu, Eraser, Grid, Heart, ChevronDown, LogIn, Star, Wand2, LogOut, UserCircle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { tools, toolCategories } from '@/lib/data';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Copy } from 'lucide-react';
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useToast } from '@/hooks/use-toast';
+
 
 const NavLink = ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => {
     const pathname = usePathname();
@@ -204,6 +216,78 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
   );
 }
 
+const AuthArea = () => {
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const supabase = createClient();
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data } = await supabase.auth.getUser();
+            setUser(data.user);
+            setIsLoading(false);
+        };
+        fetchUser();
+
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                setUser(session?.user ?? null);
+            }
+        );
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
+    }, [supabase.auth]);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        toast({
+            title: "Logged out",
+            description: "You have been successfully logged out.",
+        });
+        window.location.href = '/';
+    };
+    
+    if (isLoading) {
+        return <div className="h-10 w-24 rounded-md bg-muted animate-pulse" />;
+    }
+
+    if (user) {
+        return (
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        <UserCircle className="mr-2 h-4 w-4"/>
+                        Account
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
+    }
+    
+    return (
+        <Button variant="outline" asChild>
+            <Link href="/admin/login">
+                <LogIn className="mr-2 h-4 w-4"/>
+                Login
+            </Link>
+        </Button>
+    )
+}
+
 
 export function AppHeader() {
     const isMobile = useIsMobile();
@@ -241,12 +325,7 @@ export function AppHeader() {
                         <Heart className="mr-2 h-4 w-4 fill-current"/>
                         Donate ₹ 1
                      </Button>
-                      <Button variant="outline" asChild>
-                        <Link href="/admin/login">
-                          <LogIn className="mr-2 h-4 w-4"/>
-                          Login
-                        </Link>
-                      </Button>
+                      <AuthArea />
                 </div>
             </div>
             <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} />
