@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseEnv } from '@/lib/actions/blog';
 
 export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
@@ -17,10 +19,37 @@ export default function AdminLoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
-    const supabase = createClient();
+    const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+
+    useEffect(() => {
+        const initializeSupabase = async () => {
+            const { url, key } = await getSupabaseEnv();
+            if (url && key) {
+                setSupabase(createBrowserClient(url, key));
+            } else {
+                 toast({
+                    title: "Configuration Error",
+                    description: "Supabase environment variables are not set.",
+                    variant: "destructive",
+                });
+            }
+        };
+        initializeSupabase();
+    }, [toast]);
+
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!supabase) {
+             toast({
+                title: "Not Ready",
+                description: "Supabase client is not yet initialized. Please wait a moment.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setIsLoading(true);
 
         const { error } = await supabase.auth.signInWithPassword({
@@ -63,7 +92,7 @@ export default function AdminLoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                disabled={isLoading}
+                                disabled={isLoading || !supabase}
                             />
                         </div>
                         <div className="space-y-2">
@@ -74,12 +103,12 @@ export default function AdminLoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                disabled={isLoading}
+                                disabled={isLoading || !supabase}
                             />
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full" disabled={isLoading || !supabase}>
                             {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Logging in...</> : <><LogIn className="mr-2 h-4 w-4" /> Login</>}
                         </Button>
                     </CardFooter>
