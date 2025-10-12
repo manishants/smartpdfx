@@ -1,5 +1,5 @@
 
-import { FileSignature, Scissors, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Crop, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact, Link } from "lucide-react";
+import { FileSignature, Scissors, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Crop, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact, Link, Bot, PenSquare, Code2, Paintbrush, Home, Dumbbell, Utensils, Lightbulb, UserRound, Mail, BookOpen, Route, Music, ShoppingCart, BarChart3, Moon, VideoIcon, Speech } from "lucide-react";
 
 export const toolCategories = [
     { id: 'compress', name: 'Compress' },
@@ -16,7 +16,169 @@ export const toolCategories = [
 ];
 
 export const tools = [
-  // Compress
+  // AI Tools First
+  {
+    title: "AI Story Generator",
+    description: "Writes a short story from a user's prompt.",
+    icon: PenSquare,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Blog Post Idea Generator",
+    description: "Creates titles and outlines from a topic.",
+    icon: Lightbulb,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Code Explainer",
+    description: "Explains a piece of code in plain English.",
+    icon: Code2,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Image Background Remover",
+    description: "Automatically removes the background from an image.",
+    icon: Eraser,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "AI Interior Designer",
+    description: "Redesigns a room from a photo.",
+    icon: Home,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Personalized Workout Planner",
+    description: "Creates custom workout plans based on user goals.",
+    icon: Dumbbell,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Meal Planner & Recipe Generator",
+    description: "Generates weekly meal plans and recipes.",
+    icon: Utensils,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Logo Concept Generator",
+    description: "Designs logo ideas from a company description.",
+    icon: Paintbrush,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Social Media Post Creator",
+    description: "Writes engaging social media posts from a topic.",
+    icon: Share2,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Resume Assistant",
+    description: "Reviews a resume and suggests improvements.",
+    icon: UserRound,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Email Responder",
+    description: "Drafts professional replies to emails.",
+    icon: Mail,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "PDF Summarizer",
+    description: "Reads a PDF and provides a concise summary.",
+    icon: BookOpen,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Travel Itinerary Planner",
+    description: "Creates a detailed travel itinerary.",
+    icon: Route,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Lyric and Melody Writer",
+    description: "Generates song lyrics and a basic melody.",
+    icon: Music,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Product Description Writer",
+    description: "Writes compelling descriptions for products.",
+    icon: ShoppingCart,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Market Trend Analyzer",
+    description: "Summarizes market trends from news or data.",
+    icon: BarChart3,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Dream Interpreter",
+    description: "Offers possible interpretations of a dream.",
+    icon: Moon,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Face Swapper",
+    description: "Swaps faces between two uploaded photos.",
+    icon: UserX,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Video Script Generator",
+    description: "Creates a script for a video from an outline.",
+    icon: VideoIcon,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+  {
+    title: "Domain Name Suggester",
+    description: "Suggests available domain names for a business idea.",
+    icon: SearchCheck,
+    href: "#",
+    category: 'ai',
+    color: '#10b981'
+  },
+
+  // Existing Tools
   {
     title: "Compress Image",
     description: "Compress an image to a smaller size.",
@@ -57,8 +219,6 @@ export const tools = [
     category: 'compress',
     color: '#ef4444' // red
   },
-
-  // Organize PDF
   {
     title: "Merge PDF",
     description: "Combine multiple PDFs into one.",
@@ -107,8 +267,6 @@ export const tools = [
     category: 'organize',
     color: '#64748b'
   },
-  
-  // Convert
   {
     title: "PDF to Word",
     description: "Convert PDF to an editable Word file.",
@@ -157,8 +315,6 @@ export const tools = [
     category: 'convert',
     color: '#ca8a04' // mud yellow
   },
-
-  // Edit PDF & Video
   {
     title: "Edit PDF",
     description: "Add text, images, or shapes.",
@@ -191,8 +347,6 @@ export const tools = [
     category: 'edit',
     color: '#0ea5e9' // sky blue
   },
-
-  // Image Tools
   {
     title: "Image Resizer",
     description: "Resize image by pixel or percentage.",
@@ -209,8 +363,6 @@ export const tools = [
     category: 'image_tools',
     color: '#a855f7' // purple
   },
-
-  // Security
   {
     title: "Unlock PDF",
     description: "Remove password from a PDF.",
@@ -227,8 +379,6 @@ export const tools = [
     category: 'security',
     color: '#ec4899' // pink
   },
-
-  // AI Tools
    {
     title: "Whatsapp Chat Analyzer",
     description: "Analyze and summarize chats.",
@@ -285,8 +435,6 @@ export const tools = [
     category: 'ai',
     color: '#10b981'
   },
-  
-  // Generators
   {
     title: "QR Code Generator",
     description: "Create a QR code for any URL.",
@@ -319,8 +467,6 @@ export const tools = [
     category: 'generators',
     color: '#f59e0b'
   },
-  
-  // Text Tools
   {
     title: "What's My IP Address?",
     description: "Find your public IP address.",
@@ -337,8 +483,6 @@ export const tools = [
     category: 'text_tools',
     color: '#84cc16'
   },
-  
-  // Color Tools
   {
     title: "Image Color Picker",
     description: "Pick colors from an image.",
@@ -355,8 +499,6 @@ export const tools = [
     category: 'color_tools',
     color: '#d946ef'
   },
-
-  // Link Tools
   {
     title: "Short Link Generator",
     description: "Create short, custom-branded links.",
@@ -366,3 +508,5 @@ export const tools = [
     color: '#3b82f6' // blue
   }
 ];
+
+    
