@@ -608,3 +608,18 @@ export const TextToImageOutputSchema = z.object({
   imageUri: z.string().describe("The generated image as a data URI."),
 });
 export type TextToImageOutput = z.infer<typeof TextToImageOutputSchema>;
+
+// Background Remover
+export const RemoveBackgroundInputSchema = z.object({
+  photoUri: z
+    .string()
+    .describe(
+      "An image as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+});
+export type RemoveBackgroundInput = z.infer<typeof RemoveBackgroundInputSchema>;
+
+export const RemoveBackgroundOutputSchema = z.object({
+  resultUri: z.string().describe('The resulting image with a transparent background as a data URI.'),
+});
+export type RemoveBackgroundOutput = z.infer<typeof RemoveBackgroundOutputSchema>;

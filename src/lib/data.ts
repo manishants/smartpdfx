@@ -45,7 +45,7 @@ export const tools = [
     title: "Image Background Remover",
     description: "Automatically removes the background from an image.",
     icon: Eraser,
-    href: "#",
+    href: "/remove-background",
     category: 'ai',
     color: '#10b981'
   },
