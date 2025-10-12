@@ -582,7 +582,7 @@ export const PdfToWordInputSchema = z.object({
 });
 export type PdfToWordInput = z.infer<typeof PdfToWordInputSchema>;
 
-const WordContentSchema = z.object({
+export const WordContentSchema = z.object({
     text: z.string(),
     bold: z.boolean().optional(),
     italic: z.boolean().optional(),
@@ -592,6 +592,19 @@ const WordContentSchema = z.object({
 export type WordContent = z.infer<typeof WordContentSchema>;
 
 export const PdfToWordOutputSchema = z.object({
-  content: z.array(WordContentSchema).describe("The structured text content of the PDF."),
+  docxUri: z.string().describe("The converted Word document as a data URI."),
 });
 export type PdfToWordOutput = z.infer<typeof PdfToWordOutputSchema>;
+
+
+// Text to Image
+export const TextToImageInputSchema = z.object({
+  prompt: z.string().describe("The text prompt to generate an image from."),
+  style: z.string().optional().describe("The artistic style of the image."),
+});
+export type TextToImageInput = z.infer<typeof TextToImageInputSchema>;
+
+export const TextToImageOutputSchema = z.object({
+  imageUri: z.string().describe("The generated image as a data URI."),
+});
+export type TextToImageOutput = z.infer<typeof TextToImageOutputSchema>;

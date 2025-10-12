@@ -9,7 +9,7 @@ export const toolCategories = [
     { id: 'security', name: 'Security' },
     { id: 'ai_tools', name: 'AI Tools' },
     { id: 'color_tools', name: 'Color Tools' },
-    { id: 'generators', name: 'Generators' },
+    { id: 'generators', name 'Generators' },
     { id: 'text_tools', name: 'Text Tools' },
     { id: 'image_tools', name: 'Image Tools' },
 ];
@@ -108,6 +108,14 @@ export const tools = [
   },
   
   // Convert
+  {
+    title: "PDF to Word",
+    description: "Convert PDF to an editable Word file.",
+    icon: FileUp,
+    href: "/pdf-to-word",
+    category: 'convert',
+    color: '#f97316' // orange
+  },
   {
     title: "PDF to PPT",
     description: "Convert PDF to PowerPoint.",
@@ -265,6 +273,14 @@ export const tools = [
     description: "Visually extract data to Excel.",
     icon: Users,
     href: "/extract-pdf-data-to-excel",
+    category: 'ai_tools',
+    color: '#10b981'
+  },
+  {
+    title: "Text to Image",
+    description: "Generate an image from text.",
+    icon: ImageIconLucide,
+    href: "/text-to-image",
     category: 'ai_tools',
     color: '#10b981'
   },
