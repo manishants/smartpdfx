@@ -26,6 +26,7 @@ export function CreatePostForm() {
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
     const editorRef = useRef<HTMLDivElement>(null);
+    const [origin, setOrigin] = useState('');
     
     // State for the form fields
     const [title, setTitle] = useState('');
@@ -37,6 +38,12 @@ export function CreatePostForm() {
     const [published, setPublished] = useState('true');
     const [faqs, setFaqs] = useState<FaqItem[]>([]);
     const [activeFormats, setActiveFormats] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setOrigin(window.location.origin);
+        }
+    }, []);
 
     useEffect(() => {
         if (!seoTitle && title) {
@@ -268,7 +275,7 @@ export function CreatePostForm() {
                                 <Label className="font-semibold">Preview</Label>
                                 <div className="p-3 border rounded-lg mt-2 bg-muted/20">
                                     <p className="text-blue-700 text-lg truncate dark:text-blue-400">{seoTitle || "Your SEO Title Here"}</p>
-                                    <p className="text-green-600 text-sm truncate dark:text-green-400">{slug ? `${window.location.origin}/blog/${slug}` : `${window.location.origin}/blog/...`}</p>
+                                    <p className="text-green-600 text-sm truncate dark:text-green-400">{origin && (slug ? `${origin}/blog/${slug}` : `${origin}/blog/...`)}</p>
                                     <p className="text-sm text-gray-600 line-clamp-2 dark:text-gray-400">{metaDescription || "Your meta description will appear here. Write a compelling summary to attract readers."}</p>
                                 </div>
                             </div>
@@ -310,5 +317,7 @@ export function CreatePostForm() {
         </form>
     );
 }
+
+    
 
     
