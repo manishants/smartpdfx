@@ -5,7 +5,7 @@ import { type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { AppFooter } from "./app-footer";
-import { GoogleAd } from "./google-ad";
+import { GoogleAd } from "@/components/google-ad";
 import { GoogleSidebarAd } from "@/components/google-sidebar-ad";
 
 export function MainLayout({ children }: { children: ReactNode }) {
@@ -17,7 +17,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
   // Define paths that should not have sidebars
   const noSidebarPaths = ['/', '/about', '/contact', '/privacy-policy', '/terms-and-conditions', '/blog'];
-  const hasSidebars = !noSidebarPaths.includes(pathname) && !pathname.startsWith('/admin');
+  const hasSidebars = !noSidebarPaths.includes(pathname) && !pathname.startsWith('/admin') && !pathname.startsWith('/blog/');
 
   return (
     <div className="flex flex-col min-h-screen">
