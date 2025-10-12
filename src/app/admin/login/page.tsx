@@ -40,9 +40,9 @@ export default function AdminLoginPage() {
                 title: "Login Successful",
                 description: "Redirecting to the admin dashboard...",
             });
-            // Redirect to the dashboard after successful login
-             router.push('/admin/dashboard');
-             setIsLoading(false); // Reset loading state on success
+            // Use window.location.href to force a full page reload
+            // This ensures the server session is updated correctly.
+            window.location.href = '/admin/dashboard';
         }
     };
 
