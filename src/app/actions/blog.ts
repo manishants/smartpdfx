@@ -4,9 +4,11 @@
 import { revalidatePath } from 'next/cache';
 import type { BlogPost, Faq } from '@/lib/types';
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
 export async function getBlogs(): Promise<BlogPost[]> {
-  const supabase = createClient();
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const { data, error } = await supabase
     .from('blogs')
     .select('*')
@@ -17,8 +19,6 @@ export async function getBlogs(): Promise<BlogPost[]> {
     return [];
   }
 
-  // The data from Supabase might have a different structure for faqs.
-  // We need to ensure it matches the BlogPost type.
   return data.map((post: any) => ({
     ...post,
     faqs: post.faqs || [],
@@ -26,7 +26,8 @@ export async function getBlogs(): Promise<BlogPost[]> {
 }
 
 export async function getPost(slug: string): Promise<BlogPost | null> {
-  const supabase = createClient();
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const { data, error } = await supabase
     .from('blogs')
     .select('*')
@@ -41,6 +42,15 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
 }
 
 export async function createPost(formData: FormData) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'You must be logged in to create a post.' };
+  }
+
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
   const author = formData.get('author') as string;
@@ -65,11 +75,9 @@ export async function createPost(formData: FormData) {
     return { error: 'Title, Content, Author, and Image are required.' };
   }
 
-  const supabase = createClient();
   const finalSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   const imageName = `${finalSlug}-${Date.now()}`;
   
-  // 1. Upload image to Supabase Storage
   const { data: imageData, error: imageError } = await supabase.storage
     .from('blogs')
     .upload(imageName, image);
@@ -79,14 +87,12 @@ export async function createPost(formData: FormData) {
     return { error: 'Failed to upload image.' };
   }
 
-  // 2. Get the public URL for the image
   const { data: imageUrlData } = supabase.storage
     .from('blogs')
     .getPublicUrl(imageData.path);
     
   const imageUrl = imageUrlData.publicUrl;
 
-  // 3. Insert the new post into the database
   const newPost: Omit<BlogPost, 'id'> = {
     slug: finalSlug,
     title,
@@ -109,7 +115,6 @@ export async function createPost(formData: FormData) {
     return { error: 'Failed to create blog post.' };
   }
 
-  // Revalidate paths to show the new post
   revalidatePath('/admin/dashboard');
   revalidatePath('/blog');
   revalidatePath(`/blog/${slug}`);

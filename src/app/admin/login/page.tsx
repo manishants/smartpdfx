@@ -9,36 +9,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { LogIn } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AdminLoginPage() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
+    const supabase = createClient();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // In a real application, this would be a secure API call.
-        // For this demo, we use hardcoded credentials.
-        if (username === 'blowkida' && password === 'Rn5manish') {
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            toast({
+                title: "Login Failed",
+                description: error.message,
+                variant: "destructive",
+            });
+            setIsLoading(false);
+        } else {
             toast({
                 title: "Login Successful",
                 description: "Redirecting to the admin dashboard...",
             });
-            // Simulate a short delay for the toast to be visible
-            setTimeout(() => {
-                router.push('/admin/dashboard');
-            }, 1000);
-        } else {
-            toast({
-                title: "Login Failed",
-                description: "Invalid username or password.",
-                variant: "destructive",
-            });
-            setIsLoading(false);
+            // Redirect to the dashboard after successful login
+             router.push('/admin/dashboard');
         }
     };
 
@@ -52,12 +55,12 @@ export default function AdminLoginPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="username">Username</Label>
+                            <Label htmlFor="email">Email</Label>
                             <Input
-                                id="username"
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 required
                                 disabled={isLoading}
                             />
