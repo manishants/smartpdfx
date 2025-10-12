@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Link, Copy, Check, Wand, RefreshCw } from 'lucide-react';
 import { createShortLink } from '@/lib/actions/short-link';
 import { AllTools } from '@/components/all-tools';
+import * as React from 'react';
 
 export default function ShortLinkGeneratorPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +18,13 @@ export default function ShortLinkGeneratorPage() {
     const [hasCopied, setHasCopied] = useState(false);
     const { toast } = useToast();
     const formRef = React.useRef<HTMLFormElement>(null);
+    const [baseUrl, setBaseUrl] = useState('');
+
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setBaseUrl(window.location.origin);
+        }
+    }, []);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -106,7 +114,7 @@ export default function ShortLinkGeneratorPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="customSlug">Custom Slug (Optional)</Label>
                                     <div className="flex items-center">
-                                        <span className="p-2 bg-muted border border-r-0 rounded-l-md text-muted-foreground text-sm">smartpdfx/</span>
+                                        <span className="p-2 bg-muted border border-r-0 rounded-l-md text-muted-foreground text-sm">{baseUrl ? `${new URL(baseUrl).hostname}/` : 'domain/'}</span>
                                         <Input 
                                             id="customSlug" 
                                             name="customSlug" 

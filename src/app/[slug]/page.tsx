@@ -1,7 +1,7 @@
 
 import { getOriginalUrl } from '@/lib/actions/short-link';
 import { notFound, redirect } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
 export default async function ShortLinkRedirectPage({ params }: { params: { slug: string } }) {

@@ -4,10 +4,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 
 const CreateShortLinkSchema = z.object({
     originalUrl: z.string().url("Please enter a valid URL."),
-    customSlug: z.string().optional(),
+    customSlug: z.string().max(50).regex(/^[a-zA-Z0-9_-]*$/, "Slug can only contain letters, numbers, hyphens, and underscores.").optional(),
 });
 
 function generateRandomSlug(length = 7) {
@@ -35,17 +36,23 @@ export async function createShortLink(formData: FormData) {
     });
 
     if (!validatedFields.success) {
-        return { error: validatedFields.error.flatten().fieldErrors.originalUrl?.[0] };
+        const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0];
+        return { error: firstError || "Invalid input." };
     }
 
     const { originalUrl, customSlug } = validatedFields.data;
-    const slug = customSlug || generateRandomSlug();
+    
+    // Ensure custom slug, if provided, is not empty after trim
+    const slugToUse = customSlug?.trim() || generateRandomSlug();
+     if (!slugToUse) {
+        return { error: 'Custom slug cannot be empty spaces.' };
+    }
 
     // Check if slug already exists
     const { data: existingLink, error: fetchError } = await supabase
         .from('short_links')
         .select('slug')
-        .eq('slug', slug)
+        .eq('slug', slugToUse)
         .single();
     
     if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = 'Not found'
@@ -54,13 +61,13 @@ export async function createShortLink(formData: FormData) {
     }
 
     if (existingLink) {
-        return { error: `The custom slug "${slug}" is already taken. Please choose another.` };
+        return { error: `The custom slug "${slugToUse}" is already taken. Please choose another.` };
     }
 
     // Insert new link
     const { data: newLink, error: insertError } = await supabase
         .from('short_links')
-        .insert({ original_url: originalUrl, slug: slug })
+        .insert({ original_url: originalUrl, slug: slugToUse, user_id: user.id })
         .select()
         .single();
     
@@ -71,8 +78,10 @@ export async function createShortLink(formData: FormData) {
         }
         return { error: "Failed to create short link in the database." };
     }
+    revalidatePath(`/${newLink.slug}`);
 
-    const fullShortUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/${newLink.slug}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://${cookies().get('host')?.value}`;
+    const fullShortUrl = `${baseUrl}/${newLink.slug}`;
 
     return { success: 'Short link created successfully!', shortUrl: fullShortUrl };
 }
@@ -88,6 +97,9 @@ export async function getOriginalUrl(slug: string): Promise<string | null> {
         .single();
 
     if (error || !data) {
+        if (error && error.code !== 'PGRST116') {
+            console.error(`Error fetching slug ${slug}:`, error);
+        }
         return null;
     }
 
