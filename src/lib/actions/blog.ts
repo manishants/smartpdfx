@@ -125,3 +125,10 @@ export async function createPost(formData: FormData) {
 
   return { success: 'Blog post created successfully!' };
 }
+
+export async function getSupabaseEnv() {
+  return {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  };
+}
