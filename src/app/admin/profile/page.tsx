@@ -2,7 +2,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,127 +9,115 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save } from 'lucide-react';
+import { getProfile, updateProfile } from '@/app/actions/profile';
+import { createClient } from '@/lib/supabase/client';
+
+type Profile = {
+    username: string | null;
+    full_name: string | null;
+    website: string | null;
+    avatar_url: string | null;
+}
 
 export default function ProfilePage() {
-  const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [fullName, setFullName] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
-  const [website, setWebsite] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
-  const getProfile = useCallback(async (user: User) => {
-    try {
-      setLoading(true);
-
-      const { data, error, status } = await supabase
-        .from('profiles')
-        .select(`full_name, username, website, avatar_url`)
-        .eq('id', user.id)
-        .single();
-
-      if (error && status !== 406) {
-        throw error;
-      }
-
-      if (data) {
-        setFullName(data.full_name);
-        setUsername(data.username);
-        setWebsite(data.website);
-        setAvatarUrl(data.avatar_url);
-      }
-    } catch (error) {
-      toast({ title: "Error loading profile", description: "Please ensure you have created the 'profiles' table in Supabase.", variant: "destructive" });
-    } finally {
-      setLoading(false);
+  const fetchUserProfile = useCallback(async () => {
+    setLoading(true);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+        setUser(user);
+        const { data, error } = await getProfile();
+        if (error) {
+            toast({ title: "Error loading profile", description: "Please ensure you have created the 'profiles' table in Supabase.", variant: "destructive" });
+        }
+        setProfile(data);
     }
-  }, [supabase, toast]);
+    setLoading(false);
+  }, [toast]);
 
   useEffect(() => {
-    const fetchUserAndProfile = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if(user) {
-            setUser(user);
-            getProfile(user);
-        } else {
-            setLoading(false);
-        }
-    }
-    fetchUserAndProfile();
-  }, [getProfile, supabase.auth]);
+    fetchUserProfile();
+  }, [fetchUserProfile]);
   
-  async function updateProfile() {
-    if(!user) return;
-    try {
-      setLoading(true);
+  async function handleUpdateProfile(formData: FormData) {
+    setLoading(true);
+    const result = await updateProfile(formData);
+    setLoading(false);
 
-      const { error } = await supabase.from('profiles').upsert({
-        id: user.id,
-        full_name: fullName,
-        username,
-        website,
-        avatar_url: avatarUrl,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'id' });
-      if (error) throw error;
+    if (result.error) {
+      toast({ title: "Error updating profile", description: result.error, variant: "destructive" });
+    } else {
       toast({ title: "Profile updated successfully!" });
-    } catch (error) {
-      toast({ title: "Error updating the data!", variant: "destructive" });
-    } finally {
-      setLoading(false);
+      // Re-fetch profile to show updated data
+      fetchUserProfile();
     }
+  }
+
+  const handleInputChange = (field: keyof Profile, value: string) => {
+      if (profile) {
+          setProfile({...profile, [field]: value});
+      }
   }
 
   return (
     <div className="space-y-8 max-w-2xl mx-auto">
       <Card>
-        <CardHeader>
-          <CardTitle>Your Profile</CardTitle>
-          <CardDescription>Manage your account details here.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={user?.email || ''} disabled />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              type="text"
-              value={fullName || ''}
-              onChange={(e) => setFullName(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              value={username || ''}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
-              type="url"
-              value={website || ''}
-              onChange={(e) => setWebsite(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={updateProfile} disabled={loading}>
-            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Changes</>}
-          </Button>
-        </CardFooter>
+        <form action={handleUpdateProfile}>
+            <CardHeader>
+              <CardTitle>Your Profile</CardTitle>
+              <CardDescription>Manage your account details here.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={user?.email || ''} disabled />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={profile?.full_name || ''}
+                  onChange={(e) => handleInputChange('full_name', e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={profile?.username || ''}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  name="website"
+                  type="url"
+                  value={profile?.website || ''}
+                  onChange={(e) => handleInputChange('website', e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" disabled={loading}>
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Saving...</> : <><Save className="mr-2 h-4 w-4" /> Save Changes</>}
+              </Button>
+            </CardFooter>
+        </form>
       </Card>
     </div>
   );
