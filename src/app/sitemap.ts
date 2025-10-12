@@ -1,8 +1,7 @@
+
 import { MetadataRoute } from 'next'
 import { tools } from '@/lib/data';
-import { promises as fs } from 'fs';
-import path from 'path';
-import type { BlogPost } from '@/lib/types';
+import { getBlogs } from '@/app/actions/blog';
 
 const URL = 'https://REPLACE-WITH-YOUR-DOMAIN.com'; // IMPORTANT: Replace with your actual domain
 
@@ -33,9 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Blog pages
   let blogPosts: MetadataRoute.Sitemap = [];
   try {
-      const filePath = path.join(process.cwd(), 'blogs.json');
-      const data = await fs.readFile(filePath, 'utf-8');
-      const posts = JSON.parse(data) as BlogPost[];
+      const posts = await getBlogs();
       blogPosts = posts.map(post => ({
         url: `${URL}/blog/${post.slug}`,
         lastModified: new Date(post.date).toISOString(),
@@ -43,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       }));
   } catch (error) {
-    console.error("Could not read blogs.json for sitemap", error);
+    console.error("Could not fetch blogs for sitemap", error);
   }
 
 

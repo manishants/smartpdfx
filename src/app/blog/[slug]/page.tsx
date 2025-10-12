@@ -1,8 +1,5 @@
 
-
 import type { BlogPost } from "@/lib/types";
-import { promises as fs } from 'fs';
-import path from 'path';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Image from "next/image";
@@ -10,20 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from 'next';
+import { getPost, getBlogs } from "@/app/actions/blog";
 
 type Props = {
   params: { slug: string }
-}
-
-async function getPost(slug: string): Promise<BlogPost | undefined> {
-    const filePath = path.join(process.cwd(), 'blogs.json');
-    try {
-        const data = await fs.readFile(filePath, 'utf-8');
-        const posts = JSON.parse(data) as BlogPost[];
-        return posts.find(post => post.slug === slug);
-    } catch (error) {
-        return undefined;
-    }
 }
 
 export async function generateMetadata(
@@ -74,14 +61,8 @@ export async function generateMetadata(
 }
 
 export async function generateStaticParams() {
-    const filePath = path.join(process.cwd(), 'blogs.json');
-    try {
-        const data = await fs.readFile(filePath, 'utf-8');
-        const posts = JSON.parse(data) as BlogPost[];
-        return posts.filter(p => p.published).map(post => ({ slug: post.slug }));
-    } catch (error) {
-        return [];
-    }
+    const posts = await getBlogs();
+    return posts.filter(p => p.published).map(post => ({ slug: post.slug }));
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {

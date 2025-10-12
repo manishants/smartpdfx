@@ -1,23 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
-import { promises as fs } from 'fs';
-import path from 'path';
 import type { BlogPost } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-
-async function getBlogs(): Promise<BlogPost[]> {
-  const filePath = path.join(process.cwd(), 'blogs.json');
-  try {
-    const data = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(data) as BlogPost[];
-  } catch (error) {
-    return [];
-  }
-}
+import { getBlogs } from "@/app/actions/blog";
 
 export default async function AllPostsPage() {
     const posts = await getBlogs();

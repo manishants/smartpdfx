@@ -1,27 +1,16 @@
 
 import type { BlogPost } from "@/lib/types";
-import { promises as fs } from 'fs';
-import path from 'path';
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { getBlogs } from "@/app/actions/blog";
 
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Insights, updates, and stories from the SmartPDFx team. Learn more about our PDF and image tools.',
 };
-
-async function getBlogs(): Promise<BlogPost[]> {
-    const filePath = path.join(process.cwd(), 'blogs.json');
-    try {
-        const data = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(data) as BlogPost[];
-    } catch (error) {
-        return [];
-    }
-}
 
 const PopularPostItem = ({ post }: { post: BlogPost }) => (
     <div className="flex items-start gap-4">

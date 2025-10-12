@@ -242,7 +242,7 @@ export type CompressPdfOutput = z.infer<typeof CompressPdfOutputSchema>;
 
 // Word to PDF
 export const WordToPdfInputSchema = z.object({
-  htmlContent: z.string().describe("The HTML content rendered from the DOCX file."),
+  docxUri: z.string().describe("The DOCX file as a data URI."),
 });
 export type WordToPdfInput = z.infer<typeof WordToPdfInputSchema>;
 
@@ -250,6 +250,7 @@ export const WordToPdfOutputSchema = z.object({
   pdfUri: z.string().describe("The converted PDF document as a data URI."),
 });
 export type WordToPdfOutput = z.infer<typeof WordToPdfOutputSchema>;
+
 
 // PPT to PDF
 export const PptToPdfInputSchema = z.object({
@@ -324,6 +325,7 @@ const FaqSchema = z.object({
 export type Faq = z.infer<typeof FaqSchema>;
 
 export const BlogPostSchema = z.object({
+    id: z.number().optional(),
     slug: z.string(),
     title: z.string(),
     content: z.string(),
@@ -574,4 +576,22 @@ export const ImageToTextOutputSchema = z.object({
 });
 export type ImageToTextOutput = z.infer<typeof ImageToTextOutputSchema>;
 
-    
+// PDF to Word
+export const PdfToWordInputSchema = z.object({
+  pdfUri: z.string().describe("The PDF to convert as a data URI."),
+});
+export type PdfToWordInput = z.infer<typeof PdfToWordInputSchema>;
+
+const WordContentSchema = z.object({
+    text: z.string(),
+    bold: z.boolean().optional(),
+    italic: z.boolean().optional(),
+    color: z.string().optional(),
+    fontSize: z.number().optional(),
+});
+export type WordContent = z.infer<typeof WordContentSchema>;
+
+export const PdfToWordOutputSchema = z.object({
+  content: z.array(WordContentSchema).describe("The structured text content of the PDF."),
+});
+export type PdfToWordOutput = z.infer<typeof PdfToWordOutputSchema>;
