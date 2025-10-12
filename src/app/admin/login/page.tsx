@@ -9,9 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Loader2 } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getSupabaseEnv } from '@/lib/actions/blog';
 
 export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
@@ -22,20 +21,9 @@ export default function AdminLoginPage() {
     const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
 
     useEffect(() => {
-        const initializeSupabase = async () => {
-            const { url, key } = await getSupabaseEnv();
-            if (url && key) {
-                setSupabase(createBrowserClient(url, key));
-            } else {
-                 toast({
-                    title: "Configuration Error",
-                    description: "Supabase environment variables are not set.",
-                    variant: "destructive",
-                });
-            }
-        };
-        initializeSupabase();
-    }, [toast]);
+        // Standard client-side initialization
+        setSupabase(createClient());
+    }, []);
 
 
     const handleLogin = async (e: React.FormEvent) => {

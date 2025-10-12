@@ -6,13 +6,6 @@ import type { BlogPost, Faq } from '@/lib/types';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 
-export async function getSupabaseEnv() {
-  return {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  };
-}
-
 export async function getBlogs(): Promise<BlogPost[]> {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
