@@ -30,11 +30,11 @@ const removeBackgroundFlow = ai.defineFlow(
     outputSchema: RemoveBackgroundOutputSchema,
   },
   async ({photoUri}) => {
-    const {text, media} = await ai.generate({
+    const {media} = await ai.generate({
       model: 'googleai/gemini-pro-vision',
       prompt: [
         {
-          text: 'Remove the background from this image. The output should only be the main subject with a transparent background. Do not add any new background. The output should be a single image, not text.',
+          text: 'TASK: Isolate the main subject in the provided image. OBJECTIVE: Generate a new image of ONLY the main subject with a completely transparent background. The subject must not be altered in any way. The output must be a single PNG image with a transparent background, not text.',
         },
         {media: {url: photoUri}},
       ],
