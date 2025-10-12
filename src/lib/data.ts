@@ -1,5 +1,5 @@
 
-import { FileSignature, Scissors, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Crop, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact } from "lucide-react";
+import { FileSignature, Scissors, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Crop, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact, Link } from "lucide-react";
 
 export const toolCategories = [
     { id: 'compress', name: 'Compress' },
@@ -12,6 +12,7 @@ export const toolCategories = [
     { id: 'generators', name: 'Generators' },
     { id: 'text_tools', name: 'Text Tools' },
     { id: 'image_tools', name: 'Image Tools' },
+    { id: 'link_tools', name: 'Link Tools'},
 ];
 
 export const tools = [
@@ -353,5 +354,15 @@ export const tools = [
     href: "/website-color-picker",
     category: 'color_tools',
     color: '#d946ef'
+  },
+
+  // Link Tools
+  {
+    title: "Short Link Generator",
+    description: "Create short, custom-branded links.",
+    icon: Link,
+    href: "/short-link-generator",
+    category: 'link_tools',
+    color: '#3b82f6' // blue
   }
 ];
