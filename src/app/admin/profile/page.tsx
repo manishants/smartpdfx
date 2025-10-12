@@ -42,7 +42,7 @@ export default function ProfilePage() {
         setAvatarUrl(data.avatar_url);
       }
     } catch (error) {
-      toast({ title: "Error loading profile", variant: "destructive" });
+      toast({ title: "Error loading profile", description: "Please ensure you have created the 'profiles' table in Supabase.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
