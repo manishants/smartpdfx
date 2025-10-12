@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Menu, Eraser, Grid, Heart, ChevronDown, LogIn, Star } from 'lucide-react';
+import { Menu, Eraser, Grid, Heart, ChevronDown, LogIn, Star, Wand2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { tools, toolCategories } from '@/lib/data';
 import { cn } from '@/lib/utils';
@@ -31,6 +31,10 @@ const NavLink = ({ href, children, className }: { href: string; children: React.
 
 const ToolsMegaMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
+    // Exclude AI tools from the general "All Tools" menu
+    const nonAiTools = tools.filter(tool => tool.category !== 'ai');
+    const nonAiCategories = toolCategories.filter(cat => cat.id !== 'ai');
+
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
@@ -41,10 +45,10 @@ const ToolsMegaMenu = () => {
             <PopoverContent className="w-screen max-w-7xl mx-auto p-6 lg:p-8" align="center">
                 <ScrollArea className="max-h-[80vh] h-[550px]">
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-4 pr-6">
-                        {toolCategories.map(category => (
+                        {nonAiCategories.map(category => (
                             <div key={category.id} className="flex flex-col space-y-2">
                                 <h3 className="text-sm font-semibold text-foreground mb-2">{category.name}</h3>
-                                {tools.filter(tool => tool.category === category.id).map(tool => (
+                                {nonAiTools.filter(tool => tool.category === category.id).map(tool => (
                                     <Link
                                         href={tool.href}
                                         key={tool.title}
@@ -66,20 +70,20 @@ const ToolsMegaMenu = () => {
     );
 };
 
-const BestToolsMenu = () => {
+const AIToolsMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const bestTools = tools.filter(t => ["e-Sign PDF", "Compress PDF", "Remove Background"].includes(t.title));
+    const aiTools = tools.filter(t => t.category === 'ai');
 
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                  <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-primary data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
-                    <Star className="mr-2 h-4 w-4" /> Best Tools <ChevronDown className={cn("ml-1 h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                    <Wand2 className="mr-2 h-4 w-4" /> AI Tools <ChevronDown className={cn("ml-1 h-4 w-4 transition-transform", isOpen && "rotate-180")} />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-2" align="start">
                 <div className="flex flex-col space-y-1">
-                    {bestTools.map(tool => (
+                    {aiTools.map(tool => (
                          <Link
                             href={tool.href}
                             key={tool.title}
@@ -97,7 +101,6 @@ const BestToolsMenu = () => {
         </Popover>
     );
 };
-
 
 const MobileNav = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -228,7 +231,7 @@ export function AppHeader() {
                 </div>
 
                 <nav className="hidden md:flex items-center space-x-1 text-sm font-medium">
-                    <BestToolsMenu />
+                    <AIToolsMenu />
                     <ToolsMegaMenu />
                 </nav>
                 

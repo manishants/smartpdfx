@@ -7,7 +7,7 @@ export const toolCategories = [
     { id: 'edit', name: 'Edit PDF & Video' },
     { id: 'convert', name: 'Convert' },
     { id: 'security', name: 'Security' },
-    { id: 'ai_tools', name: 'AI Tools' },
+    { id: 'ai', name: 'AI Tools' },
     { id: 'color_tools', name: 'Color Tools' },
     { id: 'generators', name: 'Generators' },
     { id: 'text_tools', name: 'Text Tools' },
@@ -233,7 +233,7 @@ export const tools = [
     description: "Analyze and summarize chats.",
     icon: MessageSquare,
     href: "/whatsapp-chat-organiser",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981' // emerald
   },
     {
@@ -241,7 +241,7 @@ export const tools = [
     description: "Upscale and improve photo quality.",
     icon: Sparkles,
     href: "/photo-enhancer",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981'
   },
    {
@@ -249,7 +249,7 @@ export const tools = [
     description: "Extract text from an image.",
     icon: ScanText,
     href: "/image-to-text",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981'
   },
   {
@@ -257,7 +257,7 @@ export const tools = [
     description: "Extract text from a PDF document.",
     icon: ScanText,
     href: "/pdf-ocr",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981'
   },
   {
@@ -265,7 +265,7 @@ export const tools = [
     description: "Extract data from voter lists.",
     icon: Users,
     href: "/voter-list-extractor",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981'
   },
   {
@@ -273,7 +273,7 @@ export const tools = [
     description: "Visually extract data to Excel.",
     icon: Users,
     href: "/extract-pdf-data-to-excel",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981'
   },
   {
@@ -281,7 +281,7 @@ export const tools = [
     description: "Generate an image from text.",
     icon: ImageIconLucide,
     href: "/text-to-image",
-    category: 'ai_tools',
+    category: 'ai',
     color: '#10b981'
   },
   
