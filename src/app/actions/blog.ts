@@ -16,6 +16,7 @@ export async function getBlogs(): Promise<BlogPost[]> {
 
   if (error) {
     console.error('Error fetching blogs:', error);
+    // Return empty array but don't block the page from rendering
     return [];
   }
 
@@ -84,7 +85,7 @@ export async function createPost(formData: FormData) {
 
   if (imageError) {
     console.error('Error uploading image:', imageError);
-    return { error: 'Failed to upload image.' };
+    return { error: 'Failed to upload image. Make sure you have a "blogs" bucket in your Supabase Storage.' };
   }
 
   const { data: imageUrlData } = supabase.storage
@@ -93,7 +94,7 @@ export async function createPost(formData: FormData) {
     
   const imageUrl = imageUrlData.publicUrl;
 
-  const newPost: Omit<BlogPost, 'id'> = {
+  const newPost: Omit<BlogPost, 'id' | 'created_at'> = {
     slug: finalSlug,
     title,
     content,
@@ -112,7 +113,10 @@ export async function createPost(formData: FormData) {
 
   if (insertError) {
     console.error('Error creating post:', insertError);
-    return { error: 'Failed to create blog post.' };
+    if (insertError.code === '42P01') { // '42P01' is the code for 'undefined_table'
+        return { error: 'The "blogs" table does not exist. Please create it in your Supabase project.' };
+    }
+    return { error: 'Failed to create blog post in the database.' };
   }
 
   revalidatePath('/admin/dashboard');
