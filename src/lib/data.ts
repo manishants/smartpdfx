@@ -85,7 +85,7 @@ export const tools = [
     title: "Resume Assistant",
     description: "Reviews a resume and suggests improvements.",
     icon: UserRound,
-    href: "#",
+    href: "/resume-assistant",
     category: 'ai',
     color: '#10b981'
   },

@@ -635,3 +635,16 @@ export const RedesignRoomOutputSchema = z.object({
   redesignedPhotoUri: z.string().describe("The redesigned room photo as a data URI."),
 });
 export type RedesignRoomOutput = z.infer<typeof RedesignRoomOutputSchema>;
+
+// Resume Assistant
+export const ResumeAssistantInputSchema = z.object({
+  resumeText: z.string().describe("The full text content of the user's resume."),
+});
+export type ResumeAssistantInput = z.infer<typeof ResumeAssistantInputSchema>;
+
+export const ResumeAssistantOutputSchema = z.object({
+  overallScore: z.number().describe("A score from 0-100 evaluating the resume's overall quality."),
+  overallImpression: z.string().describe("A brief, one-paragraph summary of the AI's first impression."),
+  feedback: z.string().describe("Detailed, actionable feedback formatted in Markdown. It should have sections for 'Strengths' and 'Areas for Improvement' with bullet points."),
+});
+export type ResumeAssistantOutput = z.infer<typeof ResumeAssistantOutputSchema>;
