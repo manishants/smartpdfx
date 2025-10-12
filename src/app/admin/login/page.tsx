@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
-import { LogIn } from 'lucide-react';
+import { LogIn, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AdminLoginPage() {
@@ -42,6 +42,7 @@ export default function AdminLoginPage() {
             });
             // Redirect to the dashboard after successful login
              router.push('/admin/dashboard');
+             setIsLoading(false); // Reset loading state on success
         }
     };
 
@@ -79,7 +80,7 @@ export default function AdminLoginPage() {
                     </CardContent>
                     <CardFooter>
                         <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? 'Logging in...' : <><LogIn className="mr-2 h-4 w-4" /> Login</>}
+                            {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Logging in...</> : <><LogIn className="mr-2 h-4 w-4" /> Login</>}
                         </Button>
                     </CardFooter>
                 </form>
