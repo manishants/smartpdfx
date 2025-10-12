@@ -31,16 +31,13 @@ const redesignRoomFlow = ai.defineFlow(
   },
   async ({photoUri, style}) => {
     const {media} = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-image-preview',
+      model: 'googleai/gemini-pro-vision',
       prompt: [
         {
-          text: `Redesign this room in a ${style} style. Keep the original room layout and architecture, but change the furniture, colors, and decorations to match the requested style.`,
+          text: `Redesign this room in a ${style} style. Keep the original room layout and architecture, but change the furniture, colors, and decorations to match the requested style. The output must be a single image only.`,
         },
         {media: {url: photoUri}},
       ],
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
     });
 
     if (!media || !media.url) {
