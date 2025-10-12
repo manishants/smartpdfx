@@ -9,7 +9,7 @@ export const toolCategories = [
     { id: 'security', name: 'Security' },
     { id: 'ai_tools', name: 'AI Tools' },
     { id: 'color_tools', name: 'Color Tools' },
-    { id: 'generators', name 'Generators' },
+    { id: 'generators', name: 'Generators' },
     { id: 'text_tools', name: 'Text Tools' },
     { id: 'image_tools', name: 'Image Tools' },
 ];
