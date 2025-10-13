@@ -16,17 +16,6 @@ export const toolCategories = [
 ];
 
 export const tools = [
-  // AI Tools First
-  {
-    title: "Domain Name Suggester",
-    description: "Suggests available domain names for a business idea.",
-    icon: SearchCheck,
-    href: "#",
-    category: 'ai',
-    color: '#10b981'
-  },
-
-  // Existing Tools
   {
     title: "Compress Image",
     description: "Compress an image to a smaller size.",
@@ -227,14 +216,6 @@ export const tools = [
     category: 'security',
     color: '#ec4899' // pink
   },
-   {
-    title: "Whatsapp Chat Analyzer",
-    description: "Analyze and summarize chats.",
-    icon: MessageSquare,
-    href: "/whatsapp-chat-organiser",
-    category: 'ai',
-    color: '#10b981' // emerald
-  },
     {
     title: "Photo Enhancer",
     description: "Upscale and improve photo quality.",
@@ -272,14 +253,6 @@ export const tools = [
     description: "Visually extract data to Excel.",
     icon: Users,
     href: "/extract-pdf-data-to-excel",
-    category: 'ai',
-    color: '#10b981'
-  },
-  {
-    title: "Text to Image",
-    description: "Generate an image from text.",
-    icon: ImageIconLucide,
-    href: "/text-to-image",
     category: 'ai',
     color: '#10b981'
   },
