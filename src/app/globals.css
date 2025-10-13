@@ -61,6 +61,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Hide Next.js Turbopack development indicator */
+  nextjs-route-announcer {
+    display: none;
+  }
 }
 
 @layer components {
