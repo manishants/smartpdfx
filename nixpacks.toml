@@ -4,7 +4,7 @@ NEXT_TELEMETRY_DISABLED = "1"
 PORT = "3000"
 
 [phases.setup]
-nixPkgs = ["nodejs_18", "npm"]
+nixPkgs = ["nodejs_18", "nodePackages.npm"]
 
 [phases.install]
 cmds = ["npm ci --omit=dev"]
