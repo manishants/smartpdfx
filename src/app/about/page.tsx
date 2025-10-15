@@ -52,12 +52,12 @@ export default function AboutUsPage() {
         <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
             {/* Hero Section */}
             <section className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10"></div>
                 <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-32">
                     <div className="text-center space-y-8">
                         <div className="flex justify-center">
                             <Badge className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
-                                <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                                <Sparkles className="w-4 h-4 mr-2" />
                                 Meet Our Amazing Team
                             </Badge>
                         </div>
@@ -69,11 +69,11 @@ export default function AboutUsPage() {
                             world-class tools that empower millions of users globally.
                         </p>
                         <div className="flex justify-center gap-4 pt-4">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 rounded-full shadow-lg">
-                                <Heart className="w-5 h-5 text-red-500 animate-pulse" />
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 shadow-lg">
+                                <Heart className="w-5 h-5 text-red-500" />
                                 <span className="text-sm font-medium">Made with Love in India</span>
                             </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 rounded-full shadow-lg">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 shadow-lg">
                                 <Trophy className="w-5 h-5 text-yellow-500" />
                                 <span className="text-sm font-medium">100% Free Forever</span>
                             </div>
@@ -85,26 +85,29 @@ export default function AboutUsPage() {
             {/* Mission Section */}
             <section className="py-20 px-4">
                 <div className="max-w-6xl mx-auto">
-                    <Card className="border-0 shadow-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-                        <CardHeader className="text-center pb-8">
-                            <div className="flex justify-center mb-4">
-                                <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg">
-                                    <Goal className="h-10 w-10 text-white" />
+                    <div className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-2xl border border-white/10 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5"></div>
+                        <div className="relative p-8 md:p-12">
+                            <div className="text-center mb-8">
+                                <div className="flex justify-center mb-4">
+                                    <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
+                                        <Goal className="h-10 w-10 text-white" />
+                                    </div>
                                 </div>
+                                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                    Our Mission: A Better, Freer Internet
+                                </h2>
                             </div>
-                            <CardTitle className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                Our Mission: A Better, Freer Internet
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-                            <p>
-                                In a digital world, documents and images are central to our personal and professional lives. Yet, managing them can often be complicated, expensive, or insecure. SmartPDFx was born from a simple idea: to create a suite of powerful, free, and easy-to-use tools that are accessible to everyone, everywhere.
-                            </p>
-                            <p>
-                                Our mission is to empower users by simplifying complex tasks. We believe that you shouldn't have to deal with aggressive pop-ups, hourly limits, or pay a premium for features that should be straightforward. Whether you need to compress a large file, convert a document, or secure private information, you should be able to do so without friction. We are committed to building tools that respect your privacy and your time.
-                            </p>
-                        </CardContent>
-                    </Card>
+                            <div className="space-y-6 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+                                <p>
+                                    In a digital world, documents and images are central to our personal and professional lives. Yet, managing them can often be complicated, expensive, or insecure. SmartPDFx was born from a simple idea: to create a suite of powerful, free, and easy-to-use tools that are accessible to everyone, everywhere.
+                                </p>
+                                <p>
+                                    Our mission is to empower users by simplifying complex tasks. We believe that you shouldn't have to deal with aggressive pop-ups, hourly limits, or pay a premium for features that should be straightforward. Whether you need to compress a large file, convert a document, or secure private information, you should be able to do so without friction. We are committed to building tools that respect your privacy and your time.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -204,41 +207,41 @@ export default function AboutUsPage() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        <Card className="text-center border-0 shadow-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
-                            <CardContent className="pt-8">
-                                <div className="p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-6 mx-auto w-fit group-hover:scale-110 transition-transform duration-300">
+                        <div className="text-center bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-xl border border-white/10 overflow-hidden">
+                            <div className="p-8">
+                                <div className="p-4 bg-gradient-to-r from-yellow-400 to-orange-500 mb-6 mx-auto w-fit">
                                     <Zap className="h-10 w-10 text-white" />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Fast & Efficient</h3>
                                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                                     Our tools are designed for speed. Get your tasks done in seconds, not minutes, with our optimized cloud-based processing.
                                 </p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
-                        <Card className="text-center border-0 shadow-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
-                            <CardContent className="pt-8">
-                                <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-6 mx-auto w-fit group-hover:scale-110 transition-transform duration-300">
+                        <div className="text-center bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-xl border border-white/10 overflow-hidden">
+                            <div className="p-8">
+                                <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 mb-6 mx-auto w-fit">
                                     <Users className="h-10 w-10 text-white" />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">User-Focused</h3>
                                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                                     We build for you. With clean interfaces and straightforward functionality, our tools are intuitive for both beginners and pros.
                                 </p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
-                        <Card className="text-center border-0 shadow-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group">
-                            <CardContent className="pt-8">
-                                <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full mb-6 mx-auto w-fit group-hover:scale-110 transition-transform duration-300">
+                        <div className="text-center bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-xl border border-white/10 overflow-hidden">
+                            <div className="p-8">
+                                <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-600 mb-6 mx-auto w-fit">
                                     <Shield className="h-10 w-10 text-white" />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Privacy First</h3>
                                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                                     We respect your privacy. Files you upload are processed securely and are automatically deleted from our servers within one hour.
                                 </p>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -246,27 +249,27 @@ export default function AboutUsPage() {
             {/* Commitment Section */}
             <section className="py-20 px-4">
                 <div className="max-w-6xl mx-auto">
-                    <Card className="border-0 shadow-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white overflow-hidden relative">
+                    <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white overflow-hidden shadow-2xl border border-white/10">
                         <div className="absolute inset-0 bg-black/20"></div>
-                        <div className="relative">
-                            <CardHeader className="text-center pb-8">
+                        <div className="relative p-8 md:p-12">
+                            <div className="text-center mb-8">
                                 <div className="flex justify-center mb-6">
-                                    <div className="p-4 bg-white/20 rounded-full backdrop-blur-sm">
-                                        <Star className="h-12 w-12 text-white animate-pulse" />
+                                    <div className="p-4 bg-white/20 backdrop-blur-sm">
+                                        <Star className="h-12 w-12 text-white" />
                                     </div>
                                 </div>
-                                <CardTitle className="text-3xl md:text-4xl font-bold">Our Commitment to You</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6 text-lg leading-relaxed">
+                                <h2 className="text-3xl md:text-4xl font-bold">Our Commitment to You</h2>
+                            </div>
+                            <div className="space-y-6 text-lg leading-relaxed">
                                 <p>
                                     SmartPDFx is a project driven by passion and a commitment to open accessibility. We are constantly working to improve our existing tools and develop new ones to meet your evolving needs. We believe in the power of free tools to level the playing field, and we are proud to offer this service to our users.
                                 </p>
                                 <p className="text-center text-xl font-semibold">
                                     Thank you for choosing SmartPDFx. We're excited to be part of your productivity toolkit.
                                 </p>
-                            </CardContent>
+                            </div>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </section>
         </main>
