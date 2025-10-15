@@ -6,12 +6,16 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, Copy, Trash2, Check, Palette, ZoomIn, MousePointer, Globe, Loader2 } from "lucide-react";
+import { UploadCloud, Copy, Trash2, Check, Palette, ZoomIn, MousePointer, Globe, Loader2, Sparkles, Zap, Eye, Pipette } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getWebsiteScreenshot } from '@/lib/actions/get-website-screenshot';
+import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
+import { ModernSection } from '@/components/modern-section';
 
 interface Screenshot {
   preview: string;
@@ -23,29 +27,64 @@ interface ColorInfo {
 }
 
 const FAQ = () => (
-    <div className="max-w-4xl mx-auto mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-        <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-                <AccordionTrigger>How does this tool get colors from a website?</AccordionTrigger>
-                <AccordionContent>
-                    When you enter a URL, our server uses a headless browser to visit the website and take a full-page screenshot. That screenshot is then sent back to your browser and loaded into the color picker, where you can select colors just like with our Image Color Picker tool.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-                <AccordionTrigger>Why does it take a moment to load the website?</AccordionTrigger>
-                <AccordionContent>
-                    Because we are loading a real browser on our server, navigating to the URL, and waiting for the page to fully load before taking a screenshot, the process can take several seconds. This ensures we get the most accurate representation of the live website.
-                </AccordionContent>
-            </AccordionItem>
-             <AccordionItem value="item-3">
-                <AccordionTrigger>Can this tool access websites that require a login?</AccordionTrigger>
-                <AccordionContent>
-                    No, our tool can only access publicly available websites. It cannot log in to private areas, so it's not suitable for picking colors from behind a login wall.
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
+  <ModernSection className="mt-16">
+    <div className="max-w-4xl mx-auto">
+      <div className="text-center mb-12">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Frequently Asked Questions
+          </h2>
+        </div>
+        <p className="text-gray-600 text-lg">Everything you need to know about our AI-powered website color picker</p>
+      </div>
+      
+      <Accordion type="single" collapsible className="w-full space-y-4">
+        <AccordionItem value="item-1" className="border-2 border-purple-100/50 rounded-xl bg-gradient-to-br from-purple-50/30 to-pink-50/20 px-6">
+          <AccordionTrigger className="text-left font-semibold text-gray-800 hover:text-purple-600 py-6">
+            <div className="flex items-center gap-3">
+              <Globe className="w-5 h-5 text-purple-600" />
+              How does this tool get colors from a website?
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="text-gray-600 pb-6 leading-relaxed">
+            When you enter a URL, our AI-powered server uses a headless browser to visit the website and take a full-page screenshot. 
+            That screenshot is then sent back to your browser and loaded into our intelligent color picker, where you can select colors 
+            with precision just like with our Image Color Picker tool.
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="item-2" className="border-2 border-blue-100/50 rounded-xl bg-gradient-to-br from-blue-50/30 to-purple-50/20 px-6">
+          <AccordionTrigger className="text-left font-semibold text-gray-800 hover:text-blue-600 py-6">
+            <div className="flex items-center gap-3">
+              <Zap className="w-5 h-5 text-blue-600" />
+              Why does it take a moment to load the website?
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="text-gray-600 pb-6 leading-relaxed">
+            Because we are loading a real browser on our server, navigating to the URL, and waiting for the page to fully load 
+            before taking a screenshot, the process can take several seconds. This ensures we get the most accurate representation 
+            of the live website with all its dynamic content and styling.
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="item-3" className="border-2 border-green-100/50 rounded-xl bg-gradient-to-br from-green-50/30 to-blue-50/20 px-6">
+          <AccordionTrigger className="text-left font-semibold text-gray-800 hover:text-green-600 py-6">
+            <div className="flex items-center gap-3">
+              <Eye className="w-5 h-5 text-green-600" />
+              Can this tool access websites that require a login?
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="text-gray-600 pb-6 leading-relaxed">
+            No, our tool can only access publicly available websites. It cannot log in to private areas, so it's not suitable 
+            for picking colors from behind a login wall. However, it works perfectly with all public websites and landing pages.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
+  </ModernSection>
 );
 
 
@@ -134,42 +173,94 @@ export default function WebsiteColorPickerPage() {
   }
 
   return (
-    <>
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">Website Color Picker</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Enter a URL to extract color codes from a website.
-        </p>
-      </header>
-      
-      <div className="max-w-6xl mx-auto mt-8">
-        <Card>
-          <CardContent className="p-6">
-            {!screenshot && (
-              <div className="max-w-lg mx-auto flex flex-col items-center text-center gap-4">
-                <Globe className="h-16 w-16 text-primary" />
-                <div className="w-full space-y-2">
-                    <Input 
+    <ModernPageLayout
+      title="Website Color Picker"
+      description="Extract beautiful color palettes from any website with AI-powered precision and real-time preview."
+      icon={<Pipette className="w-8 h-8" />}
+    >
+      <ModernSection>
+        <div className="max-w-6xl mx-auto">
+          <Card className="border-2 border-blue-200/50 bg-gradient-to-br from-blue-50/30 to-purple-50/20">
+            <CardContent className="p-8">
+              {!screenshot ? (
+                <div className="max-w-lg mx-auto space-y-8">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                        <Globe className="w-8 h-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-800">Enter Website URL</h3>
+                    </div>
+                    <p className="text-gray-600 text-lg">Get a live screenshot and extract colors from any website</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Website URL</label>
+                      <Input 
                         type="url"
                         placeholder="https://example.com"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleFetchScreenshot()}
                         disabled={isLoading}
-                    />
-                    <Button onClick={handleFetchScreenshot} disabled={isLoading} className="w-full">
-                        {isLoading ? <><Loader2 className="mr-2 animate-spin"/>Fetching Website...</> : "Get Colors"}
+                        className="h-12 text-lg bg-white/80 border-blue-200 focus:border-purple-400 focus:ring-purple-400/20"
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleFetchScreenshot} 
+                      disabled={isLoading || !url.trim()} 
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium text-lg rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Capturing Website...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5 mr-2" />
+                          <Zap className="w-4 h-4 mr-1" />
+                          Get Colors with AI
+                        </>
+                      )}
                     </Button>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-purple-100/50 to-pink-100/50 rounded-xl p-6 border border-purple-200/50">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Eye className="w-5 h-5 text-purple-600" />
+                      <h4 className="font-semibold text-gray-800">How it works</h4>
+                    </div>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Our AI takes a live screenshot of the website, then you can hover and click anywhere on the image 
+                      to extract precise color codes. Perfect for designers and developers!
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
-            {screenshot && (
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="md:col-span-2 space-y-4">
-                  <h3 className="text-lg font-semibold">Hover over the image to pick a color</h3>
-                  <div className="relative cursor-crosshair border rounded-lg overflow-hidden">
-                     <Image
+              ) : (
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg">
+                          <Pipette className="w-5 h-5 text-white" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-800">Interactive Color Picker</h3>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => { setScreenshot(null); setPickedColors([]); setUrl(''); }}
+                        className="border-2 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-xl"
+                      >
+                        <Globe className="w-4 h-4 mr-2" /> 
+                        New Website
+                      </Button>
+                    </div>
+                    
+                    <div className="relative cursor-crosshair border-2 border-blue-200/50 rounded-xl overflow-hidden bg-white shadow-lg">
+                      <Image
                         ref={imageRef}
                         src={screenshot.preview}
                         alt="Website screenshot"
@@ -180,57 +271,81 @@ export default function WebsiteColorPickerPage() {
                         onMouseLeave={() => setHoveredColor(null)}
                         onClick={handleClick}
                       />
-                     <canvas ref={canvasRef} className="hidden" />
+                      <canvas ref={canvasRef} className="hidden" />
 
-                     {hoveredColor && mousePos && (
-                       <div 
-                         className="pointer-events-none absolute flex items-center gap-2 p-2 rounded-lg bg-background/80 border shadow-lg"
-                         style={{ left: mousePos.x + 15, top: mousePos.y + 15 }}
-                       >
-                         <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: hoveredColor.hex }}></div>
-                         <span className="font-mono text-sm">{hoveredColor.hex}</span>
-                       </div>
-                     )}
+                      {hoveredColor && mousePos && (
+                        <div 
+                          className="pointer-events-none absolute flex items-center gap-2 p-3 rounded-lg bg-white/95 backdrop-blur-sm border-2 border-blue-200/50 shadow-lg z-10"
+                          style={{ 
+                            left: Math.min(mousePos.x + 15, window.innerWidth - 200), 
+                            top: Math.max(mousePos.y - 50, 10) 
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm" style={{ backgroundColor: hoveredColor.hex }}></div>
+                          <div className="flex flex-col">
+                            <span className="font-mono font-bold text-sm text-gray-800">{hoveredColor.hex}</span>
+                            <span className="font-mono text-xs text-gray-500">{hoveredColor.rgb}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 rounded-xl p-4 border border-blue-200/50">
+                      <p className="text-sm text-gray-600 text-center flex items-center justify-center gap-2">
+                        <MousePointer className="w-4 h-4 text-blue-600" /> 
+                        Hover to preview colors, click to add them to your palette
+                      </p>
+                    </div>
                   </div>
-                   <p className="text-sm text-muted-foreground text-center flex items-center justify-center gap-2"><MousePointer className="h-4 w-4" /> Click on the image to add a color to your palette.</p>
-                </div>
 
-                <div className="space-y-4">
-                   <h3 className="text-lg font-semibold">Color Palette</h3>
-                   <Card>
-                      <CardContent className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                        <Palette className="w-5 h-5 text-white" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-800">Color Palette</h3>
+                    </div>
+                    
+                    <Card className="border-2 border-purple-200/50 bg-gradient-to-br from-purple-50/30 to-pink-50/20">
+                      <CardContent className="p-6 space-y-4 max-h-96 overflow-y-auto">
                         {pickedColors.length === 0 ? (
-                           <p className="text-sm text-muted-foreground text-center py-8">Your picked colors will appear here.</p>
+                          <div className="text-center py-12">
+                            <Palette className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                            <p className="text-gray-500 font-medium">Your color palette is empty</p>
+                            <p className="text-sm text-gray-400 mt-1">Click on the website image to start collecting colors</p>
+                          </div>
                         ) : (
                           pickedColors.map(color => (
-                            <div key={color.hex} className="flex items-center justify-between gap-2 p-2 rounded-md hover:bg-muted">
-                              <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-md border" style={{backgroundColor: color.hex}} />
+                            <div key={color.hex} className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-white/60 transition-all duration-200 border border-gray-200/50 bg-white/40">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl border-2 border-gray-300 shadow-sm" style={{backgroundColor: color.hex}} />
                                 <div className="flex flex-col">
-                                   <span className="font-mono font-semibold text-sm">{color.hex}</span>
-                                   <span className="font-mono text-xs text-muted-foreground">{color.rgb}</span>
+                                  <span className="font-mono font-bold text-sm text-gray-800">{color.hex}</span>
+                                  <span className="font-mono text-xs text-gray-500">{color.rgb}</span>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="icon" onClick={() => handleCopy(color.hex)}>
-                                <Copy className="h-4 w-4"/>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleCopy(color.hex)}
+                                className="hover:bg-blue-100 hover:text-blue-600 rounded-lg"
+                              >
+                                <Copy className="w-4 h-4"/>
                               </Button>
                             </div>
                           ))
                         )}
                       </CardContent>
-                   </Card>
-                   <Button variant="outline" className="w-full" onClick={() => { setScreenshot(null); setPickedColors([]); setUrl(''); }}>
-                       <Globe className="mr-2 h-4 w-4" /> Check Another Site
-                   </Button>
+                    </Card>
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </ModernSection>
+      
       <FAQ />
-    </div>
-    <AllTools />
-    </>
+    </ModernPageLayout>
   );
 }

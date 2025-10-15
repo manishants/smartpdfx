@@ -63,7 +63,7 @@ export default function EditPdfPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {

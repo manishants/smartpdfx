@@ -8,12 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Repeat, CheckCircle } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Repeat, CheckCircle, Sparkles, Zap, ImageIcon, Shuffle } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { convertImage } from '@/lib/actions/convert-image';
 import type { ConvertImageInput, ConvertImageOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,23 +30,49 @@ interface UploadedFile {
 type Format = 'jpeg' | 'png' | 'webp' | 'gif' | 'tiff';
 
 const FAQ = () => (
-    <div className="max-w-4xl mx-auto mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-        <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-                <AccordionTrigger>What is the difference between JPG, PNG, and WEBP?</AccordionTrigger>
-                <AccordionContent>
-                    <b>JPG (or JPEG)</b> is best for photos and images with many colors. It uses lossy compression, meaning it reduces file size by discarding some image information, but is great for general use. <b>PNG</b> is best for graphics with flat colors, text, or transparency, as it uses lossless compression (no quality loss). <b>WEBP</b> is a modern format developed by Google that provides excellent lossless and lossy compression, often resulting in smaller file sizes than both JPG and PNG at similar quality.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-                <AccordionTrigger>Will converting my image reduce its quality?</AccordionTrigger>
-                <AccordionContent>
-                    It depends on the conversion. Converting from a high-quality format like PNG to a lossy format like JPG will cause some quality loss to achieve a smaller file size. Converting between lossless formats (like PNG to WEBP lossless) will not degrade quality. Our tool aims to maintain the highest possible quality for the selected format.
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
-    </div>
+  <ModernSection 
+    title="Frequently Asked Questions" 
+    subtitle="Everything you need to know about image conversion"
+    icon={<Sparkles className="h-6 w-6" />}
+  >
+    <Accordion type="single" collapsible className="w-full space-y-4">
+      <AccordionItem value="item-1" className="border border-primary/20 rounded-lg px-6 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <AccordionTrigger className="text-left hover:text-primary transition-colors">
+          What is the difference between JPG, PNG, and WEBP?
+        </AccordionTrigger>
+        <AccordionContent className="text-muted-foreground leading-relaxed">
+          <div className="space-y-3">
+            <p><span className="font-semibold text-primary">JPG (or JPEG)</span> is best for photos and images with many colors. It uses lossy compression, meaning it reduces file size by discarding some image information, but is great for general use.</p>
+            <p><span className="font-semibold text-primary">PNG</span> is best for graphics with flat colors, text, or transparency, as it uses lossless compression (no quality loss).</p>
+            <p><span className="font-semibold text-primary">WEBP</span> is a modern format developed by Google that provides excellent lossless and lossy compression, often resulting in smaller file sizes than both JPG and PNG at similar quality.</p>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2" className="border border-primary/20 rounded-lg px-6 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <AccordionTrigger className="text-left hover:text-primary transition-colors">
+          Will converting my image reduce its quality?
+        </AccordionTrigger>
+        <AccordionContent className="text-muted-foreground leading-relaxed">
+          <div className="space-y-3">
+            <p>It depends on the conversion. Converting from a high-quality format like PNG to a lossy format like JPG will cause some quality loss to achieve a smaller file size.</p>
+            <p>Converting between lossless formats (like PNG to WEBP lossless) will not degrade quality. Our AI-powered tool aims to maintain the highest possible quality for the selected format.</p>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-3" className="border border-primary/20 rounded-lg px-6 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <AccordionTrigger className="text-left hover:text-primary transition-colors">
+          Which format should I choose for my image?
+        </AccordionTrigger>
+        <AccordionContent className="text-muted-foreground leading-relaxed">
+          <div className="space-y-3">
+            <p><span className="font-semibold text-primary">For photos:</span> Use JPG for smaller file sizes or PNG for highest quality.</p>
+            <p><span className="font-semibold text-primary">For graphics/logos:</span> Use PNG to preserve transparency and sharp edges.</p>
+            <p><span className="font-semibold text-primary">For web optimization:</span> Use WEBP for the best balance of quality and file size.</p>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </ModernSection>
 );
 
 
@@ -52,14 +83,17 @@ export default function ImageConverterPage() {
   const [result, setResult] = useState<ConvertImageOutput | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const selectedFile = event.target.files[0];
-      if (selectedFile.type.startsWith('image/')) {
-        setFile({ file: selectedFile, preview: URL.createObjectURL(selectedFile) });
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        setFile({ file, preview: URL.createObjectURL(file) });
         setResult(null);
       } else {
-        toast({ title: "Invalid file type", description: "Please select an image file.", variant: "destructive" });
+        toast({ 
+          title: "Invalid file type", 
+          description: "Please select a valid image file (JPG, PNG, GIF, WEBP, TIFF).", 
+          variant: "destructive" 
+        });
       }
     }
   };
@@ -125,97 +159,172 @@ export default function ImageConverterPage() {
   };
 
   return (
-    <>
-    <main className="flex-1 p-6 md:p-8 space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">Image Converter</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Convert images to JPG, PNG, WEBP, and more.
-        </p>
-      </header>
-      
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="p-6">
-            {!file && (
-              <div 
-                className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                <p className="mt-4 font-semibold text-primary">Drag & drop an image here</p>
-                <Input 
-                  id="file-upload"
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-            )}
+    <ModernPageLayout
+      title="AI Image Converter"
+      subtitle="Convert images between formats with intelligent optimization and quality preservation"
+      icon={<Shuffle className="h-8 w-8" />}
+    >
+      <div className="max-w-4xl mx-auto space-y-8">
+        <ModernSection 
+          title="Upload & Convert" 
+          subtitle="Upload your image and choose your desired output format"
+          icon={<Zap className="h-6 w-6" />}
+        >
+          {!file && (
+            <ModernUploadArea
+              onFileSelect={handleFileChange}
+              acceptedTypes={["image/*"]}
+              maxSize={50 * 1024 * 1024} // 50MB
+              title="Drop your image here"
+              subtitle="Supports JPG, PNG, GIF, WEBP, TIFF up to 50MB"
+              icon={<ImageIcon className="h-12 w-12" />}
+            />
+          )}
 
-            {file && !result && (
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-md">
-                   <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
+          {file && !result && (
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
+                <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
+              </div>
+              
+              <div className="w-full max-w-sm space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="format" className="text-sm font-medium flex items-center gap-2">
+                    <Shuffle className="h-4 w-4" />
+                    Convert to Format
+                  </Label>
+                  <Select value={format} onValueChange={(v) => setFormat(v as Format)}>
+                    <SelectTrigger id="format" className="border-primary/20 focus:border-primary">
+                      <SelectValue placeholder="Select format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="png">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded bg-blue-500"></div>
+                          PNG - Lossless, supports transparency
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="jpeg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded bg-orange-500"></div>
+                          JPG - Smaller size, good for photos
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="webp">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded bg-green-500"></div>
+                          WEBP - Modern, best compression
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="gif">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded bg-purple-500"></div>
+                          GIF - Supports animation
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="tiff">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded bg-red-500"></div>
+                          TIFF - High quality, professional
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="w-full max-w-sm space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="format">Convert to</Label>
-                    <Select value={format} onValueChange={(v) => setFormat(v as Format)}>
-                      <SelectTrigger id="format">
-                        <SelectValue placeholder="Select format" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="png">PNG</SelectItem>
-                        <SelectItem value="jpeg">JPG</SelectItem>
-                        <SelectItem value="webp">WEBP</SelectItem>
-                        <SelectItem value="gif">GIF</SelectItem>
-                        <SelectItem value="tiff">TIFF</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              </div>
+              
+              <Button 
+                size="lg" 
+                onClick={handleConvert}
+                disabled={isConverting}
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                {isConverting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    AI Converting...
+                  </>
+                ) : (
+                  <>
+                    <Shuffle className="mr-2 h-4 w-4" />
+                    Convert Image
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {result && file && (
+            <div className="text-center flex flex-col items-center gap-6">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-full px-6 py-3">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+                <h2 className="text-xl font-semibold text-green-700">Conversion Successful!</h2>
+              </div>
+              <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
+                <Image src={result.convertedImageUri} alt="Converted preview" width={600} height={400} className="w-full h-auto object-contain" />
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button 
                   size="lg" 
-                  onClick={handleConvert}
-                  disabled={isConverting}
+                  onClick={handleDownload}
+                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Converting...
-                    </>
-                   ) : <><Repeat className="mr-2"/> Convert</>}
+                  <FileDown className="mr-2 h-5 w-5" />
+                  Download .{format.toUpperCase()}
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  onClick={handleReset}
+                  className="border-primary/20 hover:bg-primary/5"
+                >
+                  <RefreshCw className="mr-2 h-5 w-5" />
+                  Convert Another
                 </Button>
               </div>
-            )}
+            </div>
+          )}
+        </ModernSection>
 
-            {result && file && (
-               <div className="text-center flex flex-col items-center gap-6">
-                 <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                 <h2 className="text-2xl font-semibold mt-4">Conversion Successful!</h2>
-                 <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-md">
-                   <Image src={result.convertedImageUri} alt="Converted preview" width={600} height={400} className="w-full h-auto object-contain" />
-                 </div>
-                 <div className="mt-6 flex gap-4">
-                    <Button size="lg" onClick={handleDownload}>
-                      <FileDown className="mr-2" />
-                      Download .{format}
-                    </Button>
-                    <Button size="lg" variant="outline" onClick={handleReset}>
-                      <RefreshCw className="mr-2" />
-                      Convert Another
-                    </Button>
-                 </div>
+        <ModernSection 
+          title="AI-Powered Features" 
+          subtitle="Advanced capabilities for superior image conversion"
+          icon={<Sparkles className="h-6 w-6" />}
+        >
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Zap className="h-5 w-5 text-primary" />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Smart Optimization</h3>
+                <p className="text-sm text-muted-foreground">Automatically optimizes conversion settings based on image content and target format for best results.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">Quality Preservation</h3>
+                <p className="text-sm text-muted-foreground">Advanced algorithms maintain maximum image quality while achieving optimal file sizes.</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 dark:from-blue-950/20 dark:to-indigo-950/20 dark:border-blue-800/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Pro Tip</span>
+            </div>
+            <p className="text-sm text-blue-600 dark:text-blue-400">
+              For web use, WEBP offers the best compression. For print or professional work, use PNG or TIFF to maintain highest quality.
+            </p>
+          </div>
+        </ModernSection>
+
+        <FAQ />
       </div>
-      <FAQ />
-    </main>
-    <AllTools />
-    </>
+    </ModernPageLayout>
   );
 }

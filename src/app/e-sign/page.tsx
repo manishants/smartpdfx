@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
 import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +49,9 @@ export default function ESignPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        if (typeof window !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        }
     }, []);
 
     const fileToDataUri = (file: File): Promise<string> => {

@@ -1,98 +1,167 @@
 
 "use client";
 
-import { useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { UploadCloud, FileUp, Loader2, RefreshCw, FileType, CheckCircle } from "lucide-react";
-import { useToast } from '@/hooks/use-toast';
-import { AllTools } from '@/components/all-tools';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { saveAs } from 'file-saver';
-import { pdfToWord } from '@/ai/flows/pdf-to-word';
-import type { PdfToWordInput, PdfToWordOutput } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { FileText, Download, RefreshCw, Upload, Sparkles, Zap, CheckCircle, AlertCircle, FileDown, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { pdfToWord } from "@/ai/flows/pdf-to-word";
+import { ModernPageLayout } from "@/components/modern-page-layout";
+import { ModernSection } from "@/components/modern-section";
+import { ModernUploadArea } from "@/components/modern-upload-area";
+import { AllTools } from "@/components/all-tools";
+
+interface ConversionResult {
+  success: boolean;
+  docxBuffer?: ArrayBuffer;
+  error?: string;
+}
 
 
 const FAQ = () => (
-    <div className="max-w-4xl mx-auto mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
+  <div className="mt-12">
+    <Card className="backdrop-blur-sm bg-background/80 border-border/50">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          Frequently Asked Questions
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
         <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-                <AccordionTrigger>How does the AI-powered PDF to Word conversion work?</AccordionTrigger>
-                <AccordionContent>
-                    Our tool uses a powerful multimodal AI model to analyze your PDF. It doesn't just extract text; it understands the layout, font sizes, colors, and styles. It then reconstructs this into a new, editable Microsoft Word (.docx) document that preserves the original look and feel as closely as possible.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-                <AccordionTrigger>Will my formatting and images be kept?</AccordionTrigger>
-                <AccordionContent>
-                    Yes, this AI-powered tool is designed to preserve as much formatting as possible, including font styles, sizes, colors, and layout. It will also embed images from the PDF into the Word document.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-3">
-                <AccordionTrigger>What happens with scanned PDFs (OCR)?</AccordionTrigger>
-                <AccordionContent>
-                    Our AI model has powerful Optical Character Recognition (OCR) capabilities built-in. If your PDF is a scanned document, the AI will automatically read the text from the images and include it in the final Word document, attempting to match the original formatting.
-                </AccordionContent>
-            </AccordionItem>
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="text-left">How accurate is the PDF to Word conversion?</AccordionTrigger>
+            <AccordionContent>
+              Our AI-powered conversion technology maintains high accuracy for text, formatting, and layout preservation. 
+              Complex documents with intricate designs may require minor adjustments after conversion.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2">
+            <AccordionTrigger className="text-left">What file formats are supported?</AccordionTrigger>
+            <AccordionContent>
+              We support PDF files up to 50MB in size. The output is a fully editable Microsoft Word document (.docx format) 
+              compatible with Word 2007 and later versions.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger className="text-left">Is my document secure during conversion?</AccordionTrigger>
+            <AccordionContent>
+              Yes, your documents are processed securely and are automatically deleted from our servers after conversion. 
+              We do not store or share your files with third parties.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-4">
+            <AccordionTrigger className="text-left">Can I convert password-protected PDFs?</AccordionTrigger>
+            <AccordionContent>
+              Currently, password-protected PDFs need to be unlocked before conversion. You can use our PDF unlock tool 
+              first, then proceed with the conversion.
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
-    </div>
+      </CardContent>
+    </Card>
+  </div>
 );
 
 export default function PdfToWordPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
-  const [result, setResult] = useState<PdfToWordOutput | null>(null);
+  const [result, setResult] = useState<ConversionResult | null>(null);
+  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const selectedFile = event.target.files[0];
-       if (selectedFile.type === 'application/pdf') {
-        setFile(selectedFile);
-        setResult(null);
-      } else {
-        toast({ title: "Invalid file type", description: "Please select a PDF file.", variant: "destructive" });
-      }
+  const handleFileChange = (selectedFile: File) => {
+    if (selectedFile.type !== "application/pdf") {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a PDF file.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (selectedFile.size > 50 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select a PDF file smaller than 50MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFile(selectedFile);
+    setResult(null);
+    setProgress(0);
   };
 
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = (event) => {
+        resolve(event.target?.result as string);
+      };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
   const handleConvert = async () => {
-    if (!file) {
-        toast({ title: "No file selected", description: "Please select a PDF to convert.", variant: "destructive" });
-        return;
-    }
-    setIsConverting(true);
-    setResult(null);
-    
-    try {
-      const pdfUri = await fileToDataUri(file);
-      const input: PdfToWordInput = { pdfUri };
-      
-      const conversionResult = await pdfToWord(input);
-      
-      if (conversionResult && conversionResult.docxUri) {
-        setResult(conversionResult);
-      } else {
-        throw new Error("Conversion process returned no data.");
-      }
+    if (!file) return;
 
-    } catch (error: any) {
-      console.error("Conversion failed:", error);
+    setIsConverting(true);
+    setProgress(0);
+
+    try {
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      const dataUri = await fileToDataUri(file);
+      const conversionResult = await pdfToWord({ dataUri });
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      if (conversionResult.success && conversionResult.docxBuffer) {
+        setResult({
+          success: true,
+          docxBuffer: conversionResult.docxBuffer
+        });
+        toast({
+          title: "Conversion successful!",
+          description: "Your PDF has been converted to Word format.",
+        });
+      } else {
+        setResult({
+          success: false,
+          error: conversionResult.error || "Conversion failed"
+        });
+        toast({
+          title: "Conversion failed",
+          description: conversionResult.error || "An error occurred during conversion.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Conversion error:", error);
+      setResult({
+        success: false,
+        error: "An unexpected error occurred"
+      });
       toast({
-        title: "Conversion Failed",
-        description: error.message || "Could not convert the PDF. It may be too complex or corrupted.",
-        variant: "destructive"
+        title: "Conversion failed",
+        description: "An unexpected error occurred during conversion.",
+        variant: "destructive",
       });
     } finally {
       setIsConverting(false);
@@ -100,102 +169,253 @@ export default function PdfToWordPage() {
   };
   
   const handleDownload = () => {
-    if (result && file) {
-      const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
-      const newFilename = `${originalFilename}.docx`;
-      
-      const a = document.createElement('a');
-      a.href = result.docxUri;
-      a.download = newFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    if (!result?.docxBuffer || !file) return;
+
+    const blob = new Blob([result.docxBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name.replace(/\.pdf$/i, ".docx");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
 
   const handleReset = () => {
     setFile(null);
     setResult(null);
+    setProgress(0);
     setIsConverting(false);
   };
 
   return (
     <>
-    <main className="flex-1 p-6 md:p-8 space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">PDF to Word</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Convert your PDF to an editable Word document with AI.
-        </p>
-      </header>
-      
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="p-6">
-            {!file && (
-              <div 
-                className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => document.getElementById('file-upload')?.click()}
+      <ModernPageLayout
+        title="PDF to Word Converter"
+        description="Transform your PDF documents into fully editable Word files with our advanced AI-powered conversion technology."
+        icon={FileText}
+        badge="AI-Powered"
+      >
+        <div className="space-y-8">
+          {/* Upload Section */}
+          <ModernSection>
+            {!file ? (
+              <ModernUploadArea
+                onFileSelect={handleFileChange}
+                accept=".pdf"
+                maxSize={50 * 1024 * 1024}
+                isLoading={isConverting}
               >
-                <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                <p className="mt-4 font-semibold text-primary">Drag & drop a PDF here</p>
-                <p className="text-sm text-muted-foreground mt-1">or click to select a file</p>
-                <Input 
-                  id="file-upload"
-                  type="file" 
-                  className="hidden" 
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                />
-              </div>
-            )}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-full blur-xl animate-pulse" />
+                    <div className="relative bg-gradient-to-r from-primary/10 to-blue-600/10 p-6 rounded-full border border-primary/20">
+                      <Upload className="h-12 w-12 text-primary" />
+                    </div>
+                  </div>
+                  
+                  <div className="text-center space-y-2">
+                    <h3 className="text-xl font-semibold text-foreground">
+                      Drop your PDF here or click to browse
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Supports PDF files up to 50MB
+                    </p>
+                  </div>
 
-            {file && !result &&(
-              <div className="flex flex-col items-center gap-6">
-                <div className="flex flex-col items-center justify-center bg-muted/50 border rounded-lg p-8 w-full">
-                    <FileType className="w-16 h-16 text-primary" />
-                    <p className="mt-2 text-sm font-semibold text-muted-foreground">{file.name}</p>
+                  <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-purple-500" />
+                      <span>AI-Enhanced</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-yellow-500" />
+                      <span>Fast Processing</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>High Accuracy</span>
+                    </div>
+                  </div>
                 </div>
-                <Button 
-                  size="lg" 
-                  onClick={handleConvert}
-                  disabled={isConverting}
-                >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Converting...
-                    </>
-                   ) : <><FileUp className="mr-2"/>Convert to Word</>}
-                </Button>
-              </div>
-            )}
-            
-            {result && file && (
-               <div className="text-center flex flex-col items-center gap-4">
-                 <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                 <h2 className="text-2xl font-semibold mt-4">Conversion Successful!</h2>
-                 <p className="text-muted-foreground">Your editable Word document is ready.</p>
-                 <div className="mt-6 flex gap-4">
-                    <Button size="lg" onClick={handleDownload}>
-                      <FileDown className="mr-2" />
-                      Download .docx
-                    </Button>
-                    <Button size="lg" variant="outline" onClick={handleReset}>
-                      <RefreshCw className="mr-2" />
-                      Convert Another
-                    </Button>
-                 </div>
-              </div>
-            )}
+              </ModernUploadArea>
+            ) : (
+              <div className="space-y-6">
+                {/* File Info */}
+                <Card className="bg-gradient-to-r from-primary/5 to-blue-600/5 border border-primary/20">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-gradient-to-r from-primary/10 to-blue-600/10 rounded-lg">
+                          <FileText className="h-8 w-8 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{file.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-600">
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Ready
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
 
-          </CardContent>
-        </Card>
-      </div>
+                {/* Conversion Progress */}
+                {isConverting && (
+                  <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-foreground flex items-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            Converting PDF to Word...
+                          </h3>
+                          <span className="text-sm text-muted-foreground">{progress}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Our AI is analyzing and converting your document. This may take a few moments.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Conversion Result */}
+                {result && (
+                  <Card className={`${result.success 
+                    ? 'bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20' 
+                    : 'bg-gradient-to-r from-red-500/5 to-pink-500/5 border border-red-500/20'
+                  }`}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className={`p-3 rounded-lg ${result.success 
+                          ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10' 
+                          : 'bg-gradient-to-r from-red-500/10 to-pink-500/10'
+                        }`}>
+                          {result.success ? (
+                            <CheckCircle className="h-8 w-8 text-green-600" />
+                          ) : (
+                            <AlertCircle className="h-8 w-8 text-red-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className={`font-semibold ${result.success ? 'text-green-600' : 'text-red-600'}`}>
+                            {result.success ? 'Conversion Successful!' : 'Conversion Failed'}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {result.success 
+                              ? 'Your PDF has been successfully converted to Word format.'
+                              : result.error || 'An error occurred during conversion.'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {!result && (
+                    <Button 
+                      onClick={handleConvert}
+                      disabled={isConverting}
+                      className="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium py-6 text-lg"
+                    >
+                      {isConverting ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Converting...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Convert to Word
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {result?.success && (
+                    <Button 
+                      onClick={handleDownload}
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-600/90 hover:to-emerald-600/90 text-white font-medium py-6 text-lg"
+                    >
+                      <FileDown className="mr-2 h-5 w-5" />
+                      Download Word File
+                    </Button>
+                  )}
+
+                  <Button 
+                    onClick={handleReset}
+                    variant="outline"
+                    className="flex-1 py-6 text-lg border-border/50 hover:bg-accent/50"
+                  >
+                    <RefreshCw className="mr-2 h-5 w-5" />
+                    Start Over
+                  </Button>
+                </div>
+              </div>
+            )}
+          </ModernSection>
+
+          {/* AI Information Section */}
+          <ModernSection>
+            <Card className="bg-gradient-to-r from-purple-500/5 to-pink-500/5 border border-purple-500/20">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg">
+                    <Sparkles className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-2">AI-Powered Conversion Technology</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Our advanced AI algorithms ensure high-quality conversion while preserving formatting, 
+                      layout, and text structure from your original PDF document.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 text-blue-600">
+                          <Zap className="w-3 h-3 mr-1" />
+                          Fast
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">Lightning speed</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-600">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Accurate
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">High precision</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 text-purple-600">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Smart
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">AI-enhanced</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </ModernSection>
+        </div>
+      </ModernPageLayout>
+      
       <FAQ />
-    </main>
-    <AllTools />
+      <AllTools />
     </>
   );
 }

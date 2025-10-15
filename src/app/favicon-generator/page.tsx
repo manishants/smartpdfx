@@ -37,7 +37,7 @@ const FAQ = () => (
              <AccordionItem value="item-3">
                 <AccordionTrigger>How do I add the favicon to my website?</AccordionTrigger>
                 <AccordionContent>
-                    After downloading your `favicon.ico` file, upload it to the root directory of your website. Then, add the following line of code to the `<head>` section of your HTML: `<link rel="icon" href="/favicon.ico" sizes="any" />`.
+                    After downloading your `favicon.ico` file, upload it to the root directory of your website. Then, add the following line of code to the `&lt;head&gt;` section of your HTML: `&lt;link rel="icon" href="/favicon.ico" sizes="any" /&gt;`.
                 </AccordionContent>
             </AccordionItem>
         </Accordion>

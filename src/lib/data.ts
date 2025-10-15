@@ -56,14 +56,7 @@ export const tools = [
     category: 'compress',
     color: '#ef4444' // red
   },
-  {
-    title: "Merge PDF",
-    description: "Combine multiple PDFs into one.",
-    icon: FileJson,
-    href: "/merge-pdf",
-    category: 'organize',
-    color: '#64748b' // dusty blue
-  },
+
   {
     title: "Split PDF",
     description: "Split a PDF into multiple files.",
@@ -319,14 +312,6 @@ export const tools = [
     href: "/website-color-picker",
     category: 'color_tools',
     color: '#d946ef'
-  },
-  {
-    title: "Short Link Generator",
-    description: "Create short, custom-branded links.",
-    icon: Link,
-    href: "/short-link-generator",
-    category: 'link_tools',
-    color: '#3b82f6' // blue
   }
 ];
 

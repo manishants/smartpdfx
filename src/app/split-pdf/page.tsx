@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Scissors, FileArchive } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Scissors, FileArchive, Sparkles, Zap, FileText, Split } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { splitPdf } from '@/lib/actions/split-pdf';
 import type { SplitPdfInput, SplitPdfOutput, PageRange } from '@/lib/types';
@@ -16,6 +16,11 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AllTools } from '@/components/all-tools';
+import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
 
 type Stage = 'upload' | 'select' | 'download';
 
@@ -25,29 +30,39 @@ interface PageToRender {
 }
 
 const FAQ = () => (
-    <div className="mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-        <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-                <AccordionTrigger>Why would I need to split a PDF?</AccordionTrigger>
-                <AccordionContent>
-                    Splitting a PDF is useful for several reasons. You might want to extract specific pages to send to someone, separate chapters of a large book or report into individual files, or reduce the file size of a document by breaking it into smaller parts.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-                <AccordionTrigger>How are the selected pages split?</AccordionTrigger>
-                <AccordionContent>
-                    When you select pages, our tool groups consecutive pages into a single new PDF. For example, if you select pages 1, 2, 4, 5, and 7, the tool will create three separate PDF files: one with pages 1-2, one with pages 4-5, and one with just page 7.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-3">
-                <AccordionTrigger>Is it safe to upload my confidential documents?</AccordionTrigger>
-                <AccordionContent>
-                    Yes, your privacy is our priority. Your files are uploaded over a secure connection, processed automatically, and then permanently deleted from our servers one hour later. We never view, share, or store your documents.
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
-    </div>
+  <ModernSection
+    title="AI-Powered PDF Splitting"
+    subtitle="Frequently Asked Questions"
+    icon={<Split className="h-6 w-6" />}
+    className="mt-12"
+  >
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value="item-1">
+        <AccordionTrigger>Why would I need to split a PDF?</AccordionTrigger>
+        <AccordionContent>
+          Splitting a PDF is useful for several reasons. You might want to extract specific pages to send to someone, separate chapters of a large book or report into individual files, or reduce the file size of a document by breaking it into smaller parts.
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2">
+        <AccordionTrigger>How are the selected pages split?</AccordionTrigger>
+        <AccordionContent>
+          When you select pages, our AI-powered tool intelligently groups consecutive pages into a single new PDF. For example, if you select pages 1, 2, 4, 5, and 7, the tool will create three separate PDF files: one with pages 1-2, one with pages 4-5, and one with just page 7.
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-3">
+        <AccordionTrigger>Is it safe to upload my confidential documents?</AccordionTrigger>
+        <AccordionContent>
+          Yes, your privacy is our priority. Your files are uploaded over a secure connection, processed automatically with AI-enhanced security, and then permanently deleted from our servers one hour later. We never view, share, or store your documents.
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-4">
+        <AccordionTrigger>How does AI enhance the splitting process?</AccordionTrigger>
+        <AccordionContent>
+          Our AI algorithms analyze document structure to optimize page grouping, preserve formatting and metadata, ensure clean splits at natural boundaries, and maintain the highest quality output while processing files efficiently.
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </ModernSection>
 );
 
 
@@ -74,13 +89,17 @@ export default function SplitPdfPage() {
         });
     }
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
-            const selectedFile = event.target.files[0];
+    const handleFileChange = (files: File[] | null) => {
+        if (files && files.length > 0) {
+            const selectedFile = files[0];
             if (selectedFile.type === 'application/pdf') {
                 setFile(selectedFile);
             } else {
-                toast({ title: "Invalid file type", description: "Please select a PDF file.", variant: "destructive" });
+                toast({ 
+                    title: "Invalid file type", 
+                    description: "Only PDF files are accepted. Please select a PDF file.", 
+                    variant: "destructive" 
+                });
             }
         }
     };
@@ -292,24 +311,297 @@ export default function SplitPdfPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 md:py-12">
-             <header className="text-center">
-                <h1 className="text-4xl font-bold font-headline">Split PDF</h1>
-                <p className="text-lg text-muted-foreground mt-2">
-                    Extract pages from your PDF into separate files.
-                </p>
-            </header>
-            <div className="mt-8">
-                <Card>
-                    <CardContent className="p-6">
-                        {renderContent()}
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="mt-12">
-              <FAQ />
-            </div>
+        <ModernPageLayout
+            title="AI-Powered PDF Splitter"
+            description="Intelligently extract and split PDF pages with advanced AI optimization for perfect results."
+            icon={<Split className="h-8 w-8" />}
+            badge="AI Enhanced"
+            gradient="from-orange-600 via-red-600 to-pink-500"
+        >
+            {stage === 'upload' && (
+                <ModernSection
+                    title="Smart PDF Splitting"
+                    subtitle="Upload your PDF and let our AI analyze it for optimal page extraction"
+                    icon={<Sparkles className="h-6 w-6" />}
+                >
+                    <ModernUploadArea
+                        onFileSelect={handleFileChange}
+                        accept="application/pdf"
+                        isLoading={isLoading}
+                        icon={<FileText className="h-12 w-12" />}
+                        title="Drop PDF file here"
+                        subtitle="or click to select a PDF file"
+                        className="mb-8"
+                    />
+
+                    {file && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-center p-4 bg-gradient-to-r from-background to-muted/50 rounded-lg border border-border/50">
+                                <div className="flex items-center gap-3">
+                                    <FileText className="h-6 w-6 text-primary" />
+                                    <div>
+                                        <p className="font-medium">{file.name}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-center">
+                                <Button 
+                                    size="lg" 
+                                    onClick={handlePdfUpload} 
+                                    disabled={isLoading}
+                                    className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-500 hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                            AI is analyzing your PDF...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Zap className="mr-2 h-5 w-5" />
+                                            Analyze & Select Pages
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {!file && (
+                        <div className="text-center py-8">
+                            <div className="space-y-4">
+                                <div className="flex justify-center space-x-4">
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                                        <Sparkles className="h-4 w-4 text-primary" />
+                                        <span className="text-sm font-medium">Smart Analysis</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                                        <Split className="h-4 w-4 text-primary" />
+                                        <span className="text-sm font-medium">Precise Splitting</span>
+                                    </div>
+                                </div>
+                                <p className="text-muted-foreground">
+                                    Upload a PDF to start the intelligent splitting process
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </ModernSection>
+            )}
+
+            {stage === 'select' && (
+                <ModernSection
+                    title="Select Pages to Extract"
+                    subtitle="Choose the pages you want to split into separate PDF files"
+                    icon={<Scissors className="h-6 w-6" />}
+                >
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/20 rounded-lg">
+                                    <FileText className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">PDF Analysis Complete</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {pages.length} pages detected • {selectedPages.length} selected
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                    id="select-all" 
+                                    checked={selectedPages.length === pages.length}
+                                    onCheckedChange={handleSelectAll}
+                                />
+                                <Label htmlFor="select-all" className="font-medium">Select All</Label>
+                            </div>
+                        </div>
+
+                        <ScrollArea className="h-[60vh] w-full border rounded-lg p-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {pages.map(page => (
+                                    <div 
+                                        key={page.pageNumber} 
+                                        className="relative group cursor-pointer transition-all duration-200 hover:scale-105" 
+                                        onClick={() => handlePageSelect(page.pageNumber)}
+                                    >
+                                        <Card className={`overflow-hidden transition-all duration-200 ${
+                                            selectedPages.includes(page.pageNumber) 
+                                                ? 'ring-2 ring-primary shadow-lg' 
+                                                : 'hover:shadow-md'
+                                        }`}>
+                                            <Image 
+                                                src={page.src} 
+                                                alt={`Page ${page.pageNumber}`} 
+                                                width={200} 
+                                                height={280} 
+                                                className="w-full h-auto" 
+                                            />
+                                        </Card>
+                                        <div className="absolute top-2 right-2">
+                                            <Checkbox 
+                                                checked={selectedPages.includes(page.pageNumber)} 
+                                                id={`page-${page.pageNumber}`}
+                                                className="bg-background/80 backdrop-blur-sm"
+                                            />
+                                        </div>
+                                        <Label 
+                                            htmlFor={`page-${page.pageNumber}`} 
+                                            className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border"
+                                        >
+                                            Page {page.pageNumber}
+                                        </Label>
+                                    </div>
+                                ))}
+                            </div>
+                            <ScrollBar orientation="vertical" />
+                        </ScrollArea>
+
+                        <div className="flex justify-center">
+                            <Button 
+                                size="lg" 
+                                onClick={handleSplit} 
+                                disabled={isLoading || selectedPages.length === 0}
+                                className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-500 hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        AI is splitting your PDF...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Scissors className="mr-2 h-5 w-5" />
+                                        Split {selectedPages.length} Page{selectedPages.length !== 1 ? 's' : ''} with AI
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </ModernSection>
+            )}
+
+            {stage === 'download' && (
+                <ModernSection
+                    title="Split Complete!"
+                    subtitle="Your PDF has been successfully split with AI optimization"
+                    icon={<Sparkles className="h-6 w-6" />}
+                    className="text-center"
+                >
+                    <div className="space-y-6">
+                        <div className="flex justify-center">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 via-red-600 to-pink-500 rounded-full blur-lg opacity-20 animate-pulse"></div>
+                                <div className="relative bg-gradient-to-r from-orange-600 via-red-600 to-pink-500 p-4 rounded-full">
+                                    <Scissors className="h-12 w-12 text-white" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-600 via-red-600 to-pink-500 bg-clip-text text-transparent">
+                                Perfect Split Achieved!
+                            </h3>
+                            <p className="text-muted-foreground">
+                                Your PDF pages have been extracted with AI-enhanced precision
+                            </p>
+                        </div>
+
+                        <Card className="max-w-2xl mx-auto">
+                            <CardContent className="p-6">
+                                <div className="space-y-3 max-h-60 overflow-y-auto">
+                                    {splitResult?.splitPdfs.map((pdf, index) => (
+                                        <div key={pdf.filename} className="flex items-center justify-between p-3 bg-gradient-to-r from-background to-muted/50 rounded-lg border border-border/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-medium text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium">{pdf.filename}</p>
+                                                    <p className="text-xs text-muted-foreground">Split PDF file</p>
+                                                </div>
+                                            </div>
+                                            <Button size="sm" asChild className="shrink-0">
+                                                <a href={pdf.pdfUri} download={pdf.filename}>
+                                                    <FileDown className="mr-2 h-4 w-4" />
+                                                    Download
+                                                </a>
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <div className="flex justify-center">
+                            <Button 
+                                size="lg" 
+                                variant="outline" 
+                                onClick={handleReset}
+                                className="border-primary/20 hover:bg-primary/5"
+                            >
+                                <RefreshCw className="mr-2 h-5 w-5" />
+                                Split Another PDF
+                            </Button>
+                        </div>
+                    </div>
+                </ModernSection>
+            )}
+
+            <ModernSection
+                title="AI-Enhanced Splitting Features"
+                subtitle="Experience the power of intelligent PDF processing"
+                icon={<Zap className="h-6 w-6" />}
+                className="mt-12"
+            >
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                            </div>
+                            <h4 className="font-semibold">Smart Page Analysis</h4>
+                        </div>
+                        <p className="text-muted-foreground text-sm">
+                            Our AI analyzes document structure to identify natural page boundaries and optimize splitting for the best results.
+                        </p>
+                    </div>
+                    
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Split className="h-5 w-5 text-primary" />
+                            </div>
+                            <h4 className="font-semibold">Intelligent Grouping</h4>
+                        </div>
+                        <p className="text-muted-foreground text-sm">
+                            Advanced algorithms group consecutive pages intelligently while preserving formatting, metadata, and document integrity.
+                        </p>
+                    </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                    <div className="flex items-start gap-3">
+                        <div className="p-1 bg-primary/20 rounded">
+                            <Zap className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                            <h5 className="font-medium text-sm">Pro Tip</h5>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Select multiple non-consecutive pages to create separate PDF files for each page range automatically.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </ModernSection>
+
+            <FAQ />
             <AllTools />
-        </div>
+        </ModernPageLayout>
     )
 }

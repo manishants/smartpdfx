@@ -624,6 +624,21 @@ export const RemoveBackgroundOutputSchema = z.object({
 });
 export type RemoveBackgroundOutput = z.infer<typeof RemoveBackgroundOutputSchema>;
 
+// Face Blur
+export const BlurFaceInputSchema = z.object({
+  imageUri: z
+    .string()
+    .describe(
+      "An image as a data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+});
+export type BlurFaceInput = z.infer<typeof BlurFaceInputSchema>;
+
+export const BlurFaceOutputSchema = z.object({
+  blurredImageUri: z.string().describe('The image with blurred faces as a data URI.'),
+});
+export type BlurFaceOutput = z.infer<typeof BlurFaceOutputSchema>;
+
 // AI Interior Designer
 export const RedesignRoomInputSchema = z.object({
   photoUri: z.string().describe("A photo of a room as a data URI."),

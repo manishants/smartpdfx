@@ -5,13 +5,18 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, ArrowRight, RefreshCw } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, ArrowRight, RefreshCw, Sparkles, Zap, Minimize2, ImageIcon } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import type { CompressImageOutput } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { AllTools } from '@/components/all-tools';
 import Link from 'next/link';
 import { compressImage } from '@/lib/actions/compress-image';
+import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,19 +26,40 @@ interface UploadedFile {
 }
 
 const ToolDescription = () => (
-    <div className="max-w-4xl mx-auto my-12 text-center">
-        <Card className="p-6 md:p-8">
-            <CardTitle className="text-2xl font-bold mb-4">Smart Image Compression</CardTitle>
-            <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                    Our smart image compressor uses a powerful lossy compression technique to reduce the file size of your JPG, PNG, and WEBP images by up to 90%. By intelligently decreasing the number of colors in the image, we can shrink the file size dramatically while maintaining excellent visual quality. This is perfect for optimizing images for your website, sharing them via email, or saving storage space.
+    <ModernSection 
+        title="AI-Powered Image Compression" 
+        subtitle="Intelligent compression that preserves quality while maximizing size reduction"
+        icon={<Sparkles className="h-6 w-6" />}
+        className="my-12"
+    >
+        <div className="space-y-6 text-muted-foreground">
+            <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-primary" />
+                        <h3 className="font-semibold text-foreground">Smart Compression</h3>
+                    </div>
+                    <p>
+                        Our AI-powered compressor uses advanced lossy compression techniques to reduce file sizes by up to 90% while maintaining excellent visual quality. Perfect for web optimization and storage savings.
+                    </p>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <Minimize2 className="h-5 w-5 text-primary" />
+                        <h3 className="font-semibold text-foreground">Intelligent Processing</h3>
+                    </div>
+                    <p>
+                        By intelligently analyzing and reducing color information, we achieve dramatic size reductions while preserving the visual integrity of your images.
+                    </p>
+                </div>
+            </div>
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-4 border border-primary/20">
+                <p className="text-sm">
+                    <strong className="text-foreground">Pro Tip:</strong> For specific size targets, try our specialized tools: <Link href="/under-100kb-image" className="text-primary hover:underline font-medium">Under 100KB Image</Link> or <Link href="/under-30kb-image" className="text-primary hover:underline font-medium">Under 30KB Image</Link>.
                 </p>
-                <p>
-                    <strong>How to Use:</strong> Upload your image, and our tool automatically finds the best balance between file size and quality to significantly reduce its size. For specific size targets, try our dedicated <Link href="/under-100kb-image" className="text-primary hover:underline">Under 100KB Image</Link> or <Link href="/under-30kb-image" className="text-primary hover:underline">Under 30KB Image</Link> tools.
-                </p>
-            </CardContent>
-        </Card>
-    </div>
+            </div>
+        </div>
+    </ModernSection>
 );
 
 export default function CompressImagePage() {
@@ -42,17 +68,20 @@ export default function CompressImagePage() {
   const [result, setResult] = useState<CompressImageOutput | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const selectedFile = event.target.files[0];
-      if (selectedFile.type.startsWith('image/')) {
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      if (file.type.startsWith('image/')) {
         setFile({
-          file: selectedFile,
-          preview: URL.createObjectURL(selectedFile),
+          file: file,
+          preview: URL.createObjectURL(file),
         });
         setResult(null);
       } else {
-        toast({ title: "Invalid file type", description: "Please select an image file.", variant: "destructive" });
+        toast({ 
+          title: "Invalid file type", 
+          description: "Please select an image file (JPG, PNG, GIF, WEBP).", 
+          variant: "destructive" 
+        });
       }
     }
   };
@@ -159,109 +188,124 @@ export default function CompressImagePage() {
   }, [result]);
 
   return (
-    <>
-    <div className="space-y-8 py-8 md:py-12">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">Image Compressor</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Reduce the file size of your images by up to 90%.
-        </p>
-      </header>
-      
-      <div className="max-w-6xl mx-auto">
-        <Card>
-          <CardContent className="p-6">
-            {!file && (
-              <div 
-                className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById('file-upload')?.click()}
+    <ModernPageLayout
+      title="AI Image Compressor"
+      subtitle="Reduce image file sizes by up to 90% with intelligent compression"
+      icon={<ImageIcon className="h-8 w-8" />}
+    >
+      <div className="max-w-6xl mx-auto space-y-8">
+        <ModernSection 
+          title="Upload & Compress" 
+          subtitle="Upload your image and let our AI optimize it for you"
+          icon={<Zap className="h-6 w-6" />}
+        >
+          {!file && (
+            <ModernUploadArea
+              onFileSelect={handleFileChange}
+              acceptedTypes={["image/*"]}
+              maxSize={50 * 1024 * 1024} // 50MB
+              title="Drop your image here"
+              subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"
+              icon={<ImageIcon className="h-12 w-12" />}
+            />
+          )}
+
+          {file && !result && (
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
+                <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
+              </div>
+              <div className="text-center space-y-2">
+                <p className="font-semibold text-lg">{file.file.name}</p>
+                <Badge variant="secondary" className="text-sm">{formatBytes(file.file.size)}</Badge>
+              </div>
+              <Button 
+                size="lg" 
+                onClick={handleCompress}
+                disabled={isCompressing}
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                <p className="mt-4 font-semibold text-primary">Drag & drop an image here, or click to select a file</p>
-                <p className="text-sm text-muted-foreground mt-1">Supports JPG, PNG, GIF, WEBP</p>
-                <Input 
-                  id="file-upload"
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-            )}
+                {isCompressing ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    AI Compressing...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="mr-2 h-5 w-5" />
+                    Compress with AI
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
 
-            {file && !result && (
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-md">
-                   <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
-                </div>
-                 <div className="text-center">
-                    <p className="font-semibold">{file.file.name}</p>
-                    <p className="text-sm text-muted-foreground">{formatBytes(file.file.size)}</p>
-                </div>
-                <Button 
-                  size="lg" 
-                  onClick={handleCompress}
-                  disabled={isCompressing}
-                >
-                  {isCompressing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Compressing...
-                    </>
-                   ) : "Compress Image"}
-                </Button>
-              </div>
-            )}
-
-            {result && file && (
-              <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+          {result && file && (
+            <div className="space-y-8">
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-8">
                 {/* Original Image */}
-                <div className="flex flex-col items-center gap-2">
-                  <h3 className="text-lg font-semibold">Original</h3>
-                  <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md">
-                     <Image src={file.preview} alt="Original preview" width={400} height={300} className="w-full h-auto object-contain" />
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold">Original</h3>
                   </div>
-                  <Badge variant="secondary">{formatBytes(result.originalSize)}</Badge>
+                  <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md">
+                    <Image src={file.preview} alt="Original preview" width={400} height={300} className="w-full h-auto object-contain" />
+                  </div>
+                  <Badge variant="outline" className="text-sm">{formatBytes(result.originalSize)}</Badge>
                 </div>
 
-                <div className="flex flex-col items-center gap-4 my-8 md:my-0">
-                    <ArrowRight className="h-8 w-8 text-primary hidden md:block" />
-                    <Badge variant="default" className="text-base py-1 px-3">
-                        - {compressionPercentage}%
+                <div className="flex flex-col items-center gap-4 my-8 lg:my-0">
+                  <ArrowRight className="h-8 w-8 text-primary hidden lg:block" />
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-full px-4 py-2">
+                    <Minimize2 className="h-4 w-4 text-green-600" />
+                    <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white text-base py-1 px-3">
+                      -{compressionPercentage}%
                     </Badge>
+                  </div>
                 </div>
 
                 {/* Compressed Image */}
-                <div className="flex flex-col items-center gap-2">
-                  <h3 className="text-lg font-semibold">Compressed</h3>
-                   <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-semibold">AI Compressed</h3>
+                  </div>
+                  <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md bg-gradient-to-br from-primary/5 to-secondary/5">
                     <Image src={result.compressedImageUri} alt="Compressed preview" width={400} height={300} className="w-full h-auto object-contain" />
                   </div>
-                  <Badge variant="secondary" className="text-green-600 font-bold">{formatBytes(result.compressedSize)}</Badge>
+                  <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white font-bold">
+                    {formatBytes(result.compressedSize)}
+                  </Badge>
                 </div>
               </div>
-            )}
 
-            {result && (
-              <div className="mt-8 text-center space-x-4">
-                  <Button size="lg" onClick={handleDownload}>
-                    <FileDown className="mr-2" />
-                    Download
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={handleReset}>
-                    <RefreshCw className="mr-2" />
-                    Compress Another
-                  </Button>
-               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button 
+                  size="lg" 
+                  onClick={handleDownload}
+                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <FileDown className="mr-2 h-5 w-5" />
+                  Download Compressed
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  onClick={handleReset}
+                  className="border-primary/20 hover:bg-primary/5"
+                >
+                  <RefreshCw className="mr-2 h-5 w-5" />
+                  Compress Another
+                </Button>
+              </div>
+            </div>
+          )}
+        </ModernSection>
+
+        <ToolDescription />
       </div>
-      <ToolDescription />
-    </div>
-    <AllTools />
-    </>
+    </ModernPageLayout>
   );
 }

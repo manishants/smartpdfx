@@ -5,13 +5,17 @@ import { useState } from 'react';
 import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Wand2, ArrowRight } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Wand2, ArrowRight, Sparkles, Zap, Camera, ImageIcon } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { enhancePhoto } from '@/ai/flows/enhance-photo';
 import type { EnhancePhotoInput, EnhancePhotoOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,214 +25,360 @@ interface UploadedFile {
 }
 
 const FAQ = () => (
-    <div className="max-w-4xl mx-auto mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-        <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-                <AccordionTrigger>How does the AI Photo Enhancer work?</AccordionTrigger>
-                <AccordionContent>
-                    Our tool uses a state-of-the-art generative AI model. When you upload your photo, the AI analyzes it and intelligently enhances its quality by improving resolution, clarity, lighting, and color balance. It essentially creates a new, higher-quality version of your photo.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-                <AccordionTrigger>Will this work on old or blurry photos?</AccordionTrigger>
-                <AccordionContent>
-                    Yes, it can significantly improve the quality of old, blurry, or low-resolution photos. The AI can sharpen details, reduce noise, and correct colors. However, the results will vary depending on the quality of the original image.
-                </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-3">
-                <AccordionTrigger>Are my photos kept private?</AccordionTrigger>
-                <AccordionContent>
-                    Yes, your privacy is our top priority. Your photos are uploaded securely, processed by our AI, and then permanently deleted from our servers one hour later. We do not view, share, or use your photos for any other purpose.
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
+  <div className="relative">
+    {/* AI Background Elements */}
+    <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-blue-50/30 rounded-2xl" />
+    <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-xl" />
+    <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-lg" />
+    
+    <div className="relative p-8">
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+          <Camera className="w-6 h-6 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Frequently Asked Questions
+        </h2>
+      </div>
+      
+      <Accordion type="single" collapsible className="w-full space-y-4">
+        <AccordionItem value="item-1" className="border border-purple-200/50 rounded-xl bg-white/50 backdrop-blur-sm px-6">
+          <AccordionTrigger className="text-lg font-semibold hover:text-purple-600 transition-colors">
+            How does the AI Photo Enhancer work?
+          </AccordionTrigger>
+          <AccordionContent className="text-gray-700 leading-relaxed">
+            Our advanced AI model analyzes your photo and intelligently enhances quality by improving resolution, clarity, lighting, and color balance. It uses state-of-the-art generative technology to create a superior, high-quality version of your image.
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="item-2" className="border border-pink-200/50 rounded-xl bg-white/50 backdrop-blur-sm px-6">
+          <AccordionTrigger className="text-lg font-semibold hover:text-pink-600 transition-colors">
+            Will this work on old or blurry photos?
+          </AccordionTrigger>
+          <AccordionContent className="text-gray-700 leading-relaxed">
+            Absolutely! Our AI excels at restoring old, blurry, or low-resolution photos. It can sharpen details, reduce noise, and correct colors dramatically. Results vary based on the original image quality, but improvements are typically remarkable.
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="item-3" className="border border-blue-200/50 rounded-xl bg-white/50 backdrop-blur-sm px-6">
+          <AccordionTrigger className="text-lg font-semibold hover:text-blue-600 transition-colors">
+            Are my photos kept private?
+          </AccordionTrigger>
+          <AccordionContent className="text-gray-700 leading-relaxed">
+            Your privacy is paramount. Photos are uploaded securely, processed by our AI, and permanently deleted from our servers after one hour. We never view, share, or use your photos for any other purpose.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
+  </div>
 );
 
 
 export default function EnhancePhotoPage() {
-  const [file, setFile] = useState<UploadedFile | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnhancePhotoOutput | null>(null);
+  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const selectedFile = event.target.files[0];
-      if (selectedFile.type.startsWith('image/')) {
-        setFile({
-          file: selectedFile,
-          preview: URL.createObjectURL(selectedFile),
-        });
-        setResult(null);
-      } else {
-        toast({ title: "Invalid file type", description: "Please select an image file.", variant: "destructive" });
-      }
+  const handleFileChange = (selectedFile: File | null) => {
+    if (!selectedFile) return;
+    
+    // Validate file type
+    if (!selectedFile.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file (JPG, PNG, GIF, etc)",
+        variant: "destructive",
+      });
+      return;
     }
+
+    // Validate file size (max 10MB)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFile(selectedFile);
+    setResult(null);
+    setProgress(0);
   };
 
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = (event) => {
+        resolve(event.target?.result as string);
+      };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
   const handleProcess = async () => {
-    if (!file) {
-      toast({ title: "No file selected", description: "Please select a photo to enhance.", variant: "destructive" });
-      return;
-    }
+    if (!file) return;
+
     setIsProcessing(true);
-    setResult(null);
+    setProgress(0);
+
     try {
-      const photoUri = await fileToDataUri(file.file);
-      const input: EnhancePhotoInput = { photoUri };
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + Math.random() * 15;
+        });
+      }, 500);
 
-      const processedResult = await enhancePhoto(input);
+      const dataUri = await fileToDataUri(file);
+      const input: EnhancePhotoInput = {
+        image: dataUri,
+        enhancementLevel: 'high'
+      };
 
-      if (processedResult) {
-        setResult(processedResult);
-      } else {
-        throw new Error("Enhancement process returned no data.");
-      }
-    } catch (error: any) {
-      console.error("Processing failed:", error);
+      const enhancedResult = await enhancePhoto(input);
+      
+      clearInterval(progressInterval);
+      setProgress(100);
+      setResult(enhancedResult);
+      
       toast({
-        title: "An Error Occurred",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive"
+        title: "Enhancement Complete!",
+        description: "Your photo has been successfully enhanced with AI.",
+      });
+    } catch (error) {
+      console.error('Enhancement failed:', error);
+      toast({
+        title: "Enhancement Failed",
+        description: "There was an error enhancing your photo. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
+      setTimeout(() => setProgress(0), 1000);
     }
   };
 
   const handleDownload = () => {
-    if (result && file) {
-      const originalFilename = file.file.name.substring(0, file.file.name.lastIndexOf('.'));
-      const newFilename = `${originalFilename}-enhanced.png`;
+    if (!result?.enhancedImage) return;
 
-      const a = document.createElement('a');
-      a.href = result.enhancedPhotoUri;
-      a.download = newFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    const link = document.createElement('a');
+    link.href = result.enhancedImage;
+    link.download = `enhanced_${file?.name || 'photo'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Download Started",
+      description: "Your enhanced photo is being downloaded.",
+    });
   };
 
   const handleReset = () => {
     setFile(null);
     setResult(null);
     setIsProcessing(false);
+    setProgress(0);
   };
 
   return (
-    <>
-    <main className="flex-1 p-6 md:p-8 space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">AI Photo Enhancer</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Improve photo quality, resolution, and lighting with a single click.
-        </p>
-      </header>
-      
-      <div className="max-w-6xl mx-auto">
-        <Card>
-          <CardContent className="p-6">
-            {!file && (
-              <div 
-                className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                <p className="mt-4 font-semibold text-primary">Drag & drop a photo here, or click to select a file</p>
-                <p className="text-sm text-muted-foreground mt-1">Supports JPG, PNG, WEBP</p>
-                <Input 
-                  id="file-upload"
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
+    <ModernPageLayout
+      title="AI Photo Enhancer"
+      description="Transform your photos with cutting-edge AI technology. Enhance quality, sharpen details, and restore old images with professional results."
+      icon={<Camera className="w-8 h-8" />}
+    >
+      <ModernSection>
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Upload Section */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                <ImageIcon className="w-5 h-5 text-white" />
               </div>
-            )}
+              <h3 className="text-xl font-semibold text-gray-800">Upload Your Photo</h3>
+            </div>
 
-            {file && !result && (
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-md">
-                   <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
-                </div>
-                <Button 
-                  size="lg" 
-                  onClick={handleProcess}
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Enhancing Photo...
-                    </>
-                   ) : <><Wand2 className="mr-2"/>Enhance with AI</>}
-                </Button>
-              </div>
-            )}
+            <ModernUploadArea
+              onFileSelect={handleFileChange}
+              acceptedTypes="image/*"
+              maxSize="10MB"
+              icon={<UploadCloud className="w-12 h-12" />}
+              title="Drop your photo here or click to browse"
+              subtitle="Supports JPG, PNG, GIF up to 10MB"
+            />
 
-            {result && file && (
-                <div className="flex flex-col items-center gap-6">
-                  <div className="w-full grid md:grid-cols-3 gap-6 items-center">
-                      <div className="flex flex-col items-center gap-2">
-                          <h3 className="text-lg font-semibold">Before</h3>
-                          <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md">
-                              <Image src={file.preview} alt="Original" width={400} height={300} className="w-full h-auto object-contain" />
-                          </div>
+            {file && (
+              <Card className="border-2 border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-pink-50/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <ImageIcon className="w-5 h-5 text-purple-600" />
                       </div>
-
-                      <ArrowRight className="h-8 w-8 text-primary hidden md:block mx-auto" />
-
-                      <div className="flex flex-col items-center gap-2">
-                          <h3 className="text-lg font-semibold">After</h3>
-                          <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md">
-                              <Image src={result.enhancedPhotoUri} alt="Enhanced photo preview" width={400} height={300} className="w-full h-auto object-contain" />
-                          </div>
+                      <div>
+                        <p className="font-medium text-gray-800">{file.name}</p>
+                        <p className="text-sm text-gray-600">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
                       </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleReset}
+                      className="text-gray-600 hover:text-red-600"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Remove
+                    </Button>
                   </div>
 
-                  <div className="mt-6 text-center space-x-4">
-                      <Button size="lg" onClick={handleDownload}>
-                          <FileDown className="mr-2" />
-                          Download
-                      </Button>
-                      <Button size="lg" variant="outline" onClick={handleReset}>
-                          <RefreshCw className="mr-2" />
-                          Enhance Another
-                      </Button>
+                  <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt="Original photo"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
-                </div>
+
+                  <div className="mt-6 space-y-4">
+                    <Button
+                      onClick={handleProcess}
+                      disabled={isProcessing}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Enhancing... {Math.round(progress)}%
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="w-5 h-5 mr-2" />
+                          <Sparkles className="w-4 h-4 mr-1" />
+                          Enhance with AI
+                        </>
+                      )}
+                    </Button>
+
+                    {isProcessing && (
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
-      </div>
-       <div className="max-w-4xl mx-auto my-12 text-center">
-        <Card className="p-6 md:p-8">
-            <CardTitle className="text-2xl font-bold mb-4">Upscale & Enhance with AI</CardTitle>
-            <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                   Breathe new life into your photos. Our AI Photo Enhancer automatically upscales images, clarifies blurry details, and corrects lighting and color to produce a stunning, high-quality result. It's like having a professional photo editor in a single click.
-                </p>
-                <p>
-                    <strong>How to Use:</strong> Upload any photo—old family pictures, blurry social media images, or low-resolution graphics. The AI will generate an enhanced version for you to compare and download.
-                </p>
-            </CardContent>
-        </Card>
-    </div>
-       <FAQ />
-    </main>
-    <AllTools />
-    </>
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800">Enhanced Result</h3>
+            </div>
+
+            {result ? (
+              <Card className="border-2 border-blue-200/50 bg-gradient-to-br from-blue-50/50 to-purple-50/30">
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                      <Image
+                        src={result.enhancedImage}
+                        alt="Enhanced photo"
+                        fill
+                        className="object-contain"
+                      />
+                      <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Enhanced
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleDownload}
+                        className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
+                      >
+                        <FileDown className="w-5 h-5 mr-2" />
+                        Download Enhanced
+                      </Button>
+                      <Button
+                        onClick={handleReset}
+                        variant="outline"
+                        className="px-6 py-3 rounded-xl border-2 hover:bg-gray-50 transition-all duration-300"
+                      >
+                        <RefreshCw className="w-5 h-5 mr-2" />
+                        New Photo
+                      </Button>
+                    </div>
+
+                    {file && (
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">Before</p>
+                          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                            <Image
+                              src={URL.createObjectURL(file)}
+                              alt="Original"
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">After</p>
+                          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                            <Image
+                              src={result.enhancedImage}
+                              alt="Enhanced"
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-2 border-dashed border-gray-300 bg-gray-50/50">
+                <CardContent className="p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                    <ImageIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 mb-2">Enhanced photo will appear here</p>
+                  <p className="text-sm text-gray-500">Upload and enhance a photo to see results</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </ModernSection>
+
+      <ModernSection>
+        <FAQ />
+      </ModernSection>
+
+      <ModernSection>
+        <AllTools />
+      </ModernSection>
+    </ModernPageLayout>
   );
 }

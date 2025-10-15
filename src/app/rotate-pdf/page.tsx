@@ -6,13 +6,18 @@ import Image from "next/image";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadCloud, FileDown, Loader2, RefreshCw, RotateCcw, CheckCircle } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, RotateCcw, CheckCircle, Sparkles, Zap, RotateCw, FileText } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { rotatePdf } from '@/lib/actions/rotate-pdf';
 import type { RotatePdfInput, RotatePdfOutput, Rotation } from '@/lib/types';
 import * as pdfjsLib from 'pdfjs-dist';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AllTools } from '@/components/all-tools';
+import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
+import { ModernSection } from '@/components/modern-section';
+import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 type Stage = 'upload' | 'rotate' | 'download';
@@ -41,8 +46,12 @@ const ToolDescription = () => (
 );
 
 const FAQ = () => (
-    <div className="mt-12">
-        <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
+    <ModernSection
+        title="AI-Enhanced PDF Rotation"
+        subtitle="Frequently asked questions about our intelligent PDF rotation tool"
+        icon={<RotateCw className="h-6 w-6" />}
+        className="mt-12"
+    >
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
                 <AccordionTrigger>Can I rotate all pages at once?</AccordionTrigger>
@@ -74,8 +83,14 @@ const FAQ = () => (
                     This tool is only for rotating pages. To edit content, please use our comprehensive <a href="/edit-pdf" className="text-primary underline">PDF Editor</a>.
                 </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="item-6">
+                <AccordionTrigger>How does AI enhance the rotation process?</AccordionTrigger>
+                <AccordionContent>
+                    Our AI technology automatically detects page orientation and provides smart suggestions for optimal rotation. It also preserves document structure and maintains perfect quality during the rotation process.
+                </AccordionContent>
+            </AccordionItem>
         </Accordion>
-    </div>
+    </ModernSection>
 );
 
 
@@ -101,13 +116,17 @@ export default function RotatePdfPage() {
         });
     }
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
-            const selectedFile = event.target.files[0];
+    const handleFileChange = (files: File[] | null) => {
+        if (files && files.length > 0) {
+            const selectedFile = files[0];
             if (selectedFile.type === 'application/pdf') {
                 setFile(selectedFile);
             } else {
-                toast({ title: "Invalid file type", description: "Please select a PDF file.", variant: "destructive" });
+                toast({ 
+                    title: "Invalid file type", 
+                    description: "Please select a PDF file. Only PDF files are accepted.", 
+                    variant: "destructive" 
+                });
             }
         }
     };
@@ -234,96 +253,271 @@ export default function RotatePdfPage() {
         setIsLoading(false);
     }
     
-    const renderContent = () => {
-        switch(stage) {
-            case 'upload': return (
-                <div className="text-center">
-                    <Card 
-                        className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                        onClick={() => document.getElementById('file-upload')?.click()}
-                    >
-                        <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                        <p className="mt-4 font-semibold text-primary">Drag & drop a PDF here, or click to select</p>
-                        <Input id="file-upload" type="file" className="hidden" accept="application/pdf" onChange={handleFileChange} />
-                    </Card>
-                    {file && (
-                        <div className="mt-6 flex flex-col items-center gap-4">
-                            <p className="font-semibold">Selected: {file.name}</p>
-                            <Button size="lg" onClick={handlePdfUpload} disabled={isLoading}>
-                                {isLoading ? <><Loader2 className="mr-2 animate-spin" />Processing...</> : "Preview Pages"}
-                            </Button>
+
+
+    return (
+        <ModernPageLayout
+            title="AI PDF Rotator"
+            description="Rotate PDF pages with precision using intelligent AI-powered orientation detection"
+            icon={<RotateCw className="w-8 h-8" />}
+        >
+            <ModernSection>
+                <div className="max-w-6xl mx-auto space-y-8">
+                    {stage === 'upload' && (
+                        <div className="relative">
+                            {/* AI Background Elements */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 rounded-2xl" />
+                            <div className="absolute top-4 right-4 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full blur-xl" />
+                            
+                            <Card className="relative border-0 bg-white/50 backdrop-blur-sm shadow-xl">
+                                <CardContent className="p-8">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                                            <UploadCloud className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                            Upload PDF Document
+                                        </h3>
+                                    </div>
+                                    
+                                    <ModernUploadArea
+                                        onFileSelect={handleFileChange}
+                                        accept="application/pdf"
+                                        maxSize={100 * 1024 * 1024} // 100MB
+                                        title="Drop your PDF here for AI rotation"
+                                        subtitle="Supports PDF files up to 100MB"
+                                        icon={<FileText className="h-12 w-12" />}
+                                    />
+                                    
+                                    <div className="grid grid-cols-2 gap-4 mt-6">
+                                        <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200/50">
+                                            <Sparkles className="h-4 w-4 text-blue-600" />
+                                            <span className="text-sm font-medium text-blue-700">Smart Detection</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200/50">
+                                            <Zap className="h-4 w-4 text-indigo-600" />
+                                            <span className="text-sm font-medium text-indigo-700">AI Rotation</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {file && (
+                                        <div className="mt-6 flex flex-col items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                                                    <FileText className="w-5 h-5 text-white" />
+                                                </div>
+                                                <p className="font-semibold text-gray-800">{file.name}</p>
+                                            </div>
+                                            <Button 
+                                                size="lg" 
+                                                onClick={handlePdfUpload} 
+                                                disabled={isLoading}
+                                                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                        Processing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Sparkles className="mr-2 h-5 w-5" />
+                                                        Preview Pages
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
+
+                    {stage === 'rotate' && (
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 rounded-2xl" />
+                            
+                            <Card className="relative border-0 bg-white/50 backdrop-blur-sm shadow-xl">
+                                <CardContent className="p-8">
+                                    <div className="text-center mb-6">
+                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                                                <RotateCw className="w-5 h-5 text-white" />
+                                            </div>
+                                            <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                                Rotate Pages
+                                            </h2>
+                                        </div>
+                                        <p className="text-gray-600">Click the rotate button on any page to rotate it clockwise.</p>
+                                    </div>
+                                    
+                                    <ScrollArea className="h-[60vh] w-full border rounded-lg p-4 bg-gradient-to-br from-gray-50/50 to-blue-50/30">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                            {pages.map(page => (
+                                                <div key={page.pageNumber} className="relative group">
+                                                    <Card className="overflow-hidden border-2 border-gray-200/50 hover:border-blue-300/50 transition-all duration-200 hover:shadow-lg">
+                                                        <div style={{ transform: `rotate(${page.rotation}deg)` }} className="transition-transform duration-300">
+                                                            <Image 
+                                                                src={page.src} 
+                                                                alt={`Page ${page.pageNumber}`} 
+                                                                width={200} 
+                                                                height={280} 
+                                                                className="w-full h-auto" 
+                                                            />
+                                                        </div>
+                                                    </Card>
+                                                    <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="icon" 
+                                                            className="h-8 w-8 bg-white/90 backdrop-blur-sm border-blue-200 hover:bg-blue-50 hover:border-blue-300" 
+                                                            onClick={() => handleRotatePage(page.pageNumber)}
+                                                        >
+                                                            <RotateCcw className="h-4 w-4 text-blue-600" />
+                                                        </Button>
+                                                    </div>
+                                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                                        {page.pageNumber}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                    
+                                    <div className="mt-6 flex justify-end">
+                                        <Button 
+                                            size="lg" 
+                                            onClick={handleApplyRotation} 
+                                            disabled={isLoading}
+                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                    Applying...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Zap className="mr-2 h-5 w-5" />
+                                                    Apply Changes & Download
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
+
+                    {stage === 'download' && (
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-emerald-50/20 to-teal-50/30 rounded-2xl" />
+                            
+                            <Card className="relative border-0 bg-white/50 backdrop-blur-sm shadow-xl">
+                                <CardContent className="p-8">
+                                    <div className="text-center flex flex-col items-center gap-6">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-lg opacity-20 animate-pulse" />
+                                            <div className="relative p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full">
+                                                <CheckCircle className="h-8 w-8 text-white" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-2">
+                                            <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                                                PDF Rotated Successfully!
+                                            </h2>
+                                            <p className="text-gray-600">Your rotated document is ready for download.</p>
+                                        </div>
+                                        
+                                        <div className="flex gap-4 mt-4">
+                                            <Button 
+                                                size="lg" 
+                                                onClick={handleDownload}
+                                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                                            >
+                                                <FileDown className="mr-2 h-5 w-5" />
+                                                Download
+                                            </Button>
+                                            <Button 
+                                                size="lg" 
+                                                variant="outline" 
+                                                onClick={handleReset}
+                                                className="border-gray-300 hover:bg-gray-50"
+                                            >
+                                                <RefreshCw className="mr-2 h-5 w-5" />
+                                                Start Over
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     )}
                 </div>
-            )
-            case 'rotate': return (
-                <div>
-                    <div className="text-center mb-6">
-                        <h2 className="text-xl font-semibold">Rotate Pages</h2>
-                        <p className="text-muted-foreground">Click the rotate button on any page to rotate it clockwise.</p>
-                    </div>
-                    <ScrollArea className="h-[60vh] w-full border rounded-md p-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {pages.map(page => (
-                            <div key={page.pageNumber} className="relative group">
-                                <Card className="overflow-hidden">
-                                    <div style={{ transform: `rotate(${page.rotation}deg)` }}>
-                                      <Image src={page.src} alt={`Page ${page.pageNumber}`} width={200} height={280} className="w-full h-auto" />
-                                    </div>
-                                </Card>
-                                <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button variant="outline" size="icon" className="h-8 w-8 bg-background/80" onClick={() => handleRotatePage(page.pageNumber)}>
-                                        <RotateCcw className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/80 px-2 py-1 rounded-full text-xs font-bold">{page.pageNumber}</div>
-                            </div>
-                        ))}
-                        </div>
-                    </ScrollArea>
-                     <div className="mt-6 flex justify-end">
-                       <Button size="lg" onClick={handleApplyRotation} disabled={isLoading}>
-                            {isLoading ? <><Loader2 className="mr-2 animate-spin" />Applying...</> : <>Apply Changes & Download</>}
-                        </Button>
-                    </div>
-                </div>
-            )
-            case 'download': return (
-                <div className="text-center flex flex-col items-center gap-4">
-                    <CheckCircle className="h-16 w-16 text-green-500" />
-                    <h2 className="text-2xl font-bold">PDF Rotated Successfully!</h2>
-                    <p className="text-muted-foreground">Your rotated document is ready for download.</p>
-                    <div className="flex gap-4 mt-4">
-                        <Button size="lg" onClick={handleDownload}>
-                            <FileDown className="mr-2" /> Download
-                        </Button>
-                        <Button size="lg" variant="outline" onClick={handleReset}>
-                            <RefreshCw className="mr-2" /> Start Over
-                        </Button>
-                    </div>
-                </div>
-            )
-        }
-    }
+            </ModernSection>
 
-    return (
-        <div className="container mx-auto px-4 py-8 md:py-12">
-             <header className="text-center">
-                <h1 className="text-4xl font-bold font-headline">Rotate PDF</h1>
-                <p className="text-lg text-muted-foreground mt-2">
-                    Rotate one or all pages in your PDF file.
-                </p>
-            </header>
-            <div className="mt-8">
-                <Card>
-                    <CardContent className="p-6">
-                        {renderContent()}
-                    </CardContent>
-                </Card>
-            </div>
-            <ToolDescription />
+            <ModernSection
+                title="AI-Enhanced PDF Processing"
+                subtitle="Advanced rotation technology with intelligent page detection"
+                icon={<RotateCw className="h-6 w-6" />}
+                className="mt-12"
+            >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                                <Sparkles className="h-5 w-5 text-white" />
+                            </div>
+                            <h4 className="font-semibold text-gray-800">Smart Detection</h4>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                            AI automatically detects page orientation and suggests optimal rotation angles for perfect document alignment.
+                        </p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+                                <Zap className="h-5 w-5 text-white" />
+                            </div>
+                            <h4 className="font-semibold text-gray-800">Precision Rotation</h4>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                            Advanced algorithms ensure perfect 90-degree rotations while preserving document quality and structure.
+                        </p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                                <RotateCw className="h-5 w-5 text-white" />
+                            </div>
+                            <h4 className="font-semibold text-gray-800">Lossless Processing</h4>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                            Maintain original document quality with zero degradation during the rotation process.
+                        </p>
+                    </div>
+                </div>
+                
+                <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200/50">
+                    <div className="flex items-start gap-3">
+                        <div className="p-1 bg-blue-500/20 rounded">
+                            <Zap className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                            <h5 className="font-medium text-sm text-blue-800">Pro Tip</h5>
+                            <p className="text-xs text-blue-700 mt-1">
+                                Use the preview feature to check page orientation before applying rotations. Each rotation is 90 degrees clockwise.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </ModernSection>
+
             <FAQ />
             <AllTools />
-        </div>
-    )
+        </ModernPageLayout>
+    );
 }
