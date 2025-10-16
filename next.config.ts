@@ -48,10 +48,10 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Handle .node files (native modules)
+    // Handle .node files (native modules) - ignore them completely
     config.module.rules.push({
       test: /\.node$/,
-      use: 'ignore-loader',
+      loader: 'null-loader',
     });
 
     // Ignore canvas module completely for client-side builds
