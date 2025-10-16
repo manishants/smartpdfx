@@ -48,6 +48,12 @@ const nextConfig: NextConfig = {
       };
     }
 
+    // Handle .node files (native modules)
+    config.module.rules.push({
+      test: /\.node$/,
+      use: 'ignore-loader',
+    });
+
     // Ignore canvas module completely for client-side builds
     config.externals = config.externals || [];
     if (!isServer) {
