@@ -29,41 +29,27 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { isServer }) => {
     // Fix for canvas module and other Node.js modules
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        canvas: false,
-        fs: false,
-        path: false,
-        os: false,
-        crypto: false,
-        stream: false,
-        buffer: false,
-        util: false,
-        assert: false,
-        http: false,
-        https: false,
-        url: false,
-        zlib: false,
-      };
-    }
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      canvas: false,
+      fs: false,
+      path: false,
+      os: false,
+      crypto: false,
+      stream: false,
+      buffer: false,
+      util: false,
+      assert: false,
+      http: false,
+      https: false,
+      url: false,
+      zlib: false,
+    };
 
-    // Handle .node files (native modules) - ignore them completely
-    config.module.rules.push({
-      test: /\.node$/,
-      loader: 'null-loader',
-    });
-
-    // Ignore canvas module completely for client-side builds
+    // Completely exclude 'canvas' from both client and server bundles
     config.externals = config.externals || [];
-    if (!isServer) {
+    if (Array.isArray(config.externals)) {
       config.externals.push('canvas');
-      // Exclude genkit and AI-related modules from client-side builds
-      config.externals.push('genkit');
-      config.externals.push('@genkit-ai/googleai');
-      config.externals.push('@genkit-ai/core');
-      config.externals.push('@genkit-ai/firebase');
-      config.externals.push('handlebars');
     }
 
     // Fix for handlebars require.extensions
@@ -72,9 +58,13 @@ const nextConfig: NextConfig = {
       loader: 'handlebars-loader',
     });
 
-    // Ignore genkit-related modules in client builds
+    // Aliases to prevent client-side bundling of certain modules
     config.resolve.alias = {
       ...config.resolve.alias,
+      // Block canvas everywhere to avoid native .node resolution during build
+      'canvas': false,
+      // Also block the nested canvas inside pdfjs-dist
+      'pdfjs-dist/node_modules/canvas': false,
       ...(isServer ? {} : {
         'genkit': false,
         '@genkit-ai/googleai': false,
