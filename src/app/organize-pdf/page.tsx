@@ -18,8 +18,6 @@ import { cn } from '@/lib/utils';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
-import { ModernUploadArea } from '@/components/modern-upload-area';
 
 type Stage = 'upload' | 'organize' | 'download';
 

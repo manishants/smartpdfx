@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
@@ -22,18 +21,15 @@ import {
     User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface NavLinkProps {
     href: string;
     icon: React.ElementType;
     children: React.ReactNode;
     className?: string;
 }
-
 const NavLink = ({ href, icon: Icon, children, className }: NavLinkProps) => {
     const pathname = usePathname();
     const isActive = pathname === href;
-
     return (
         <Link
             href={href}
@@ -50,7 +46,6 @@ const NavLink = ({ href, icon: Icon, children, className }: NavLinkProps) => {
         </Link>
     );
 };
-
 export function UserSidebar() {
     return (
         <div className="hidden border-r border-gray-200 bg-white md:block w-64">
@@ -85,7 +80,6 @@ export function UserSidebar() {
                             <NavLink href="/dashboard/compress-pdf" icon={FileOutput}>
                                 Compress PDF
                             </NavLink>
-
                             <NavLink href="/dashboard/pdf-to-word" icon={FileText}>
                                 PDF to Word
                             </NavLink>

@@ -17,8 +17,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
-import { ModernUploadArea } from '@/components/modern-upload-area';
 
 
 type PdfToJpgOutput = {

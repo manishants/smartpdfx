@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -39,7 +38,6 @@ import {
   ArrowDownUp
 } from "lucide-react";
 import { tools } from "@/lib/data";
-
 interface ToolCardProps {
   icon: React.ElementType;
   title: string;
@@ -48,7 +46,6 @@ interface ToolCardProps {
   bgColor?: string;
   iconColor?: string;
 }
-
 const ToolCard = ({ 
   icon: Icon, 
   title, 
@@ -69,7 +66,6 @@ const ToolCard = ({
     </Link>
   );
 };
-
 export default function DashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
@@ -84,7 +80,6 @@ export default function DashboardPage() {
           priority
         />
       </div>
-
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
@@ -152,7 +147,6 @@ export default function DashboardPage() {
               bgColor="bg-amber-50"
               iconColor="text-amber-600"
             />
-
             <ToolCard
               icon={Lock}
               title="Protect PDF"
@@ -199,10 +193,8 @@ export default function DashboardPage() {
               bgColor="bg-green-50"
               iconColor="text-green-600"
             />
-
           </div>
         </div>
-
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Edit & Organize</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -240,7 +232,6 @@ export default function DashboardPage() {
             />
           </div>
         </div>
-
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Image Tools</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

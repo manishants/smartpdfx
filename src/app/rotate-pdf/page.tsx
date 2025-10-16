@@ -16,8 +16,6 @@ import { AllTools } from '@/components/all-tools';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
-import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 type Stage = 'upload' | 'rotate' | 'download';

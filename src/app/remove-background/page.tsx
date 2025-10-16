@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,18 +10,12 @@ import type { RemoveBackgroundInput, RemoveBackgroundOutput } from '@/lib/types'
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ModernPageLayout } from '@/components/modern-page-layout';
-import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
-import { ModernUploadArea } from '@/components/modern-upload-area';
-
 export const dynamic = 'force-dynamic';
-
 interface UploadedFile {
   file: File;
   preview: string;
 }
-
 const ToolDescription = () => (
   <ModernSection
     title="AI-Powered Background Removal"
@@ -52,7 +45,6 @@ const ToolDescription = () => (
     </div>
   </ModernSection>
 );
-
 const FAQ = () => (
   <ModernSection 
     title="Frequently Asked Questions" 
@@ -91,13 +83,11 @@ const FAQ = () => (
     </Accordion>
   </ModernSection>
 );
-
 export default function RemoveBackgroundPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<RemoveBackgroundOutput | null>(null);
   const { toast } = useToast();
-
   const handleFileChange = (files: File[] | null) => {
     if (files && files[0]) {
       const selectedFile = files[0];
@@ -116,7 +106,6 @@ export default function RemoveBackgroundPage() {
       }
     }
   };
-
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -125,7 +114,6 @@ export default function RemoveBackgroundPage() {
       reader.readAsDataURL(file);
     });
   };
-
   const handleRemoveBackground = async () => {
     if (!file) {
       toast({ 
@@ -135,10 +123,8 @@ export default function RemoveBackgroundPage() {
       });
       return;
     }
-
     setIsProcessing(true);
     setResult(null);
-
     try {
       const photoUri = await fileToDataUri(file.file);
       const input: RemoveBackgroundInput = { photoUri };
@@ -160,7 +146,6 @@ export default function RemoveBackgroundPage() {
       setIsProcessing(false);
     }
   };
-
   const handleDownload = () => {
     if (result && file) {
       const originalFilename = file.file.name.substring(0, file.file.name.lastIndexOf('.'));
@@ -174,13 +159,11 @@ export default function RemoveBackgroundPage() {
       document.body.removeChild(a);
     }
   };
-
   const handleReset = () => {
     setFile(null);
     setResult(null);
     setIsProcessing(false);
   };
-
   return (
     <ModernPageLayout
       title="Remove Background"
@@ -202,7 +185,6 @@ export default function RemoveBackgroundPage() {
               subtitle="Supports JPG, PNG, WEBP and other image formats"
             />
           )}
-
           {file && !result && (
             <div className="space-y-6">
               <div className="flex justify-center">
@@ -246,7 +228,6 @@ export default function RemoveBackgroundPage() {
               </div>
             </div>
           )}
-
           {result && file && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -262,7 +243,6 @@ export default function RemoveBackgroundPage() {
                     />
                   </div>
                 </div>
-
                 <div className="text-center space-y-4">
                   <h3 className="text-lg font-semibold flex items-center justify-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-500" />
@@ -279,7 +259,6 @@ export default function RemoveBackgroundPage() {
                   </div>
                 </div>
               </div>
-
               <div className="flex justify-center gap-4">
                 <Button size="lg" onClick={handleDownload} className="bg-green-600 hover:bg-green-700">
                   <FileDown className="mr-2 h-5 w-5" />
@@ -294,7 +273,6 @@ export default function RemoveBackgroundPage() {
           )}
         </div>
       </ModernSection>
-
       <ToolDescription />
       <FAQ />
       <AllTools />

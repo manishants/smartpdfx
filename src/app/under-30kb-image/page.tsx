@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo } from 'react';
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,16 +10,12 @@ import type { CompressImageOutput } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { AllTools } from '@/components/all-tools';
 import { compressImageToSize } from '@/lib/actions/compress-image-to-size';
-
 export const dynamic = 'force-dynamic';
-
 interface UploadedFile {
   file: File;
   preview: string;
 }
-
 const TARGET_KB = 29;
-
 const ToolDescription = () => (
     <div className="max-w-4xl mx-auto my-12 text-center">
         <Card className="p-6 md:p-8">
@@ -36,13 +31,11 @@ const ToolDescription = () => (
         </Card>
     </div>
 );
-
 export default function Under30kbPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [result, setResult] = useState<CompressImageOutput | null>(null);
   const { toast } = useToast();
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
@@ -57,7 +50,6 @@ export default function Under30kbPage() {
       }
     }
   };
-
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -66,7 +58,6 @@ export default function Under30kbPage() {
       reader.readAsDataURL(file);
     });
   };
-
   const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -75,7 +66,6 @@ export default function Under30kbPage() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
-
   const handleCompress = async () => {
     if (!file) {
         toast({ title: "No file selected", description: "Please select an image to compress.", variant: "destructive" });
@@ -118,7 +108,6 @@ export default function Under30kbPage() {
     if (mimeType === 'image/webp') return 'webp';
     return 'jpg'; // fallback
   }
-
   const handleDownload = () => {
     if (result && file) {
       const originalFilename = file.file.name.substring(0, file.file.name.lastIndexOf('.'));
@@ -133,18 +122,15 @@ export default function Under30kbPage() {
       document.body.removeChild(a);
     }
   };
-
   const handleReset = () => {
     setFile(null);
     setResult(null);
     setIsCompressing(false);
   };
-
   const compressionPercentage = useMemo(() => {
     if (!result || !result.originalSize) return 0;
     return Math.round(((result.originalSize - result.compressedSize) / result.originalSize) * 100);
   }, [result]);
-
   return (
     <>
     <div className="space-y-8 py-8 md:py-12">
@@ -174,7 +160,6 @@ export default function Under30kbPage() {
                 />
               </div>
             )}
-
             {file && !result && (
               <div className="flex flex-col items-center gap-6">
                 <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-md">
@@ -198,7 +183,6 @@ export default function Under30kbPage() {
                 </Button>
               </div>
             )}
-
             {result && file && (
               <div className="flex flex-col md:flex-row items-center justify-center gap-8">
                 <div className="flex flex-col items-center gap-2">
@@ -208,14 +192,12 @@ export default function Under30kbPage() {
                   </div>
                   <Badge variant="secondary">{formatBytes(result.originalSize)}</Badge>
                 </div>
-
                 <div className="flex flex-col items-center gap-4 my-8 md:my-0">
                     <ArrowRight className="h-8 w-8 text-primary hidden md:block" />
                     <Badge variant="default" className="text-base py-1 px-3">
                         - {compressionPercentage}%
                     </Badge>
                 </div>
-
                 <div className="flex flex-col items-center gap-2">
                   <h3 className="text-lg font-semibold">Compressed</h3>
                    <div className="relative w-full max-w-xs border rounded-lg overflow-hidden shadow-md">
@@ -225,7 +207,6 @@ export default function Under30kbPage() {
                 </div>
               </div>
             )}
-
             {result && (
               <div className="mt-8 text-center space-x-4">
                   <Button size="lg" onClick={handleDownload}>

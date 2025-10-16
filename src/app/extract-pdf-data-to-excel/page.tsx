@@ -19,8 +19,6 @@ import { Progress } from '@/components/ui/progress';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
-import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Input } from '@/components/ui/input';
 
 

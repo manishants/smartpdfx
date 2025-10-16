@@ -15,7 +15,6 @@ import { getWebsiteScreenshot } from '@/lib/actions/get-website-screenshot';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
 
 interface Screenshot {
   preview: string;

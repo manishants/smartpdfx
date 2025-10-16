@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,15 +16,12 @@ import {
 } from 'lucide-react';
 import { wordToPdf } from '@/lib/actions/word-to-pdf';
 import { ModernPageLayout } from '@/components/modern-page-layout';
-import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-
 interface ConversionResult {
   success: boolean;
   pdfUri?: string;
   error?: string;
 }
-
 const ToolDescription = () => (
   <ModernSection>
     <div className="space-y-6">
@@ -39,7 +35,6 @@ const ToolDescription = () => (
           Transform your Word documents into professional PDF files with perfect formatting preservation using our LibreOffice-powered conversion engine.
         </p>
       </div>
-
       <div className="grid md:grid-cols-3 gap-6">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-lg flex items-center justify-center mx-auto border border-blue-500/20">
@@ -71,7 +66,6 @@ const ToolDescription = () => (
           </p>
         </div>
       </div>
-
       {/* FAQ Section */}
       <div className="bg-gradient-to-r from-gray-50/50 to-gray-100/50 rounded-xl p-6 border border-gray-200/50">
         <h3 className="font-semibold text-foreground mb-4">Frequently Asked Questions</h3>
@@ -93,14 +87,12 @@ const ToolDescription = () => (
     </div>
   </ModernSection>
 );
-
 export default function WordToPdfPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
-
   const handleFileChange = (files: File[] | null) => {
     if (files && files.length > 0) {
       const selectedFile = files[0];
@@ -117,14 +109,11 @@ export default function WordToPdfPage() {
       }
     }
   };
-
   const handleConvert = async () => {
     if (!file) return;
-
     setIsConverting(true);
     setProgress(0);
     setResult(null);
-
     // Simulate progress
     const progressInterval = setInterval(() => {
       setProgress(prev => {
@@ -135,13 +124,11 @@ export default function WordToPdfPage() {
         return prev + Math.random() * 15;
       });
     }, 200);
-
     try {
       // Convert file to data URI
       const fileBuffer = await file.arrayBuffer();
       const base64 = Buffer.from(fileBuffer).toString('base64');
       const docxUri = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${base64}`;
-
       const output = await wordToPdf({ docxUri });
       
       clearInterval(progressInterval);
@@ -151,7 +138,6 @@ export default function WordToPdfPage() {
         success: true,
         pdfUri: output.pdfUri,
       });
-
       toast({
         title: "Conversion successful!",
         description: "Your Word document has been converted to PDF.",
@@ -164,7 +150,6 @@ export default function WordToPdfPage() {
         success: false,
         error: error.message || 'Conversion failed',
       });
-
       toast({
         title: "Conversion failed",
         description: error.message || "An error occurred during conversion.",
@@ -174,7 +159,6 @@ export default function WordToPdfPage() {
       setIsConverting(false);
     }
   };
-
   const handleDownload = () => {
     if (result?.pdfUri) {
       const link = document.createElement('a');
@@ -185,14 +169,12 @@ export default function WordToPdfPage() {
       document.body.removeChild(link);
     }
   };
-
   const handleReset = () => {
     setFile(null);
     setResult(null);
     setProgress(0);
     setIsConverting(false);
   };
-
   return (
     <>
       <ModernPageLayout
@@ -253,7 +235,6 @@ export default function WordToPdfPage() {
                     </div>
                   </CardContent>
                 </Card>
-
                 {/* Conversion Progress */}
                 {isConverting && (
                   <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20">
@@ -276,7 +257,6 @@ export default function WordToPdfPage() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* Result */}
                 {result && (
                   <Card className={`${result.success ? 'bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20' : 'bg-gradient-to-r from-red-500/5 to-rose-500/5 border border-red-500/20'}`}>
@@ -304,7 +284,6 @@ export default function WordToPdfPage() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
                   {!result && (
@@ -349,7 +328,6 @@ export default function WordToPdfPage() {
               </div>
             )}
           </ModernSection>
-
           <ToolDescription />
         </div>
       </ModernPageLayout>

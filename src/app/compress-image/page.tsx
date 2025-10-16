@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo } from 'react';
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,18 +12,12 @@ import { AllTools } from '@/components/all-tools';
 import Link from 'next/link';
 import { compressImage } from '@/lib/actions/compress-image';
 import { ModernPageLayout } from '@/components/modern-page-layout';
-import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ModernSection } from '@/components/modern-section';
-import { ModernUploadArea } from '@/components/modern-upload-area';
-
 export const dynamic = 'force-dynamic';
-
 interface UploadedFile {
   file: File;
   preview: string;
 }
-
 const ToolDescription = () => (
     <ModernSection 
         title="AI-Powered Image Compression" 
@@ -61,13 +54,11 @@ const ToolDescription = () => (
         </div>
     </ModernSection>
 );
-
 export default function CompressImagePage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [result, setResult] = useState<CompressImageOutput | null>(null);
   const { toast } = useToast();
-
   const handleFileChange = (file: File | null) => {
     if (file) {
       if (file.type.startsWith('image/')) {
@@ -85,11 +76,9 @@ export default function CompressImagePage() {
       }
     }
   };
-
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
-
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (event.dataTransfer.files && event.dataTransfer.files[0]) {
@@ -105,7 +94,6 @@ export default function CompressImagePage() {
       }
     }
   };
-
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -114,7 +102,6 @@ export default function CompressImagePage() {
       reader.readAsDataURL(file);
     });
   };
-
   const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -123,7 +110,6 @@ export default function CompressImagePage() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
-
   const handleCompress = async () => {
     if (!file) {
         toast({ title: "No file selected", description: "Please select an image to compress.", variant: "destructive" });
@@ -160,7 +146,6 @@ export default function CompressImagePage() {
     if (mimeType === 'image/webp') return 'webp';
     return 'jpg'; // fallback
   }
-
   const handleDownload = () => {
     if (result && file) {
       const originalFilename = file.file.name.substring(0, file.file.name.lastIndexOf('.'));
@@ -175,18 +160,15 @@ export default function CompressImagePage() {
       document.body.removeChild(a);
     }
   };
-
   const handleReset = () => {
     setFile(null);
     setResult(null);
     setIsCompressing(false);
   };
-
   const compressionPercentage = useMemo(() => {
     if (!result || !result.originalSize) return 0;
     return Math.round(((result.originalSize - result.compressedSize) / result.originalSize) * 100);
   }, [result]);
-
   return (
     <ModernPageLayout
       title="AI Image Compressor"
@@ -209,7 +191,6 @@ export default function CompressImagePage() {
               icon={<ImageIcon className="h-12 w-12" />}
             />
           )}
-
           {file && !result && (
             <div className="flex flex-col items-center gap-6">
               <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -240,7 +221,6 @@ export default function CompressImagePage() {
               </Button>
             </div>
           )}
-
           {result && file && (
             <div className="space-y-8">
               <div className="flex flex-col lg:flex-row items-center justify-center gap-8">
@@ -255,7 +235,6 @@ export default function CompressImagePage() {
                   </div>
                   <Badge variant="outline" className="text-sm">{formatBytes(result.originalSize)}</Badge>
                 </div>
-
                 <div className="flex flex-col items-center gap-4 my-8 lg:my-0">
                   <ArrowRight className="h-8 w-8 text-primary hidden lg:block" />
                   <div className="flex items-center gap-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-full px-4 py-2">
@@ -265,7 +244,6 @@ export default function CompressImagePage() {
                     </Badge>
                   </div>
                 </div>
-
                 {/* Compressed Image */}
                 <div className="flex flex-col items-center gap-4">
                   <div className="flex items-center gap-2">
@@ -280,7 +258,6 @@ export default function CompressImagePage() {
                   </Badge>
                 </div>
               </div>
-
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button 
                   size="lg" 
@@ -303,7 +280,6 @@ export default function CompressImagePage() {
             </div>
           )}
         </ModernSection>
-
         <ToolDescription />
       </div>
     </ModernPageLayout>

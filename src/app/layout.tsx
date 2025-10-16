@@ -3,7 +3,6 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { MainLayout } from '@/components/main-layout';
 import { ThemeProvider } from '@/components/theme-provider';
-
 export const metadata: Metadata = {
   title: {
     default: 'SmartPDFx - Free PDF & Image Tools',
@@ -12,7 +11,6 @@ export const metadata: Metadata = {
   description: 'A free online suite of tools to compress, convert, edit, and secure your PDF and image files. Fast, private, and easy to use.',
   keywords: ['PDF tools', 'image compressor', 'PDF converter', 'e-sign PDF', 'mask aadhar', 'online tools', 'free'],
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{

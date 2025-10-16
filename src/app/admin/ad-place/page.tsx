@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save } from 'lucide-react';
-
 export default function AdPlacePage() {
     const [adCode, setAdCode] = useState(`<ins
     className="adsbygoogle"
@@ -19,7 +17,6 @@ export default function AdPlacePage() {
 ></ins>`);
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
-
     const handleSave = async () => {
         setIsLoading(true);
         // In a real app, you would save this to a database or a configuration file.
@@ -33,7 +30,6 @@ export default function AdPlacePage() {
         });
         setIsLoading(false);
     };
-
     return (
         <div className="space-y-8">
             <Card>

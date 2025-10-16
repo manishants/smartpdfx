@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,16 +11,12 @@ import { addPageNumbersToPdf } from '@/lib/actions/add-page-numbers-to-pdf';
 import type { AddPageNumbersInput, AddPageNumbersOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-
 export const dynamic = 'force-dynamic';
-
 interface UploadedFile {
   file: File;
   name: string;
 }
-
 type Position = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
-
 const FAQ = () => (
     <div className="mt-12">
         <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
@@ -47,15 +42,12 @@ const FAQ = () => (
         </Accordion>
     </div>
 );
-
-
 export default function AddPageNumbersPage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [position, setPosition] = useState<Position>('bottom-center');
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<AddPageNumbersOutput | null>(null);
   const { toast } = useToast();
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
@@ -67,7 +59,6 @@ export default function AddPageNumbersPage() {
       }
     }
   };
-
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -76,7 +67,6 @@ export default function AddPageNumbersPage() {
       reader.readAsDataURL(file);
     });
   };
-
   const handleProcess = async () => {
     if (!file) {
       toast({ title: "No file selected", description: "Please select a PDF.", variant: "destructive" });
@@ -107,7 +97,6 @@ export default function AddPageNumbersPage() {
       setIsProcessing(false);
     }
   };
-
   const handleDownload = () => {
     if (result && file) {
       const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
@@ -121,13 +110,11 @@ export default function AddPageNumbersPage() {
       document.body.removeChild(a);
     }
   };
-
   const handleReset = () => {
     setFile(null);
     setResult(null);
     setIsProcessing(false);
   };
-
   return (
     <>
     <div className="py-8 md:py-12">
@@ -158,7 +145,6 @@ export default function AddPageNumbersPage() {
                 />
               </div>
             )}
-
             {file && !result && (
               <div className="flex flex-col items-center gap-6">
                 <div className="flex flex-col items-center justify-center bg-muted/50 border rounded-lg p-8 w-full">
@@ -197,7 +183,6 @@ export default function AddPageNumbersPage() {
                 </Button>
               </div>
             )}
-
             {result && file && (
                <div className="text-center flex flex-col items-center gap-4">
                  <CheckCircle className="mx-auto h-16 w-16 text-green-500" />

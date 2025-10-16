@@ -1,7 +1,5 @@
 "use client";
-
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-
 const chartData = [
   { date: 'Jan', visitors: 65, clicks: 20 },
   { date: 'Feb', visitors: 59, clicks: 23 },
@@ -11,7 +9,6 @@ const chartData = [
   { date: 'Jun', visitors: 55, clicks: 33 },
   { date: 'Jul', visitors: 40, clicks: 25 },
 ];
-
 export function AnalyticsChart() {
     return (
          <ResponsiveContainer width="100%" height={300}>

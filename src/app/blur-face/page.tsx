@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,12 +16,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
 interface UploadedFile {
   file: File;
   preview: string;
 }
-
 const ToolDescription = () => (
   <ModernSection
     title="AI-Powered Face Blur"
@@ -52,7 +49,6 @@ const ToolDescription = () => (
     </div>
   </ModernSection>
 );
-
 const FAQ = () => (
   <ModernSection 
     title="Frequently Asked Questions" 
@@ -99,13 +95,11 @@ const FAQ = () => (
     </Accordion>
   </ModernSection>
 );
-
 export default function BlurFacePage() {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<BlurFaceOutput | null>(null);
   const { toast } = useToast();
-
   const handleFileUpload = (uploadedFile: File) => {
     if (!uploadedFile.type.startsWith('image/')) {
       toast({
@@ -115,15 +109,12 @@ export default function BlurFacePage() {
       });
       return;
     }
-
     const preview = URL.createObjectURL(uploadedFile);
     setFile({ file: uploadedFile, preview });
     setResult(null);
   };
-
   const handleProcess = async () => {
     if (!file) return;
-
     setIsProcessing(true);
     try {
       const reader = new FileReader();
@@ -133,7 +124,6 @@ export default function BlurFacePage() {
         const input: BlurFaceInput = {
           imageUri,
         };
-
         const output = await blurFace(input);
         setResult(output);
         
@@ -154,10 +144,8 @@ export default function BlurFacePage() {
       setIsProcessing(false);
     }
   };
-
   const handleDownload = () => {
     if (!result) return;
-
     const link = document.createElement('a');
     link.href = result.blurredImageUri;
     link.download = `blurred-${file?.file.name || 'image.png'}`;
@@ -165,12 +153,10 @@ export default function BlurFacePage() {
     link.click();
     document.body.removeChild(link);
   };
-
   const handleReset = () => {
     setFile(null);
     setResult(null);
   };
-
   return (
     <ModernPageLayout
       title="Face Blur Tool"
@@ -201,7 +187,6 @@ export default function BlurFacePage() {
                     Remove
                   </Button>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Original Image */}
                   <div className="space-y-3">
@@ -215,7 +200,6 @@ export default function BlurFacePage() {
                       />
                     </div>
                   </div>
-
                   {/* Processed Image */}
                   <div className="space-y-3">
                     <h4 className="font-medium text-gray-700">Blurred Image</h4>
@@ -242,7 +226,6 @@ export default function BlurFacePage() {
                     </div>
                   </div>
                 </div>
-
                 <div className="flex gap-4 justify-center">
                   {!result ? (
                     <Button
@@ -276,7 +259,6 @@ export default function BlurFacePage() {
             )}
           </CardContent>
         </Card>
-
         <ToolDescription />
         <FAQ />
       </div>

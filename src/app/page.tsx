@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import Link from "next/link";
@@ -12,11 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AllTools } from "@/components/all-tools";
 import { Badge } from "@/components/ui/badge";
-
 function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) {
   const [upiCopied, setUpiCopied] = useState(false);
   const [paypalCopied, setPaypalCopied] = useState(false);
-
   const copyToClipboard = (text: string, setter: (value: boolean) => void) => {
     navigator.clipboard.writeText(text);
     setter(true);
@@ -25,7 +22,6 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
   
   const upiId = "manishants@ybl";
   const paypalId = "manishants@gmail.com";
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border border-white/10">
@@ -71,20 +67,16 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
               </Button>
             </div>
           </div>
-
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-
 function AnimatedCounter({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
-
   useEffect(() => {
     let startTime: number;
     let animationFrame: number;
-
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
@@ -95,14 +87,11 @@ function AnimatedCounter({ end, duration = 2000 }: { end: number; duration?: num
         animationFrame = requestAnimationFrame(animate);
       }
     };
-
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
-
   return <span>{count.toLocaleString()}</span>;
 }
-
 function FeatureCard({ icon: Icon, title, description, color }: { 
   icon: any; 
   title: string; 
@@ -128,15 +117,12 @@ function FeatureCard({ icon: Icon, title, description, color }: {
     </Card>
   );
 }
-
 export default function Home() {
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     setIsVisible(true);
   }, []);
-
   const features = [
     {
       icon: Zap,
@@ -157,7 +143,6 @@ export default function Home() {
       color: "from-blue-500 to-cyan-500"
     }
   ];
-
   return (
     <>
       {/* Hero Section */}
@@ -168,7 +153,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(120,119,198,0.1),transparent_50%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(255,119,198,0.1),transparent_50%)]" />
         </div>
-
         {/* Floating Icons */}
         <div className="absolute inset-0 -z-10">
             <ArrowDownUp className="absolute top-[10%] left-[5%] h-8 w-8 text-primary/20 rotate-12 animate-pulse" />
@@ -178,7 +162,6 @@ export default function Home() {
             <RotateCcw className="absolute top-[60%] right-[15%] h-8 w-8 text-primary/20 -rotate-12 animate-pulse" />
             <Sparkles className="absolute top-[70%] left-[10%] h-6 w-6 text-fuchsia-400/20 rotate-6 animate-bounce" />
         </div>
-
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid gap-12 lg:grid-cols-2 lg:gap-16 items-center relative z-10">
             <div className={`flex flex-col justify-center space-y-8 text-center lg:text-left items-center lg:items-start transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="space-y-6">
@@ -204,7 +187,6 @@ export default function Home() {
                   <span className="text-primary font-medium"> Compress, convert, edit, and enhance</span> with 
                   cutting-edge AI technology.
                 </p>
-
                 {/* Stats */}
                 <div className="flex flex-wrap gap-8 justify-center lg:justify-start text-center">
                   <div>
@@ -258,7 +240,6 @@ export default function Home() {
             </div>
           </div>
       </section>
-
       {/* Features Section */}
       <section className="w-full py-20 bg-gradient-to-b from-background to-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
