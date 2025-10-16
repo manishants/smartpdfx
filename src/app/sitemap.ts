@@ -1,7 +1,6 @@
 
 import { MetadataRoute } from 'next'
 import { tools } from '@/lib/data';
-import { getBlogs } from '@/app/actions/blog';
 
 const URL = 'https://REPLACE-WITH-YOUR-DOMAIN.com'; // IMPORTANT: Replace with your actual domain
 
@@ -29,19 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  // Blog pages
-  let blogPosts: MetadataRoute.Sitemap = [];
-  try {
-      const posts = await getBlogs();
-      blogPosts = posts.map(post => ({
-        url: `${URL}/blog/${post.slug}`,
-        lastModified: new Date(post.date).toISOString(),
-        changeFrequency: 'yearly',
-        priority: 0.7,
-      }));
-  } catch (error) {
-    console.error("Could not fetch blogs for sitemap", error);
-  }
+  // Blog pages (omit during build to avoid dynamic APIs)
+  const blogPosts: MetadataRoute.Sitemap = [];
 
 
   return [

@@ -7,7 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from 'next';
-import { getPost, getBlogs } from "@/app/actions/blog";
+import { getPost } from "@/app/actions/blog";
+
+// Ensure this page renders dynamically so build doesn't call cookies() in static scope
+export const dynamic = 'force-dynamic';
 
 type Props = {
   params: { slug: string }
@@ -60,15 +63,7 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams() {
-    try {
-        const posts = await getBlogs();
-        return posts.filter(p => p.published).map(post => ({ slug: post.slug }));
-    } catch (error) {
-        console.error('Error generating static params for blog:', error);
-        return [];
-    }
-}
+// Removed generateStaticParams to avoid calling cookies() during build
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
     const post = await getPost(params.slug);
