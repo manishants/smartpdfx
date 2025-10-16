@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { wordToPdf } from '@/lib/actions/word-to-pdf';
 import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 interface ConversionResult {
   success: boolean;
@@ -180,7 +181,7 @@ export default function WordToPdfPage() {
       <ModernPageLayout
         title="Word to PDF Converter"
         description="Convert your Word documents to professional PDF files with perfect formatting preservation."
-        icon={FileUp}
+        icon={<FileUp className="h-8 w-8" />}
         badge="LibreOffice Powered"
       >
         <div className="space-y-8">

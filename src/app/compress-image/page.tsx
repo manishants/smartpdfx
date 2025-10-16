@@ -12,6 +12,7 @@ import { AllTools } from '@/components/all-tools';
 import Link from 'next/link';
 import { compressImage } from '@/lib/actions/compress-image';
 import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {

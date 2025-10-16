@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from "next/image";
 import SignatureCanvas from 'react-signature-canvas';
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,10 +12,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
 import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
-import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
 
+// Set up PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 type Stage = 'upload' | 'sign' | 'place' | 'download';
 type SignatureMode = 'draw' | 'type' | 'upload';
@@ -33,26 +35,20 @@ export default function ESignPage() {
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [pdfImages, setPdfImages] = useState<string[]>([]);
-    const [pageDimensions, setPageDimensions] = useState<{width: number, height: number}[]>([]);
+    const [numPages, setNumPages] = useState<number>(0);
+    const [pageNumber, setPageNumber] = useState<number>(1);
     const [signature, setSignature] = useState<string | null>(null);
     const [signatureMode, setSignatureMode] = useState<SignatureMode>('draw');
     const [typedSignature, setTypedSignature] = useState('');
     const [placedSignatures, setPlacedSignatures] = useState<PlacedSignature[]>([]);
     const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
     const [activeSignatureId, setActiveSignatureId] = useState<string | null>(null);
-    const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const [zoom, setZoom] = useState(1);
-
+    const [pageWidth, setPageWidth] = useState<number>(0);
+    const [pageHeight, setPageHeight] = useState<number>(0);
 
     const sigCanvas = useRef<SignatureCanvas>(null);
     const { toast } = useToast();
-    
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-        }
-    }, []);
 
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -62,15 +58,6 @@ export default function ESignPage() {
             reader.readAsDataURL(file);
         });
     };
-    
-    const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
-            reader.onerror = (error) => reject(error);
-            reader.readAsArrayBuffer(file);
-        });
-    }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -82,50 +69,25 @@ export default function ESignPage() {
             }
         }
     };
-    
-    const renderPdfToImages = async (pdfFile: File) => {
-        const images: string[] = [];
-        const dimensions: {width: number, height: number}[] = [];
-        const pdfData = await arrayBufferFromFile(pdfFile);
-        const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 1.5 });
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+    const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+        setNumPages(numPages);
+        setPageNumber(1);
+        setStage('place');
+    }, []);
 
-            if (context) {
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                images.push(canvas.toDataURL('image/png'));
-                dimensions.push({ width: viewport.width, height: viewport.height });
-            }
-        }
-        return { images, dimensions };
-    };
+    const onPageLoadSuccess = useCallback((page: any) => {
+        setPageWidth(page.width);
+        setPageHeight(page.height);
+    }, []);
 
     const handlePdfUpload = async () => {
         if (!file) return;
         setIsLoading(true);
-        try {
-            const { images, dimensions } = await renderPdfToImages(file);
-            if (images.length > 0) {
-                setPdfImages(images);
-                setPageDimensions(dimensions);
-                setStage('place');
-            } else {
-                throw new Error("Failed to render PDF pages.");
-            }
-        } catch (error: any) {
-            console.error("PDF Rendering failed", error);
-            toast({ title: "Error processing PDF", description: error.message || "Could not convert PDF to images.", variant: "destructive" });
-        } finally {
-            setIsLoading(false);
-        }
+        // The PDF will be loaded by react-pdf Document component
+        setIsLoading(false);
     };
-    
+
     const handleSignatureSave = () => {
         if (signatureMode === 'draw' && sigCanvas.current) {
             if(sigCanvas.current.isEmpty()) {
@@ -148,44 +110,54 @@ export default function ESignPage() {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "black";
                 ctx.font = '50px "Homemade Apple", cursive';
-                ctx.fillText(typedSignature, 20, 90);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(typedSignature, canvas.width / 2, canvas.height / 2);
                 setSignature(canvas.toDataURL('image/png'));
             }
         }
-        handlePdfUpload();
-    }
-
-    const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
-            const sigFile = event.target.files[0];
-            if (sigFile.type.startsWith('image/')) {
-                const sigUri = await fileToDataUri(sigFile);
-                setSignature(sigUri);
-                handlePdfUpload();
-            } else {
-                toast({ title: "Invalid file type", description: "Please upload an image file for your signature.", variant: "destructive" });
-            }
-        }
-    }
-
-    const handlePageDrop = (e: React.DragEvent<HTMLDivElement>, pageIndex: number) => {
-        e.preventDefault();
-        const signatureData = e.dataTransfer.getData("application/json");
-        if (!signatureData) return;
-
-        const { width, height } = JSON.parse(signatureData);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = (e.clientX - rect.left - (width / 2)) / zoom;
-        const y = (e.clientY - rect.top - (height / 2)) / zoom;
-        
-        setPlacedSignatures(prev => [...prev, { id: `sig-${Date.now()}`, pageIndex, x, y, width, height }]);
+        setStage('place');
     };
-    
+
+    const handleClearSignature = () => {
+        if (sigCanvas.current) {
+            sigCanvas.current.clear();
+        }
+        setSignature(null);
+        setTypedSignature('');
+    };
+
     const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
         const signatureData = JSON.stringify({ width: 150, height: 75 });
         e.dataTransfer.setData("application/json", signatureData);
     }
-    
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        try {
+            const signatureData = JSON.parse(e.dataTransfer.getData("application/json"));
+            const newSignature: PlacedSignature = {
+                id: Date.now().toString(),
+                pageIndex: pageNumber - 1,
+                x: x / zoom,
+                y: y / zoom,
+                width: signatureData.width / zoom,
+                height: signatureData.height / zoom,
+            };
+            setPlacedSignatures(prev => [...prev, newSignature]);
+        } catch (error) {
+            console.error("Error parsing signature data:", error);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
+
     const handleApplySignatures = async () => {
         if (!file || !signature || placedSignatures.length === 0) {
             toast({ title: "Missing information", description: "Please place at least one signature.", variant: "destructive" });
@@ -194,237 +166,356 @@ export default function ESignPage() {
         setIsLoading(true);
         try {
             const pdfUri = await fileToDataUri(file);
-            const pdfData = await arrayBufferFromFile(file);
-            const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
 
-            const placements: SignaturePlacement[] = await Promise.all(placedSignatures.map(async (ps) => {
-                const page = await pdf.getPage(ps.pageIndex + 1);
-                const originalViewport = page.getViewport({ scale: 1.0 });
-
-                const renderedPage = pageDimensions[ps.pageIndex];
-                if (!renderedPage) return null;
-
-                const scale = originalViewport.width / renderedPage.width;
+            // Convert placed signatures to the format expected by the server action
+            const placements: SignaturePlacement[] = placedSignatures.map((ps) => {
+                // Scale coordinates based on the actual PDF page size vs rendered size
+                const scaleX = pageWidth > 0 ? 1 : 1; // We'll use 1:1 scaling for simplicity
+                const scaleY = pageHeight > 0 ? 1 : 1;
                 
                 return {
                     pageIndex: ps.pageIndex,
-                    x: ps.x * scale,
-                    y: ps.y * scale,
-                    width: ps.width * scale,
-                    height: ps.height * scale,
+                    x: ps.x * scaleX,
+                    y: ps.y * scaleY,
+                    width: ps.width * scaleX,
+                    height: ps.height * scaleY,
                 };
-            })).then(results => results.filter((p): p is SignaturePlacement => p !== null));
-
+            });
 
             const input: ESignPdfInput = { pdfUri, signatureImageUri: signature, placements };
             const result = await eSignPdf(input);
             
-            if (result && result.signedPdfUri) {
-                setSignedPdfUri(result.signedPdfUri);
-                setStage('download');
-            } else {
-                throw new Error("Failed to sign the PDF.");
-            }
+            setSignedPdfUri(result.signedPdfUri);
+            setStage('download');
+            toast({ title: "Success!", description: "Your PDF has been signed successfully." });
         } catch (error: any) {
-            toast({ title: "Signing Failed", description: error.message || "An unknown error occurred.", variant: "destructive" });
+            console.error("Signing failed", error);
+            toast({ title: "Error signing PDF", description: error.message || "Could not sign the PDF.", variant: "destructive" });
         } finally {
             setIsLoading(false);
         }
-    }
-    
-    const removeSignature = (id: string) => {
-        setPlacedSignatures(prev => prev.filter(s => s.id !== id));
-    }
+    };
 
-    const handleReset = () => {
+    const handleDownload = () => {
+        if (signedPdfUri) {
+            const link = document.createElement('a');
+            link.href = signedPdfUri;
+            link.download = `signed-${file?.name || 'document.pdf'}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    const handleRemoveSignature = (id: string) => {
+        setPlacedSignatures(prev => prev.filter(sig => sig.id !== id));
+        if (activeSignatureId === id) {
+            setActiveSignatureId(null);
+        }
+    };
+
+    const handleStartOver = () => {
         setStage('upload');
         setFile(null);
-        setPdfImages([]);
-        setPageDimensions([]);
         setSignature(null);
-        setTypedSignature('');
         setPlacedSignatures([]);
         setSignedPdfUri(null);
-        setIsLoading(false);
-    }
-    
-    const renderContent = () => {
-        switch(stage) {
-            case 'upload': return (
-                <div className="text-center">
-                    <Card 
-                        className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                        onClick={() => document.getElementById('file-upload')?.click()}
-                    >
-                        <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                        <p className="mt-4 font-semibold text-primary">Drag & drop a PDF here, or click to select</p>
-                        <Input id="file-upload" type="file" className="hidden" accept="application/pdf" onChange={handleFileChange} />
-                    </Card>
-                    {file && (
-                        <div className="mt-6 flex flex-col items-center gap-4">
-                            <p className="font-semibold">Selected: {file.name}</p>
-                            <Button size="lg" onClick={() => setStage('sign')} disabled={isLoading}>
-                                {isLoading ? <><Loader2 className="mr-2 animate-spin" />Processing...</> : "Proceed to Sign"}
-                            </Button>
-                        </div>
-                    )}
+        setActiveSignatureId(null);
+        setPageNumber(1);
+        setNumPages(0);
+        setTypedSignature('');
+        if (sigCanvas.current) {
+            sigCanvas.current.clear();
+        }
+    };
+
+    const renderUploadStage = () => (
+        <div className="text-center space-y-6">
+            <div className="mx-auto w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
+                <UploadCloud className="h-12 w-12 text-primary" />
+            </div>
+            <div>
+                <h2 className="text-2xl font-semibold mb-2">Upload Your PDF</h2>
+                <p className="text-muted-foreground">Select the PDF document you want to sign</p>
+            </div>
+            <div className="max-w-md mx-auto">
+                <Input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className="cursor-pointer"
+                />
+            </div>
+            {file && (
+                <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">Selected: {file.name}</p>
+                    <Button onClick={handlePdfUpload} disabled={isLoading} className="w-full max-w-xs">
+                        {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : <>Continue </>}
+                    </Button>
                 </div>
-            )
-            case 'sign': return (
-                <div>
-                     <style>{`@import url('https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap');`}</style>
-                    <Tabs value={signatureMode} onValueChange={(v) => setSignatureMode(v as SignatureMode)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="draw"><Pen className="mr-2"/>Draw</TabsTrigger>
-                            <TabsTrigger value="type"><Type className="mr-2"/>Type</TabsTrigger>
-                            <TabsTrigger value="upload"><UploadCloud className="mr-2"/>Upload</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="draw">
-                            <Card className="mt-4">
-                                <CardContent className="p-2">
-                                    <SignatureCanvas ref={sigCanvas} penColor='black' canvasProps={{className: 'w-full h-48 rounded-md bg-white'}} />
-                                    <Button variant="ghost" size="sm" onClick={() => sigCanvas.current?.clear()} className="mt-2"><Eraser className="mr-2"/>Clear</Button>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                        <TabsContent value="type">
-                             <Card className="mt-4">
-                                <CardContent className="p-4">
-                                    <Input 
-                                        placeholder="Type your full name" 
-                                        className="text-4xl h-24 p-4" 
-                                        style={{fontFamily: '"Homemade+Apple", cursive'}}
-                                        value={typedSignature}
-                                        onChange={(e) => setTypedSignature(e.target.value)}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                        <TabsContent value="upload">
-                            <Card 
-                                className="mt-4 border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                                onClick={() => document.getElementById('sig-upload')?.click()}
-                            >
-                                <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                                <p className="mt-4 font-semibold text-primary">Click to upload signature</p>
-                                <Input id="sig-upload" type="file" className="hidden" accept="image/*" onChange={handleSignatureUpload} />
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
-                    <div className="mt-6 flex justify-end">
-                       <Button size="lg" onClick={handleSignatureSave}><Check className="mr-2" />Use This Signature</Button>
+            )}
+        </div>
+    );
+
+    const renderSignatureStage = () => (
+        <div className="space-y-6">
+            <div className="text-center">
+                <h2 className="text-2xl font-semibold mb-2">Create Your Signature</h2>
+                <p className="text-muted-foreground">Choose how you'd like to create your signature</p>
+            </div>
+            
+            <Tabs value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)}>
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="draw" className="flex items-center gap-2">
+                        <Pen className="h-4 w-4" />
+                        Draw
+                    </TabsTrigger>
+                    <TabsTrigger value="type" className="flex items-center gap-2">
+                        <Type className="h-4 w-4" />
+                        Type
+                    </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="draw" className="space-y-4">
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
+                        <SignatureCanvas
+                            ref={sigCanvas}
+                            canvasProps={{
+                                width: 500,
+                                height: 200,
+                                className: 'signature-canvas w-full h-full border rounded'
+                            }}
+                        />
                     </div>
+                    <div className="flex gap-2 justify-center">
+                        <Button variant="outline" onClick={handleClearSignature}>
+                            <Eraser className="mr-2 h-4 w-4" />
+                            Clear
+                        </Button>
+                        <Button onClick={handleSignatureSave}>
+                            <Check className="mr-2 h-4 w-4" />
+                            Save Signature
+                        </Button>
+                    </div>
+                </TabsContent>
+                
+                <TabsContent value="type" className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Type your name:</label>
+                        <Input
+                            value={typedSignature}
+                            onChange={(e) => setTypedSignature(e.target.value)}
+                            placeholder="Enter your full name"
+                            className="text-center text-2xl font-serif"
+                            style={{ fontFamily: '"Homemade Apple", cursive' }}
+                        />
+                    </div>
+                    <div className="text-center">
+                        <Button onClick={handleSignatureSave}>
+                            <Check className="mr-2 h-4 w-4" />
+                            Save Signature
+                        </Button>
+                    </div>
+                </TabsContent>
+            </Tabs>
+        </div>
+    );
+
+    const renderPlacementStage = () => (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-semibold">Place Your Signature</h2>
+                    <p className="text-muted-foreground">Drag and drop your signature onto the document</p>
                 </div>
-            )
-            case 'place':
-                const currentPageImage = pdfImages[currentPageIndex];
-                const currentPageDimension = pageDimensions[currentPageIndex];
-                return (
-                <div className="grid md:grid-cols-12 gap-6 h-[80vh]">
-                    <aside className="md:col-span-3 flex flex-col items-center gap-4 p-4 border-r">
-                        <h3 className="font-semibold text-lg">Your Signature</h3>
-                        {signature && (
-                            <div className="p-2 border border-dashed rounded-md cursor-grab">
-                                <Image 
-                                    src={signature} 
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}>
+                        <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium">{Math.round(zoom * 100)}%</span>
+                    <Button variant="outline" size="sm" onClick={() => setZoom(Math.min(2, zoom + 0.1))}>
+                        <ZoomIn className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-1 space-y-4">
+                    {signature && (
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Your Signature:</label>
+                            <div className="border rounded-lg p-2 bg-white">
+                                <Image
+                                    src={signature}
                                     alt="Your signature"
                                     width={150}
                                     height={75}
-                                    draggable="true"
+                                    className="mx-auto cursor-move"
+                                    draggable
                                     onDragStart={handleDragStart}
                                 />
                             </div>
-                        )}
-                        <p className="text-sm text-center text-muted-foreground">Drag your signature and drop it onto the document pages.</p>
-                        
-                        {activeSignatureId && (
-                           <Button variant="destructive" className="w-full mt-4" onClick={() => removeSignature(activeSignatureId)}>
-                               <Trash2 className="mr-2" /> Remove Selected
-                           </Button>
-                        )}
+                            <p className="text-xs text-muted-foreground text-center">
+                                Drag this signature onto the PDF
+                            </p>
+                        </div>
+                    )}
 
-                        <Button className="w-full mt-auto" size="lg" onClick={handleApplySignatures} disabled={isLoading || placedSignatures.length === 0}>
-                            {isLoading ? <><Loader2 className="mr-2 animate-spin" />Applying...</> : <><Wand2 className="mr-2"/>Apply Signatures</>}
-                        </Button>
-                    </aside>
-                    <main className="md:col-span-9 bg-muted/50 flex flex-col justify-between items-center p-4 overflow-auto">
-                        <div className="relative shadow-lg flex-1 w-full flex items-center justify-center">
-                            <div 
-                                className="relative" 
-                                style={{ transform: `scale(${zoom})`, transformOrigin: 'center' }}
-                                onDragOver={(e) => e.preventDefault()} 
-                                onDrop={(e) => handlePageDrop(e, currentPageIndex)} 
-                                onClick={() => setActiveSignatureId(null)}
-                            >
-                                <Image id={`pdf-page-${currentPageIndex}`} src={currentPageImage} alt={`PDF Page ${currentPageIndex + 1}`} width={currentPageDimension?.width || 800} height={currentPageDimension?.height || 1100} className="w-full h-auto" />
-                                {placedSignatures.filter(ps => ps.pageIndex === currentPageIndex).map(ps => (
-                                    <Rnd
-                                        key={ps.id}
-                                        size={{ width: ps.width, height: ps.height }}
-                                        position={{ x: ps.x, y: ps.y }}
-                                        onDragStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
-                                        onDragStop={(e, d) => {
-                                            const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {...s, x: d.x, y: d.y} : s);
-                                            setPlacedSignatures(updatedSigs);
-                                        }}
-                                        onResizeStart={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
-                                        onResizeStop={(e, direction, ref, delta, position) => {
-                                            const updatedSigs = placedSignatures.map(s => s.id === ps.id ? {
-                                                ...s,
-                                                width: parseFloat(ref.style.width),
-                                                height: parseFloat(ref.style.height),
-                                                ...position
-                                            } : s);
-                                            setPlacedSignatures(updatedSigs);
-                                        }}
-                                        onClick={(e) => { e.stopPropagation(); setActiveSignatureId(ps.id); }}
-                                        className={cn("border border-dashed", activeSignatureId === ps.id ? "border-primary" : "border-transparent")}
-                                    >
-                                        <Image
-                                            src={signature!}
-                                            alt="Placed signature"
-                                            layout="fill"
-                                            className="cursor-move object-contain"
-                                        />
-                                    </Rnd>
+                    {placedSignatures.length > 0 && (
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Placed Signatures:</label>
+                            <div className="space-y-1">
+                                {placedSignatures.map((sig) => (
+                                    <div key={sig.id} className="flex items-center justify-between text-xs p-2 bg-muted rounded">
+                                        <span>Page {sig.pageIndex + 1}</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleRemoveSignature(sig.id)}
+                                        >
+                                            <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                    </div>
                                 ))}
                             </div>
                         </div>
-                        <div className="flex items-center justify-center gap-4 mt-4 bg-background p-2 rounded-lg border shadow-sm">
-                            <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}><ZoomOut className="h-4 w-4" /></Button>
-                            <span className="text-sm font-medium w-16 text-center">{Math.round(zoom * 100)}%</span>
-                            <Button variant="outline" size="icon" onClick={() => setZoom(z => Math.min(2, z + 0.25))}><ZoomIn className="h-4 w-4" /></Button>
-                            <div className="w-px h-6 bg-border mx-4"></div>
-                            <Button variant="outline" size="icon" onClick={() => setCurrentPageIndex(p => Math.max(0, p - 1))} disabled={currentPageIndex === 0}>
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <span className="text-sm font-medium">Page {currentPageIndex + 1} of {pdfImages.length}</span>
-                            <Button variant="outline" size="icon" onClick={() => setCurrentPageIndex(p => Math.min(pdfImages.length - 1, p + 1))} disabled={currentPageIndex === pdfImages.length - 1}>
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </main>
+                    )}
+
+                    <Button onClick={handleApplySignatures} disabled={isLoading || placedSignatures.length === 0} className="w-full">
+                        {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing...</> : <><Wand2 className="mr-2 h-4 w-4" /> Apply Signatures</>}
+                    </Button>
                 </div>
-            )
-            case 'download': return (
-                <div className="text-center flex flex-col items-center gap-4">
-                    <Check className="h-16 w-16 text-green-500 bg-green-500/10 p-2 rounded-full" />
-                    <h2 className="text-2xl font-bold">PDF Signed Successfully!</h2>
-                    <p className="text-muted-foreground">Your signed document is ready for download.</p>
-                    <div className="flex gap-4 mt-4">
-                        <Button size="lg" asChild>
-                            <a href={signedPdfUri!} download={file?.name.replace('.pdf', '-signed.pdf')}>
-                                <FileDown className="mr-2" /> Download
-                            </a>
-                        </Button>
-                        <Button size="lg" variant="outline" onClick={handleReset}>
-                            <RefreshCw className="mr-2" /> Start Over
-                        </Button>
+
+                <div className="lg:col-span-3">
+                    <div className="border rounded-lg overflow-hidden bg-gray-100">
+                        {file && (
+                            <div className="relative">
+                                <div className="flex items-center justify-between p-2 bg-white border-b">
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
+                                            disabled={pageNumber <= 1}
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <span className="text-sm">
+                                            Page {pageNumber} of {numPages}
+                                        </span>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
+                                            disabled={pageNumber >= numPages}
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                
+                                <div 
+                                    className="relative overflow-auto max-h-[600px]"
+                                    onDrop={handleDrop}
+                                    onDragOver={handleDragOver}
+                                    style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}
+                                >
+                                    <Document
+                                        file={file}
+                                        onLoadSuccess={onDocumentLoadSuccess}
+                                        loading={<div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}
+                                    >
+                                        <Page
+                                            pageNumber={pageNumber}
+                                            onLoadSuccess={onPageLoadSuccess}
+                                            renderTextLayer={false}
+                                            renderAnnotationLayer={false}
+                                        />
+                                    </Document>
+                                    
+                                    {/* Render placed signatures for current page */}
+                                    {placedSignatures
+                                        .filter(sig => sig.pageIndex === pageNumber - 1)
+                                        .map((sig) => (
+                                            <Rnd
+                                                key={sig.id}
+                                                size={{ width: sig.width, height: sig.height }}
+                                                position={{ x: sig.x, y: sig.y }}
+                                                onDragStop={(e, d) => {
+                                                    setPlacedSignatures(prev =>
+                                                        prev.map(s => s.id === sig.id ? { ...s, x: d.x, y: d.y } : s)
+                                                    );
+                                                }}
+                                                onResizeStop={(e, direction, ref, delta, position) => {
+                                                    setPlacedSignatures(prev =>
+                                                        prev.map(s => s.id === sig.id ? {
+                                                            ...s,
+                                                            width: parseInt(ref.style.width),
+                                                            height: parseInt(ref.style.height),
+                                                            ...position,
+                                                        } : s)
+                                                    );
+                                                }}
+                                                bounds="parent"
+                                                className={cn(
+                                                    "border-2 border-dashed border-primary/50 bg-primary/10",
+                                                    activeSignatureId === sig.id && "border-primary border-solid"
+                                                )}
+                                                onClick={() => setActiveSignatureId(sig.id)}
+                                            >
+                                                <Image
+                                                    src={signature!}
+                                                    alt="Placed signature"
+                                                    fill
+                                                    className="object-contain pointer-events-none"
+                                                />
+                                            </Rnd>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
-            )
+            </div>
+        </div>
+    );
+
+    const renderDownloadStage = () => (
+        <div className="text-center space-y-6">
+            <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
+                <Check className="h-12 w-12 text-green-600" />
+            </div>
+            <div>
+                <h2 className="text-2xl font-semibold mb-2">PDF Signed Successfully!</h2>
+                <p className="text-muted-foreground">Your document has been signed and is ready for download</p>
+            </div>
+            <div className="space-y-4">
+                <Button onClick={handleDownload} className="w-full max-w-xs">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Download Signed PDF
+                </Button>
+                <Button variant="outline" onClick={handleStartOver} className="w-full max-w-xs">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Sign Another Document
+                </Button>
+            </div>
+        </div>
+    );
+
+    const renderContent = () => {
+        switch (stage) {
+            case 'upload':
+                return renderUploadStage();
+            case 'sign':
+                return renderSignatureStage();
+            case 'place':
+                return renderPlacementStage();
+            case 'download':
+                return renderDownloadStage();
+            default:
+                return renderUploadStage();
         }
-    }
+    };
 
     return (
         <div className="container mx-auto px-4 py-8 md:py-12">

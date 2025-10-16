@@ -52,6 +52,12 @@ const nextConfig: NextConfig = {
     config.externals = config.externals || [];
     if (!isServer) {
       config.externals.push('canvas');
+      // Exclude genkit and AI-related modules from client-side builds
+      config.externals.push('genkit');
+      config.externals.push('@genkit-ai/googleai');
+      config.externals.push('@genkit-ai/core');
+      config.externals.push('@genkit-ai/firebase');
+      config.externals.push('handlebars');
     }
 
     // Fix for handlebars require.extensions
@@ -59,6 +65,18 @@ const nextConfig: NextConfig = {
       test: /\.handlebars$/,
       loader: 'handlebars-loader',
     });
+
+    // Ignore genkit-related modules in client builds
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      ...(isServer ? {} : {
+        'genkit': false,
+        '@genkit-ai/googleai': false,
+        '@genkit-ai/core': false,
+        '@genkit-ai/firebase': false,
+        'handlebars': false,
+      }),
+    };
 
     return config;
   },

@@ -10,6 +10,7 @@ import type { RemoveBackgroundInput, RemoveBackgroundOutput } from '@/lib/types'
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ModernPageLayout } from '@/components/modern-page-layout';
+import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {

@@ -61,8 +61,13 @@ export async function generateMetadata(
 }
 
 export async function generateStaticParams() {
-    const posts = await getBlogs();
-    return posts.filter(p => p.published).map(post => ({ slug: post.slug }));
+    try {
+        const posts = await getBlogs();
+        return posts.filter(p => p.published).map(post => ({ slug: post.slug }));
+    } catch (error) {
+        console.error('Error generating static params for blog:', error);
+        return [];
+    }
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {

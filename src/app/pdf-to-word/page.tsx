@@ -198,7 +198,7 @@ export default function PdfToWordPage() {
       <ModernPageLayout
         title="PDF to Word Converter"
         description="Transform your PDF documents into fully editable Word files with our advanced AI-powered conversion technology."
-        icon={FileText}
+        icon={<FileText className="h-8 w-8" />}
         badge="AI-Powered"
       >
         <div className="space-y-8">
