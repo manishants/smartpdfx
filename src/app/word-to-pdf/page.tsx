@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -127,9 +128,9 @@ export default function WordToPdfPage() {
       });
     }, 200);
     try {
-      // Convert file to data URI
+      // Convert file to data URI (browser-safe, no Buffer)
       const fileBuffer = await file.arrayBuffer();
-      const base64 = Buffer.from(fileBuffer).toString('base64');
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(fileBuffer)));
       const docxUri = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${base64}`;
       const output = await wordToPdf({ docxUri });
       
@@ -178,188 +179,161 @@ export default function WordToPdfPage() {
     setIsConverting(false);
   };
   return (
-    <>
-      <ModernPageLayout
-        title="Word to PDF Converter"
-        description="Convert your Word documents to professional PDF files with perfect formatting preservation."
-        icon={<FileUp className="h-8 w-8" />}
-        badge="LibreOffice Powered"
-      >
-        <div className="space-y-8">
-          {/* Upload Section */}
-          <ModernSection>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Upload Area */}
-              <div className="lg:col-span-2">
-                {!file ? (
-                  <ModernUploadArea
-                    onFileSelect={handleFileChange}
-                    accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    maxSize={50 * 1024 * 1024}
-                    isLoading={isConverting}
-                  >
-                    <div className="flex flex-col items-center space-y-4">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-full blur-xl animate-pulse" />
-                        <div className="relative bg-gradient-to-r from-primary/10 to-blue-600/10 p-6 rounded-full border border-primary/20">
-                          <Upload className="h-12 w-12 text-primary" />
-                        </div>
-                      </div>
-                      
-                      <div className="text-center space-y-2">
-                        <h3 className="text-xl font-semibold text-foreground">
-                          Drop your Word document here or click to browse
-                        </h3>
-                        <p className="text-muted-foreground">
-                          Supports DOCX files up to 50MB
-                        </p>
+    <ModernPageLayout
+      title="Word to PDF Converter"
+      description="Convert your Word documents to professional PDF files with perfect formatting preservation."
+      icon={<FileUp className="h-8 w-8" />}
+      badge="LibreOffice Powered"
+    >
+      <div className="space-y-8">
+        {/* Upload Section */}
+        <ModernSection>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Upload Area */}
+            <div className="lg:col-span-2">
+              {!file && (
+                <ModernUploadArea
+                  onFileSelect={handleFileChange}
+                  accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  maxSize={50 * 1024 * 1024}
+                  isLoading={isConverting}
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-full blur-xl animate-pulse" />
+                      <div className="relative bg-gradient-to-r from-primary/10 to-blue-600/10 p-6 rounded-full border border-primary/20">
+                        <Upload className="h-12 w-12 text-primary" />
                       </div>
                     </div>
-                  </ModernUploadArea>
-                ) : (
-              <div className="space-y-6">
-                {/* File Info */}
-                <Card className="bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-3 rounded-lg border border-green-500/20">
-                          <FileText className="h-8 w-8 text-green-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{file.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {(file.size / (1024 * 1024)).toFixed(2)} MB
-                          </p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-600">
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Ready
-                      </Badge>
+                    <div className="text-center space-y-2">
+                      <h3 className="text-xl font-semibold text-foreground">Drop your Word document here or click to browse</h3>
+                      <p className="text-muted-foreground">Supports DOCX files up to 50MB</p>
                     </div>
-                  </CardContent>
-                </Card>
-                {/* Conversion Progress */}
-                {isConverting && (
-                  <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20">
+                  </div>
+                </ModernUploadArea>
+              )}
+
+              {file && (
+                <div className="space-y-6">
+                  {/* File Info */}
+                  <Card className="bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20">
                     <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-foreground flex items-center gap-2">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            Converting Word to PDF...
-                          </h3>
-                          <span className="text-sm text-muted-foreground">{progress.toFixed(0)}%</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-3 rounded-lg border border-green-500/20">
+                            <FileText className="h-8 w-8 text-green-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-foreground">{file.name}</h3>
+                            <p className="text-sm text-muted-foreground">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div 
-                            className="bg-gradient-to-r from-primary to-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
+                        <Badge variant="secondary" className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-600">
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Ready
+                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
-                )}
-                {/* Result */}
-                {result && (
-                  <Card className={`${result.success ? 'bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20' : 'bg-gradient-to-r from-red-500/5 to-rose-500/5 border border-red-500/20'}`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-3 rounded-lg ${result.success ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20' : 'bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/20'}`}>
-                          {result.success ? (
-                            <CheckCircle className="h-8 w-8 text-green-600" />
-                          ) : (
-                            <RefreshCw className="h-8 w-8 text-red-600" />
-                          )}
+
+                  {/* Conversion Progress */}
+                  {isConverting && (
+                    <Card className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20">
+                      <CardContent className="p-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-foreground flex items-center gap-2">
+                              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                              Converting Word to PDF...
+                            </h3>
+                            <span className="text-sm text-muted-foreground">{progress.toFixed(0)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div className="bg-gradient-to-r from-primary to-blue-600 h-2 rounded-full transition-all duration-300 ease-out" style={{ width: `${progress}%` }} />
+                          </div>
                         </div>
-                        <div>
-                          <h3 className={`font-semibold ${result.success ? 'text-green-600' : 'text-red-600'}`}>
-                            {result.success ? 'Conversion Successful!' : 'Conversion Failed'}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {result.success 
-                              ? 'Your Word document has been successfully converted to PDF.'
-                              : result.error || 'An error occurred during conversion.'
-                            }
-                          </p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Result */}
+                  {result && (
+                    <Card className={`${result.success ? 'bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/20' : 'bg-gradient-to-r from-red-500/5 to-rose-500/5 border border-red-500/20'}`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center space-x-4">
+                          <div className={`p-3 rounded-lg ${result.success ? 'bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20' : 'bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/20'}`}>
+                            {result.success ? (
+                              <CheckCircle className="h-8 w-8 text-green-600" />
+                            ) : (
+                              <RefreshCw className="h-8 w-8 text-red-600" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className={`font-semibold ${result.success ? 'text-green-600' : 'text-red-600'}`}>{result.success ? 'Conversion Successful!' : 'Conversion Failed'}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {result.success ? 'Your Word document has been successfully converted to PDF.' : (result.error || 'An error occurred during conversion.')}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {!result && (
-                    <Button 
-                      onClick={handleConvert}
-                      disabled={isConverting}
-                      className="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      {isConverting ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Converting...
-                        </>
-                      ) : (
-                        <>
-                          <FileUp className="mr-2 h-5 w-5" />
-                          Convert to PDF
-                        </>
-                      )}
-                    </Button>
+                      </CardContent>
+                    </Card>
                   )}
-                  
-                  {result?.success && (
-                    <Button 
-                      onClick={handleDownload}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-600/90 hover:to-emerald-600/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      <Download className="mr-2 h-5 w-5" />
-                      Download PDF
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {!result && (
+                      <Button onClick={handleConvert} disabled={isConverting} className="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+                        {isConverting ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Converting...
+                          </>
+                        ) : (
+                          <>
+                            <FileUp className="mr-2 h-5 w-5" />
+                            Convert to PDF
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {result?.success && (
+                      <Button onClick={handleDownload} className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-600/90 hover:to-emerald-600/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <Download className="mr-2 h-5 w-5" />
+                        Download PDF
+                      </Button>
+                    )}
+
+                    <Button onClick={handleReset} variant="outline" className="flex-1 border-2 border-gray-300 hover:border-gray-400 font-medium py-3 px-6 rounded-lg transition-all duration-200">
+                      <RefreshCw className="mr-2 h-5 w-5" />
+                      Convert Another
                     </Button>
-                  )}
-                  
-                  <Button 
-                    onClick={handleReset}
-                    variant="outline"
-                    className="flex-1 border-2 border-gray-300 hover:border-gray-400 font-medium py-3 px-6 rounded-lg transition-all duration-200"
-                  >
-                    <RefreshCw className="mr-2 h-5 w-5" />
-                    Convert Another
-                  </Button>
+                  </div>
                 </div>
               )}
-              
-              {/* AI Features Component - Right Side */}
-              <div className="lg:col-span-1">
-                <AIPoweredFeatures 
-                  features={[
-                    "LibreOffice-powered conversion",
-                    "Perfect formatting preservation", 
-                    "Maintains document structure",
-                    "Professional PDF output"
-                  ]}
-                />
-              </div>
             </div>
-            
-            {/* Pro Tip Component - Below Upload */}
-            <div className="mt-8">
-              <ProTip 
-                tip="For optimal results, use standard fonts and avoid complex formatting. Our LibreOffice engine handles most Word features perfectly, including tables, images, and headers."
-              />
-            </div>
-          </ModernSection>
-          <ToolDescription />
 
-          <ToolSections 
-            toolName="Word to PDF" 
-            sections={getCustomToolSections("Word to PDF")} 
-          />
+            {/* AI Features Component - Right Side */}
+            <div className="lg:col-span-1">
+              <AIPoweredFeatures features={[
+                'LibreOffice-powered conversion',
+                'Perfect formatting preservation',
+                'Maintains document structure',
+                'Professional PDF output',
+              ]} />
+            </div>
+          </div>
+        </ModernSection>
+
+        {/* Pro Tip Component - Below Upload */}
+        <div className="mt-8">
+          <ProTip tip="For optimal results, use standard fonts and avoid complex formatting. Our LibreOffice engine handles most Word features perfectly, including tables, images, and headers." />
         </div>
-      </ModernPageLayout>
-    </>
+
+        <ToolDescription />
+
+        <ToolSections toolName="Word to PDF" sections={getCustomToolSections('Word to PDF')} />
+      </div>
+    </ModernPageLayout>
   );
 }
