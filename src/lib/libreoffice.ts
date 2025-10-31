@@ -18,34 +18,69 @@ export async function isLibreOfficeAvailable(): Promise<boolean> {
 export async function findLibreOffice(): Promise<string | null> {
   if (cachedSofficePath) return cachedSofficePath;
 
-  // Common Windows install locations
-  const candidates = [
-    'C:/Program Files/LibreOffice/program/soffice.exe',
-    'C:/Program Files (x86)/LibreOffice/program/soffice.exe',
-  ];
+  const isWin = process.platform === 'win32';
+  if (isWin) {
+    // Common Windows install locations
+    const windowsCandidates = [
+      'C:/Program Files/LibreOffice/program/soffice.exe',
+      'C:/Program Files (x86)/LibreOffice/program/soffice.exe',
+    ];
 
-  for (const c of candidates) {
-    if (existsSync(c)) {
-      cachedSofficePath = c;
-      return c;
+    for (const c of windowsCandidates) {
+      if (existsSync(c)) {
+        cachedSofficePath = c;
+        return c;
+      }
+    }
+
+    // Try resolving via PATH on Windows
+    const resolvedWin = await new Promise<string | null>((resolve) => {
+      const proc = spawn('powershell', ['-NoProfile', '-Command', 'Get-Command soffice.exe | Select-Object -ExpandProperty Path'], { stdio: ['ignore', 'pipe', 'ignore'] });
+      let out = '';
+      proc.stdout.on('data', (d) => (out += d.toString()));
+      proc.on('close', () => {
+        const p = out.trim();
+        resolve(p.length ? p : null);
+      });
+    });
+
+    if (resolvedWin && existsSync(resolvedWin)) {
+      cachedSofficePath = resolvedWin;
+      return resolvedWin;
+    }
+  } else {
+    // Linux/macOS common locations
+    const posixCandidates = [
+      '/usr/bin/soffice',
+      '/usr/local/bin/soffice',
+      '/usr/lib/libreoffice/program/soffice',
+    ];
+
+    for (const c of posixCandidates) {
+      if (existsSync(c)) {
+        cachedSofficePath = c;
+        return c;
+      }
+    }
+
+    // Try resolving via PATH using a POSIX shell
+    const resolvedPosix = await new Promise<string | null>((resolve) => {
+      const cmd = process.env.SHELL && process.env.SHELL.includes('powershell') ? '/bin/sh' : '/bin/sh';
+      const proc = spawn(cmd, ['-lc', 'command -v soffice || which soffice'], { stdio: ['ignore', 'pipe', 'ignore'] });
+      let out = '';
+      proc.stdout.on('data', (d) => (out += d.toString()));
+      proc.on('close', () => {
+        const p = out.trim();
+        resolve(p.length ? p : null);
+      });
+    });
+
+    if (resolvedPosix && existsSync(resolvedPosix)) {
+      cachedSofficePath = resolvedPosix;
+      return resolvedPosix;
     }
   }
 
-  // Try resolving via PATH
-  const resolved = await new Promise<string | null>((resolve) => {
-    const proc = spawn('powershell', ['-NoProfile', '-Command', 'Get-Command soffice.exe | Select-Object -ExpandProperty Path'], { stdio: ['ignore', 'pipe', 'ignore'] });
-    let out = '';
-    proc.stdout.on('data', (d) => (out += d.toString()));
-    proc.on('close', () => {
-      const p = out.trim();
-      resolve(p.length ? p : null);
-    });
-  });
-
-  if (resolved && existsSync(resolved)) {
-    cachedSofficePath = resolved;
-    return resolved;
-  }
   return null;
 }
 

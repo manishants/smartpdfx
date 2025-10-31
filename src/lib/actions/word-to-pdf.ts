@@ -6,6 +6,7 @@ import { writeFile, unlink, readFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import type { WordToPdfInput, WordToPdfOutput } from '@/lib/types';
+import { findLibreOffice } from '@/lib/libreoffice';
 
 const execAsync = promisify(exec);
 
@@ -36,14 +37,24 @@ export async function wordToPdf(input: WordToPdfInput): Promise<WordToPdfOutput>
     const docxBuffer = Buffer.from(base64Data, 'base64');
     await writeFile(inputPath, docxBuffer);
 
-    // Convert DOCX to PDF using LibreOffice
-    const command = `soffice --headless --convert-to pdf --outdir "${tempDir}" "${inputPath}"`;
-    
+    // Resolve LibreOffice path and convert DOCX to PDF
+    const sofficePath = await findLibreOffice();
+    if (!sofficePath) {
+      console.error('LibreOffice (soffice) not found. PATH=', process.env.PATH);
+      throw new Error('LibreOffice (soffice) not found on server. Ensure the Docker image installs LibreOffice.');
+    }
+    const command = `"${sofficePath}" --headless --convert-to pdf --outdir "${tempDir}" "${inputPath}"`;
     try {
-      await execAsync(command, { timeout: 30000 }); // 30 second timeout
+      const { stdout, stderr } = await execAsync(command, { timeout: 60000 }); // allow up to 60s for conversion
+      if (stderr && stderr.trim().length) {
+        console.warn('LibreOffice stderr:', stderr);
+      }
+      if (stdout && stdout.trim().length) {
+        console.log('LibreOffice stdout:', stdout);
+      }
     } catch (execError: any) {
       console.error('LibreOffice conversion error:', execError);
-      throw new Error('LibreOffice conversion failed. Please ensure LibreOffice is installed and accessible.');
+      throw new Error('LibreOffice conversion failed during execution.');
     }
 
     // Read the converted PDF file

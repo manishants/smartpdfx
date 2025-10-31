@@ -128,10 +128,13 @@ export default function WordToPdfPage() {
       });
     }, 200);
     try {
-      // Convert file to data URI (browser-safe, no Buffer)
-      const fileBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(fileBuffer)));
-      const docxUri = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${base64}`;
+      // Convert file to data URI using FileReader (handles large files safely)
+      const docxUri = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       const output = await wordToPdf({ docxUri });
       
       clearInterval(progressInterval);
