@@ -1,0 +1,28 @@
+{
+  "providers": {
+    "gemini": [
+      {
+        "id": "key_0kbh5bb1",
+        "provider": "gemini",
+        "key": "AIzaSyAQPp0_7dXNgDwyDTzQ0e9Btc_1lNeT7eg",
+        "label": "Kathalok - Aug 7, 2025",
+        "createdAt": "2025-10-30T11:19:34.236Z",
+        "enabled": true
+      },
+      {
+        "id": "key_plau7akt",
+        "provider": "gemini",
+        "key": "AIzaSyCuDH2nx7sE8D3phLkVAoKyR38s1elXNIU",
+        "label": "Manishants - Oct 7, 2025",
+        "createdAt": "2025-10-31T09:36:23.565Z",
+        "enabled": true
+      }
+    ]
+  },
+  "rotation": {
+    "gemini": {
+      "enabled": true,
+      "strategy": "minute"
+    }
+  }
+}

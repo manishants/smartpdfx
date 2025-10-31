@@ -1,0 +1,93 @@
+{
+  "compress-pdf": {
+    "id": "compress-pdf",
+    "slug": "compress-pdf",
+    "title": "Compress PDF",
+    "description": "Reduce PDF file size while maintaining quality",
+    "status": "published",
+    "sections": [
+      {
+        "id": "s1",
+        "type": "hero",
+        "title": "Compress PDF Files Online",
+        "content": "<p>Reduce your PDF file size by up to 90% while maintaining quality. Fast, secure, and free.</p>",
+        "order": 1,
+        "isVisible": true,
+        "settings": {
+          "backgroundColor": "#f8f9fa",
+          "textAlign": "center"
+        }
+      },
+      {
+        "id": "s2",
+        "type": "features",
+        "title": "Why Choose Our PDF Compressor",
+        "content": "Fast compression, High quality, Secure processing, No file limits",
+        "order": 2,
+        "isVisible": true,
+        "settings": {
+          "columns": 2,
+          "showIcons": true
+        }
+      },
+      {
+        "id": "sec-uipmer8rra",
+        "type": "hero",
+        "title": "New hero Section",
+        "content": "Enter your content here...",
+        "order": 3,
+        "isVisible": true,
+        "settings": {}
+      }
+    ],
+    "lastModified": "2025-10-16T09:41:07.000Z"
+  },
+  "merge-pdf": {
+    "id": "merge-pdf",
+    "slug": "merge-pdf",
+    "title": "Merge PDF",
+    "description": "Combine multiple PDF files into one document",
+    "status": "published",
+    "sections": [
+      {
+        "id": "s3",
+        "type": "hero",
+        "title": "Merge PDF Files Online",
+        "content": "Combine multiple PDF documents into a single file quickly and easily.",
+        "order": 1,
+        "isVisible": true,
+        "settings": {
+          "backgroundColor": "#ffffff",
+          "textAlign": "left"
+        }
+      }
+    ]
+  },
+  "about": {
+    "id": "about",
+    "slug": "about",
+    "title": "About Us",
+    "description": "Learn more about SmartPDFx and our mission",
+    "status": "published",
+    "sections": [
+      {
+        "id": "s4",
+        "type": "content",
+        "title": "About SmartPDFx",
+        "content": "SmartPDFx is a leading platform for PDF tools and document processing.",
+        "order": 1,
+        "isVisible": true,
+        "settings": {
+          "layout": "single-column"
+        }
+      }
+    ]
+  },
+  "root": {
+    "id": "root",
+    "slug": "root",
+    "title": "Root",
+    "status": "published",
+    "sections": []
+  }
+}
