@@ -83,18 +83,16 @@ export default function ImageConverterPage() {
   const [result, setResult] = useState<ConvertImageOutput | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (file: File | null) => {
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setFile({ file, preview: URL.createObjectURL(file) });
-        setResult(null);
-      } else {
-        toast({ 
-          title: "Invalid file type", 
-          description: "Please select a valid image file (JPG, PNG, GIF, WEBP, TIFF).", 
-          variant: "destructive" 
-        });
-      }
+  const handleFileChange = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      setFile({ file, preview: URL.createObjectURL(file) });
+      setResult(null);
+    } else {
+      toast({ 
+        title: "Invalid file type", 
+        description: "Please select a valid image file (JPG, PNG, GIF, WEBP, TIFF).", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -173,7 +171,7 @@ export default function ImageConverterPage() {
           {!file && (
             <ModernUploadArea
               onFileSelect={handleFileChange}
-              acceptedTypes={["image/*"]}
+              accept="image/*"
               maxSize={50 * 1024 * 1024} // 50MB
               title="Drop your image here"
               subtitle="Supports JPG, PNG, GIF, WEBP, TIFF up to 50MB"

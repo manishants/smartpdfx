@@ -104,7 +104,8 @@ export default function RotatePdfPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {
@@ -116,18 +117,15 @@ export default function RotatePdfPage() {
         });
     }
 
-    const handleFileChange = (files: File[] | null) => {
-        if (files && files.length > 0) {
-            const selectedFile = files[0];
-            if (selectedFile.type === 'application/pdf') {
-                setFile(selectedFile);
-            } else {
-                toast({ 
-                    title: "Invalid file type", 
-                    description: "Please select a PDF file. Only PDF files are accepted.", 
-                    variant: "destructive" 
-                });
-            }
+    const handleFileChange = (file: File) => {
+        if (file.type === 'application/pdf') {
+            setFile(file);
+        } else {
+            toast({ 
+                title: "Invalid file type", 
+                description: "Please select a PDF file. Only PDF files are accepted.", 
+                variant: "destructive" 
+            });
         }
     };
     

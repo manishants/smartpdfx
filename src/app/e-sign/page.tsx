@@ -16,8 +16,9 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
 
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.disableWorker = true;
+// Set up PDF.js worker (match the installed version dynamically)
+pdfjs.GlobalWorkerOptions.workerSrc =
+  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 type Stage = 'upload' | 'sign' | 'place' | 'download';
 type SignatureMode = 'draw' | 'type' | 'upload';

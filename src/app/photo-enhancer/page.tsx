@@ -81,9 +81,7 @@ export default function EnhancePhotoPage() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
-  const handleFileChange = (selectedFile: File | null) => {
-    if (!selectedFile) return;
-    
+  const handleFileChange = (selectedFile: File) => {
     // Validate file type
     if (!selectedFile.type.startsWith('image/')) {
       toast({
@@ -209,8 +207,8 @@ export default function EnhancePhotoPage() {
 
             <ModernUploadArea
               onFileSelect={handleFileChange}
-              acceptedTypes="image/*"
-              maxSize="10MB"
+              accept="image/*"
+              maxSize={10 * 1024 * 1024}
               icon={<UploadCloud className="w-12 h-12" />}
               title="Drop your photo here or click to browse"
               subtitle="Supports JPG, PNG, GIF up to 10MB"

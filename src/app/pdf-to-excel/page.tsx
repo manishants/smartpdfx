@@ -32,9 +32,13 @@ export default function PdfToExcelPage() {
     setIsConverting(true);
     setXlsxUri(null);
     try {
-      const buf = await file.arrayBuffer();
-      const base64 = Buffer.from(buf).toString('base64');
-      const pdfUri = `data:application/pdf;base64,${base64}`;
+      // Use FileReader to avoid Node Buffer in the browser
+      const pdfUri = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       const res = await pdfToExcel({ pdfUri });
       if (res.error) throw new Error(res.error);
       if (!res.xlsxUri) throw new Error('No XLSX output');

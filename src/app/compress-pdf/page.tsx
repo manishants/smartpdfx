@@ -27,7 +27,8 @@ import { getCustomToolSections } from '@/lib/tool-sections-config';
 export const dynamic = 'force-dynamic';
 
 // It's recommended to host this worker file yourself
-pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 
 interface UploadedFile {
@@ -103,20 +104,17 @@ export default function CompressPdfPage() {
   const [quality, setQuality] = useState(75);
   const { toast } = useToast();
 
-  const handleFileChange = (files: File[] | null) => {
-    if (files && files.length > 0) {
-      const selectedFile = files[0];
-      if (selectedFile.type === 'application/pdf') {
-        setFile({ file: selectedFile, name: selectedFile.name });
-        setResult(null);
-        setProcessingState('idle');
-      } else {
-        toast({ 
-          title: "Invalid file type", 
-          description: "Please select a PDF file. Only PDF files are accepted for compression.", 
-          variant: "destructive" 
-        });
-      }
+  const handleFileChange = (selectedFile: File) => {
+    if (selectedFile.type === 'application/pdf') {
+      setFile({ file: selectedFile, name: selectedFile.name });
+      setResult(null);
+      setProcessingState('idle');
+    } else {
+      toast({ 
+        title: "Invalid file type", 
+        description: "Please select a PDF file. Only PDF files are accepted for compression.", 
+        variant: "destructive" 
+      });
     }
   };
 

@@ -32,7 +32,11 @@ export function ModernUploadArea({
 }: ModernUploadAreaProps) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      onFileSelect(acceptedFiles[0]);
+      // Call handler once per file to support multi-select while
+      // keeping the single-file callback signature.
+      for (const f of acceptedFiles) {
+        onFileSelect(f);
+      }
     }
   }, [onFileSelect]);
 

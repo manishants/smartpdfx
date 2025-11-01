@@ -70,20 +70,17 @@ export default function UnlockPdfPage() {
   const [result, setResult] = useState<UnlockPdfOutput | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (files: File[] | null) => {
-    if (files && files.length > 0) {
-      const selectedFile = files[0];
-      if (selectedFile.type === 'application/pdf') {
-        setFile({ file: selectedFile, name: selectedFile.name });
-        setResult(null);
-        setPassword('');
-      } else {
-        toast({
-          title: "Invalid file type",
-          description: "Please select a PDF file.",
-          variant: "destructive",
-        });
-      }
+  const handleFileChange = (selectedFile: File) => {
+    if (selectedFile.type === 'application/pdf') {
+      setFile({ file: selectedFile, name: selectedFile.name });
+      setResult(null);
+      setPassword('');
+    } else {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a PDF file.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -183,8 +180,7 @@ export default function UnlockPdfPage() {
           {!file && (
             <ModernUploadArea
               onFileSelect={handleFileChange}
-              acceptedTypes={['.pdf']}
-              maxFiles={1}
+              accept="application/pdf"
               title="Upload Protected PDF"
               subtitle="Select a password-protected PDF file to unlock"
               icon={<FileText className="h-12 w-12 text-primary/60" />}

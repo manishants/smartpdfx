@@ -15,7 +15,8 @@ import { ToolSections } from '@/components/tool-sections';
 import { getCustomToolSections } from '@/lib/tool-sections-config';
 import { AllTools } from '@/components/all-tools';
 
-pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 export default function ScanPdfPage() {
   const [file, setFile] = useState<File | null>(null);

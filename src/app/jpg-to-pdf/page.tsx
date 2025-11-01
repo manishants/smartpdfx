@@ -67,26 +67,20 @@ export default function JpgToPdfPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (files: File[] | null) => {
-    if (files) {
-      const newFiles = files
-        .filter(file => {
-          if (!file.type.startsWith('image/')) {
-            toast({
-              title: "Invalid file type",
-              description: `${file.name} is not a valid image file. Please select JPG, PNG, GIF, BMP, or WEBP files.`,
-              variant: "destructive"
-            });
-            return false;
-          }
-          return true;
-        })
-        .map(file => ({
-          file,
-          preview: URL.createObjectURL(file),
-        }));
-      setFiles(prevFiles => [...prevFiles, ...newFiles]);
+  const handleFileChange = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: `${file.name} is not a valid image file. Please select JPG, PNG, GIF, BMP, or WEBP files.`,
+        variant: "destructive"
+      });
+      return;
     }
+    const newItem = {
+      file,
+      preview: URL.createObjectURL(file),
+    };
+    setFiles(prevFiles => [...prevFiles, newItem]);
   };
 
   const handleRemoveFile = (indexToRemove: number) => {
@@ -186,12 +180,11 @@ export default function JpgToPdfPage() {
             {!pdfUrl && (
               <div className="space-y-6">
                 <ModernUploadArea
-                  onFilesSelected={handleFileChange}
-                  acceptedTypes={["image/jpeg", "image/png", "image/jpg", "image/gif", "image/bmp", "image/webp"]}
+                  onFileSelect={handleFileChange}
+                  accept="image/*"
                   multiple={true}
                   title="Upload Images"
                   subtitle="Drag & drop your images here or click to browse"
-                  supportText="Supports JPG, PNG, GIF, BMP, WEBP"
                 />
 
                 {files.length > 0 && (

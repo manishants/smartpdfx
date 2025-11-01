@@ -14,7 +14,7 @@ import PptxGenJS from 'pptxgenjs';
 import { saveAs } from 'file-saver';
 import { pdfToPptx } from '@/lib/actions/pdf-to-pptx';
 
-pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+// pdfjsLib.GlobalWorkerOptions.disableWorker = true;
 
 const FAQ = () => (
     <div className="max-w-4xl mx-auto mt-12">
@@ -100,7 +100,7 @@ export default function PdfToPptPage() {
                 const textW = item.width / 72;
                 
                 const style = textContent.styles[item.fontName];
-                const isBold = style.fontWeight >= 700 || style.fontFamily.toLowerCase().includes('bold');
+                const isBold = style.fontFamily.toLowerCase().includes('bold');
                 const isItalic = style.fontFamily.toLowerCase().includes('italic');
                 
                 slide.addText(item.str, {
@@ -123,8 +123,8 @@ export default function PdfToPptPage() {
             
             for(let j=0; j < operatorList.fnArray.length; j++) {
                 const op = operatorList.fnArray[j];
-                if (validImgOperators.includes(pdfjsLib.OPS[op])) {
-                    const opName = pdfjsLib.OPS[op];
+                if (validImgOperators.includes((pdfjsLib.OPS as any)[op])) {
+                    const opName = (pdfjsLib.OPS as any)[op];
                     const opArgs = operatorList.argsArray[j];
                     const imgKey = opArgs[0];
                     try {
@@ -134,7 +134,7 @@ export default function PdfToPptPage() {
                             const { width: imgW, height: imgH } = imgData;
                             
                             let imageBase64 = '';
-                            if (imgData.kind === pdfjsLib.ImageKind.JPEG) {
+                            if (imgData.kind === 3) { // treat RGB_24BPP as JPEG
                                 imageBase64 = 'data:image/jpeg;base64,' + btoa(String.fromCharCode.apply(null, Array.from(imgData.data)));
                             } else if (imgData.kind === pdfjsLib.ImageKind.RGBA_32BPP || imgData.kind === pdfjsLib.ImageKind.RGB_24BPP) {
                                 const canvas = document.createElement('canvas');
@@ -166,7 +166,7 @@ export default function PdfToPptPage() {
             }
         }
 
-        const blob = await pptx.write('blob');
+        const blob = await pptx.write({ outputType: 'blob' });
         const originalFilename = file.name.substring(0, file.name.lastIndexOf('.'));
         saveAs(blob, `${originalFilename}.pptx`);
 
@@ -194,9 +194,13 @@ export default function PdfToPptPage() {
     }
     setIsConverting(true);
     try {
-      const fileBuffer = await file.arrayBuffer();
-      const base64 = Buffer.from(fileBuffer).toString('base64');
-      const pdfUri = `data:application/pdf;base64,${base64}`;
+      // Use FileReader to avoid Node Buffer in the browser
+      const pdfUri = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       const res = await pdfToPptx({ pdfUri });
       if (res.error) throw new Error(res.error);
       if (!res.pptxUri) throw new Error('No PPTX produced');

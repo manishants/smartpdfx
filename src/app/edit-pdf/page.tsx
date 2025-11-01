@@ -66,7 +66,8 @@ export default function EditPdfPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     }, []);
 
     // OCR functionality

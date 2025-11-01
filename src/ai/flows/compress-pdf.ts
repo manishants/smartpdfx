@@ -21,7 +21,8 @@ import * as pdfjsLib from 'pdfjs-dist';
 import sharp from 'sharp';
 
 // It's recommended to host this worker file yourself
-pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 async function convertPdfToImages(pdfBuffer: Buffer): Promise<Buffer[]> {
     const images: Buffer[] = [];

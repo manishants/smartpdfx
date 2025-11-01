@@ -71,21 +71,18 @@ export default function ProtectPdfPage() {
   const [result, setResult] = useState<ProtectPdfOutput | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (files: File[] | null) => {
-    if (files && files[0]) {
-      const selectedFile = files[0];
-      if (selectedFile.type === 'application/pdf') {
-        setFile({ file: selectedFile, name: selectedFile.name });
-        setResult(null);
-        setPassword('');
-        setConfirmPassword('');
-      } else {
-        toast({ 
-          title: "Invalid file type", 
-          description: "Please select a PDF file. Only PDF files are accepted.", 
-          variant: "destructive" 
-        });
-      }
+  const handleFileChange = (selectedFile: File) => {
+    if (selectedFile.type === 'application/pdf') {
+      setFile({ file: selectedFile, name: selectedFile.name });
+      setResult(null);
+      setPassword('');
+      setConfirmPassword('');
+    } else {
+      toast({ 
+        title: "Invalid file type", 
+        description: "Please select a PDF file. Only PDF files are accepted.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -192,8 +189,7 @@ export default function ProtectPdfPage() {
           {!file && (
             <ModernUploadArea
               onFileSelect={handleFileChange}
-              acceptedTypes={['.pdf']}
-              maxFiles={1}
+              accept="application/pdf"
               title="Upload PDF to Protect"
               subtitle="Select a PDF file to add password protection"
               icon={<FileText className="h-12 w-12 text-primary/60" />}

@@ -62,21 +62,19 @@ export default function CompressImagePage() {
   const [isCompressing, setIsCompressing] = useState(false);
   const [result, setResult] = useState<CompressImageOutput | null>(null);
   const { toast } = useToast();
-  const handleFileChange = (file: File | null) => {
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setFile({
-          file: file,
-          preview: URL.createObjectURL(file),
-        });
-        setResult(null);
-      } else {
-        toast({ 
-          title: "Invalid file type", 
-          description: "Please select an image file (JPG, PNG, GIF, WEBP).", 
-          variant: "destructive" 
-        });
-      }
+  const handleFileChange = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      setFile({
+        file: file,
+        preview: URL.createObjectURL(file),
+      });
+      setResult(null);
+    } else {
+      toast({ 
+        title: "Invalid file type", 
+        description: "Please select an image file (JPG, PNG, GIF, WEBP).", 
+        variant: "destructive" 
+      });
     }
   };
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -187,7 +185,7 @@ export default function CompressImagePage() {
           {!file && (
             <ModernUploadArea
               onFileSelect={handleFileChange}
-              acceptedTypes={["image/*"]}
+              accept="image/*"
               maxSize={50 * 1024 * 1024} // 50MB
               title="Drop your image here"
               subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"

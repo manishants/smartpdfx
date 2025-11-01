@@ -79,7 +79,8 @@ export default function SplitPdfPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+        (pdfjsLib.GlobalWorkerOptions as any).workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {
@@ -91,18 +92,15 @@ export default function SplitPdfPage() {
         });
     }
 
-    const handleFileChange = (files: File[] | null) => {
-        if (files && files.length > 0) {
-            const selectedFile = files[0];
-            if (selectedFile.type === 'application/pdf') {
-                setFile(selectedFile);
-            } else {
-                toast({ 
-                    title: "Invalid file type", 
-                    description: "Only PDF files are accepted. Please select a PDF file.", 
-                    variant: "destructive" 
-                });
-            }
+    const handleFileChange = (file: File) => {
+        if (file.type === 'application/pdf') {
+            setFile(file);
+        } else {
+            toast({ 
+                title: "Invalid file type", 
+                description: "Only PDF files are accepted. Please select a PDF file.", 
+                variant: "destructive" 
+            });
         }
     };
     
@@ -237,7 +235,10 @@ export default function SplitPdfPage() {
                           type="file"
                           className="hidden"
                           accept="application/pdf"
-                          onChange={(e) => handleFileChange(e.target.files ? Array.from(e.target.files) : null)}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleFileChange(f);
+                          }}
                         />
                     </Card>
                     {file && (

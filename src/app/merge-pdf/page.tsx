@@ -67,24 +67,17 @@ export default function MergePdfPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (files: File[] | null) => {
-    if (files) {
-      const pdfFiles = files.filter(file => file.type === 'application/pdf');
-      
-      if (pdfFiles.length !== files.length) {
-        toast({
-          title: "Invalid file type",
-          description: "Only PDF files are accepted. Please select PDF files only.",
-          variant: "destructive"
-        });
-      }
-      
-      const newFiles = pdfFiles.map(file => ({
-        file,
-        name: file.name,
-      }));
-      setFiles(prevFiles => [...prevFiles, ...newFiles]);
+  const handleFileChange = (file: File) => {
+    if (file.type !== 'application/pdf') {
+      toast({
+        title: "Invalid file type",
+        description: "Only PDF files are accepted. Please select PDF files only.",
+        variant: "destructive"
+      });
+      return;
     }
+    const newItem = { file, name: file.name };
+    setFiles(prevFiles => [...prevFiles, newItem]);
   };
 
   const handleRemoveFile = (indexToRemove: number) => {

@@ -22,7 +22,8 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Input } from '@/components/ui/input';
 
 
-pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 const languages = [
     { value: 'eng', label: 'English' },
@@ -66,8 +67,7 @@ export default function ExtractDataToExcelPage() {
   }, [columns, activeColumnId]);
   
 
-  const handleFileChange = (selectedFile: File | null) => {
-    if (!selectedFile) return;
+  const handleFileChange = (selectedFile: File) => {
     
     if (selectedFile.type === 'application/pdf') {
       setFile(selectedFile);
@@ -351,8 +351,8 @@ export default function ExtractDataToExcelPage() {
             {!file ? (
               <ModernUploadArea
                 onFileSelect={handleFileChange}
-                acceptedTypes="application/pdf"
-                maxSize="50MB"
+                accept="application/pdf"
+                maxSize={50 * 1024 * 1024}
                 icon={<UploadCloud className="w-12 h-12" />}
                 title="Drop your PDF here or click to browse"
                 subtitle="Supports PDF files up to 50MB"

@@ -148,7 +148,7 @@ export default function PdfToJpgPage() {
     setResult(null);
     try {
       const fileBuffer = await file.arrayBuffer();
-      pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '';
       const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
       const imageUris: string[] = [];
 
@@ -214,9 +214,13 @@ export default function PdfToJpgPage() {
     setIsConverting(true);
     setResult(null);
     try {
-      const buf = await file.arrayBuffer();
-      const base64 = Buffer.from(buf).toString('base64');
-      const pdfUri = `data:application/pdf;base64,${base64}`;
+      // Use FileReader to avoid Node Buffer in the browser
+      const pdfUri = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       const out = await pdfToPng({ pdfUri });
       if (out.error) throw new Error(out.error);
       if (!out.imageUris || out.imageUris.length === 0) throw new Error('No images returned');
@@ -231,7 +235,7 @@ export default function PdfToJpgPage() {
   };
 
   return (
-    <ModernPageLayout>
+    <ModernPageLayout title="PDF to JPG Converter" description="Convert PDF documents to high-quality JPG images with AI-powered precision.">
       <ModernSection
         title="PDF to JPG Converter"
         subtitle="Transform your PDF documents into high-quality JPG images with AI-powered precision"

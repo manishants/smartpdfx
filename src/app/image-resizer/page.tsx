@@ -73,25 +73,23 @@ export default function ImageResizerPage() {
 
   const { toast } = useToast();
 
-  const handleFileChange = (file: File | null) => {
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        const preview = URL.createObjectURL(file);
-        const img = document.createElement('img');
-        img.onload = () => {
-            setFile({ file: file, preview, width: img.width, height: img.height });
-            setWidth(Math.round(img.width / 2));
-            setHeight(Math.round(img.height / 2));
-        }
-        img.src = preview;
-        setResult(null);
-      } else {
-        toast({ 
-          title: "Invalid file type", 
-          description: "Please select an image file (JPG, PNG, GIF, WEBP).", 
-          variant: "destructive" 
-        });
+  const handleFileChange = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      const preview = URL.createObjectURL(file);
+      const img = document.createElement('img');
+      img.onload = () => {
+          setFile({ file: file, preview, width: img.width, height: img.height });
+          setWidth(Math.round(img.width / 2));
+          setHeight(Math.round(img.height / 2));
       }
+      img.src = preview;
+      setResult(null);
+    } else {
+      toast({ 
+        title: "Invalid file type", 
+        description: "Please select an image file (JPG, PNG, GIF, WEBP).", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -195,7 +193,7 @@ export default function ImageResizerPage() {
           {!file && (
             <ModernUploadArea
               onFileSelect={handleFileChange}
-              acceptedTypes={["image/*"]}
+              accept="image/*"
               maxSize={50 * 1024 * 1024} // 50MB
               title="Drop your image here"
               subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"
