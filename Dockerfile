@@ -40,6 +40,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED=1
+ # Explicit path for LibreOffice binary to ensure discovery in app code
+ ENV LIBREOFFICE_PATH=/usr/bin/soffice
 
 # Install LibreOffice in production image
 RUN apt-get update && apt-get install -y \
