@@ -73,6 +73,14 @@ RUN apt-get update && apt-get install -y \
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Ensure writable home and XDG dirs for LibreOffice/dconf
+ENV HOME=/home/nextjs
+ENV XDG_CONFIG_HOME=/home/nextjs/.config
+ENV XDG_CACHE_HOME=/home/nextjs/.cache
+ENV XDG_RUNTIME_DIR=/tmp/xdg
+RUN mkdir -p /home/nextjs/.config /home/nextjs/.cache /tmp/xdg \
+    && chown -R nextjs:nodejs /home/nextjs /tmp/xdg
+
 COPY --from=builder /app/public ./public
 
 # Set the correct permission for prerender cache
