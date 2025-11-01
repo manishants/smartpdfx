@@ -87,20 +87,29 @@ export default function EditPdfPage() {
                 language: ocrLanguage,
             } as any);
 
+            const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(v, max));
             const aiTextItems: EditableItem[] = (aiResult.elements || [])
-                .filter((el: any) => el.text && el.box)
-                .map((el: any, idx: number) => ({
-                    id: `ai-ocr-text-${Date.now()}-${idx}`,
-                    type: 'text' as const,
-                    pageIndex: currentPageIndex,
-                    x: el.box.x,
-                    y: el.box.y,
-                    width: el.box.width,
-                    height: el.box.height,
-                    content: el.text,
-                    fontSize: Math.max(12, el.box.height),
-                    rotation: 0,
-                }));
+                .filter((el: any) => el.type === 'text' && el.text && el.box)
+                .map((el: any, idx: number) => {
+                    const x = clamp(el.box.x, 0, renderedPage.width);
+                    const y = clamp(el.box.y, 0, renderedPage.height);
+                    const width = clamp(el.box.width, 8, renderedPage.width - x);
+                    const height = clamp(el.box.height, 12, renderedPage.height - y);
+                    // Use a conservative font size to avoid giant letters overlaying the page.
+                    const fontSize = Math.max(12, Math.min(Math.floor(height * 0.35), 22));
+                    return {
+                        id: `ai-ocr-text-${Date.now()}-${idx}`,
+                        type: 'text' as const,
+                        pageIndex: currentPageIndex,
+                        x,
+                        y,
+                        width,
+                        height,
+                        content: el.text,
+                        fontSize,
+                        rotation: 0,
+                    };
+                });
 
             if (aiTextItems.length > 0) {
                 setEditableItems(prev => [...prev, ...aiTextItems]);
@@ -178,20 +187,28 @@ export default function EditPdfPage() {
                     language: ocrLanguage,
                 } as any);
 
+                const clamp2 = (v: number, min: number, max: number) => Math.max(min, Math.min(v, max));
                 const aiTextItems: EditableItem[] = (aiResult.elements || [])
-                    .filter((el: any) => el.text && el.box)
-                    .map((el: any, idx: number) => ({
-                        id: `ai-ocr-text-${Date.now()}-${idx}`,
-                        type: 'text' as const,
-                        pageIndex: currentPageIndex,
-                        x: el.box.x,
-                        y: el.box.y,
-                        width: el.box.width,
-                        height: el.box.height,
-                        content: el.text,
-                        fontSize: Math.max(12, el.box.height),
-                        rotation: 0,
-                    }));
+                    .filter((el: any) => el.type === 'text' && el.text && el.box)
+                    .map((el: any, idx: number) => {
+                        const x = clamp2(el.box.x, 0, renderedPage.width);
+                        const y = clamp2(el.box.y, 0, renderedPage.height);
+                        const width = clamp2(el.box.width, 8, renderedPage.width - x);
+                        const height = clamp2(el.box.height, 12, renderedPage.height - y);
+                        const fontSize = Math.max(12, Math.min(Math.floor(height * 0.35), 22));
+                        return {
+                            id: `ai-ocr-text-${Date.now()}-${idx}`,
+                            type: 'text' as const,
+                            pageIndex: currentPageIndex,
+                            x,
+                            y,
+                            width,
+                            height,
+                            content: el.text,
+                            fontSize,
+                            rotation: 0,
+                        };
+                    });
 
                 if (aiTextItems.length > 0) {
                     setEditableItems(prev => [...prev, ...aiTextItems]);
@@ -674,7 +691,18 @@ export default function EditPdfPage() {
                                     >
                                        <div className="w-full h-full" style={{ transform: `rotate(${item.rotation || 0}deg)`}}>
                                             {item.type === 'text' ? (
-                                                <Textarea defaultValue={item.content} onBlur={(e) => updateItem(item.id, {content: e.target.value})} className="w-full h-full cursor-move p-0 border-none resize-none bg-transparent focus-visible:ring-0" style={{fontSize: item.fontSize, color: 'black'}}/>
+                                                <Textarea
+                                                    defaultValue={item.content}
+                                                    onBlur={(e) => updateItem(item.id, { content: e.target.value })}
+                                                    className="w-full h-full cursor-move p-0 border-none resize-none bg-transparent focus-visible:ring-0"
+                                                    style={{
+                                                        fontSize: item.fontSize,
+                                                        lineHeight: 1.2,
+                                                        color: activeItemId === item.id ? 'black' : 'transparent',
+                                                        overflow: 'hidden',
+                                                        whiteSpace: 'pre-wrap',
+                                                    }}
+                                                />
                                             ) : item.type === 'image' ? (
                                                 <Image src={item.content} alt="Editable image" layout="fill" className="w-full h-full cursor-move object-contain"/>
                                             ) : item.type === 'rectangle' || item.type === 'cover' ? (

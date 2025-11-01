@@ -37,7 +37,10 @@ const findPdfElementsPrompt = ai.definePrompt({
       box: BoundingBoxSchema.optional(),
       text: z.string().describe("The OCR-detected text content.").optional(),
   })) },
-  prompt: `You are an expert OCR system. Analyze the provided image of a document page in the specified language: {{{language}}}. Identify all text blocks. For each text block, provide its bounding box (x, y, width, height) and the exact text content. The origin (0,0) is the top-left corner of the page.
+  prompt: `You are an expert OCR system. Analyze the provided image of a document page in the specified language: {{{language}}}.
+  Return ONLY text regions; do NOT include the page background or any images.
+  Prefer small, accurate boxes per line of text (not full page). For each text region, provide its bounding box (x, y, width, height) and the exact text.
+  The origin (0,0) is the top-left corner of the page.
   
   Image: {{media url=imageUri}}`,
 });
@@ -75,9 +78,8 @@ export async function findPdfElements(
     const pageImageElement = {
         type: 'image' as const,
         pageIndex: 0,
-        box: {x: 0, y: 0, width: pageWidth, height: pageHeight },
-        content: imageUri.split(',')[1], // Just the base64 data
-        text: 'Page Background'
+        box: { x: 0, y: 0, width: pageWidth, height: pageHeight },
+        content: imageUri.split(',')[1], // Base64 image only; no text label
     }
 
     return {
