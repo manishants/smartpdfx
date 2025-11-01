@@ -15,7 +15,9 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {
   file: File;
@@ -58,6 +60,7 @@ const ToolDescription = () => (
     </ModernSection>
 );
 export default function CompressImagePage() {
+    const { sections } = useToolSections('Image Compression');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [result, setResult] = useState<CompressImageOutput | null>(null);
@@ -173,27 +176,31 @@ export default function CompressImagePage() {
   return (
     <ModernPageLayout
       title="AI Image Compressor"
-      subtitle="Reduce image file sizes by up to 90% with intelligent compression"
+      description="Reduce image sizes dramatically while preserving visual quality with AI-powered optimization."
       icon={<ImageIcon className="h-8 w-8" />}
+      badge="AI-Powered"
+      backgroundVariant="home"
     >
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="space-y-8">
         <ModernSection 
           title="Upload & Compress" 
           subtitle="Upload your image and let our AI optimize it for you"
           icon={<Zap className="h-6 w-6" />}
         >
-          {!file && (
-            <ModernUploadArea
-              onFileSelect={handleFileChange}
-              accept="image/*"
-              maxSize={50 * 1024 * 1024} // 50MB
-              title="Drop your image here"
-              subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"
-              icon={<ImageIcon className="h-12 w-12" />}
-            />
-          )}
-          {file && !result && (
-            <div className="flex flex-col items-center gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              {!file && (
+                <ModernUploadArea
+                  onFileSelect={handleFileChange}
+                  accept="image/*"
+                  maxSize={50 * 1024 * 1024} // 50MB
+                  title="Drop your image here"
+                  subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"
+                  icon={<ImageIcon className="h-12 w-12" />}
+                />
+              )}
+              {file && !result && (
+                <div className="flex flex-col items-center gap-6">
               <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
                 <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
               </div>
@@ -280,12 +287,30 @@ export default function CompressImagePage() {
               </div>
             </div>
           )}
+            </div>
+            <div className="lg:col-span-1">
+              <AIPoweredFeatures 
+                features={[
+                  "Smart lossy compression",
+                  "Preserves visual quality",
+                  "Supports JPG/PNG/GIF/WEBP",
+                  "Optimized for web performance"
+                ]}
+              />
+            </div>
+          </div>
         </ModernSection>
+
+        <div className="mt-8">
+          <ProTip 
+            tip="For best results, use high-quality source images. Our AI balances size reduction and clarity automatically."
+          />
+        </div>
         
-        <ToolSections 
-          toolName="Image Compression" 
-          sections={getCustomToolSections("Image Compression")} 
-        />
+      <ToolSections 
+        toolName="Image Compression" 
+        sections={sections} 
+      />
         
         <ToolDescription />
         <AllTools />

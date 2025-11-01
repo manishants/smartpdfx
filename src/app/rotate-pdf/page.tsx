@@ -18,7 +18,7 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 type Stage = 'upload' | 'rotate' | 'download';
 
@@ -51,6 +51,7 @@ const FAQ = () => (
         subtitle="Frequently asked questions about our intelligent PDF rotation tool"
         icon={<RotateCw className="h-6 w-6" />}
         className="mt-12"
+        contentClassName="max-w-4xl mx-auto"
     >
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
@@ -105,7 +106,7 @@ export default function RotatePdfPage() {
     
     useEffect(() => {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {
@@ -258,6 +259,7 @@ export default function RotatePdfPage() {
             title="AI PDF Rotator"
             description="Rotate PDF pages with precision using intelligent AI-powered orientation detection"
             icon={<RotateCw className="w-8 h-8" />}
+            backgroundVariant="home"
         >
             <ModernSection>
                 <div className="max-w-6xl mx-auto space-y-8">
@@ -516,7 +518,7 @@ export default function RotatePdfPage() {
 
             <ToolSections 
                 toolName="PDF Rotation" 
-                sections={getCustomToolSections("PDF Rotation")} 
+                sections={sections} 
             />
 
             <FAQ />
@@ -524,3 +526,4 @@ export default function RotatePdfPage() {
         </ModernPageLayout>
     );
 }
+    const { sections } = useToolSections('PDF Rotation');

@@ -55,7 +55,7 @@ const ToolCard = ({
   iconColor = "text-blue-600" 
 }: ToolCardProps) => {
   return (
-    <Link href={href} className="block">
+    <Link href={href} className="block" prefetch={false}>
       <div className="bg-white rounded-xl border border-gray-200 p-5 h-full transition-all hover:shadow-md hover:-translate-y-1">
         <div className={`${bgColor} ${iconColor} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
           <Icon className="h-6 w-6" />

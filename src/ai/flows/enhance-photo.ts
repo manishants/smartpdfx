@@ -34,9 +34,10 @@ const enhancePhotoFlow = ai.defineFlow(
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
       prompt: [
         {
-          text: 'Enhance this photo. Improve its resolution, clarity, lighting, and color balance to make it look like a professional, high-quality photograph. Do not change the content of the image.',
+          text:
+            'Enhance this photo. Improve resolution, clarity, lighting, and color balance to make it look professional. Preserve original framing and composition; do not crop, zoom, or change the aspect ratio. Keep output dimensions the same as the input. Do not add or remove content.',
         },
-        {media: {url: photoUri}},
+        { media: { url: photoUri } },
       ],
       config: {
         responseModalities: ['TEXT', 'IMAGE'],

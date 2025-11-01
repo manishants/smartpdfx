@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import Tesseract from 'tesseract.js';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 type Stage = 'upload' | 'edit' | 'download';
 type EditMode = 'select' | 'text' | 'image' | 'rectangle' | 'drawing' | 'highlight';
@@ -49,6 +49,7 @@ interface EditableItem {
 }
 
 export default function EditPdfPage() {
+  const { sections } = useToolSections('PDF Editor');
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +68,7 @@ export default function EditPdfPage() {
     
     useEffect(() => {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
     }, []);
 
     // OCR functionality
@@ -782,7 +783,7 @@ export default function EditPdfPage() {
             {stage === 'upload' && (
                 <ToolSections
                     toolName="PDF Editor"
-                    sections={getCustomToolSections("PDF Editor")}
+        sections={sections}
                 />
             )}
         </div>

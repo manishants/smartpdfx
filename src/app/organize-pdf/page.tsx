@@ -106,7 +106,7 @@ export default function OrganizePdfPage() {
     
     useEffect(() => {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {

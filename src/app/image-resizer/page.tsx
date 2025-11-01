@@ -17,8 +17,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,27 +37,18 @@ const FAQ = () => (
         subtitle="Everything you need to know about image resizing"
         icon={<Sparkles className="h-6 w-6" />}
         className="mt-12"
+        contentClassName="max-w-4xl mx-auto"
     >
         <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1" className="border border-primary/10 rounded-lg mb-4 px-4">
-                <AccordionTrigger className="hover:text-primary">
-                    <div className="flex items-center gap-2">
-                        <Maximize2 className="h-4 w-4 text-primary" />
-                        Will resizing my image distort it?
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pt-2">
+            <AccordionItem value="item-1">
+                <AccordionTrigger>Will resizing my image distort it?</AccordionTrigger>
+                <AccordionContent>
                     Our AI-powered tool maintains the original aspect ratio by default. When you enter a new width, the height will be adjusted automatically to prevent stretching or squashing the image. If you enter both width and height, the image will be resized to fit within those dimensions without being enlarged.
                 </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-2" className="border border-primary/10 rounded-lg mb-4 px-4">
-                <AccordionTrigger className="hover:text-primary">
-                    <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-primary" />
-                        Does resizing the image also compress it?
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pt-2">
+            <AccordionItem value="item-2">
+                <AccordionTrigger>Does resizing the image also compress it?</AccordionTrigger>
+                <AccordionContent>
                     Yes, making an image smaller in dimensions (e.g., from 4000x3000 pixels to 800x600 pixels) will naturally reduce its file size because there is less pixel data to store. However, this tool does not apply additional compression like our dedicated Image Compressor tool.
                 </AccordionContent>
             </AccordionItem>
@@ -64,6 +57,7 @@ const FAQ = () => (
 );
 
 export default function ImageResizerPage() {
+  const { sections } = useToolSections('Image Resizing');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [result, setResult] = useState<ResizeImageOutput | null>(null);
@@ -181,33 +175,36 @@ export default function ImageResizerPage() {
   return (
     <ModernPageLayout
       title="AI Image Resizer"
-      subtitle="Resize images by dimensions or percentage with intelligent aspect ratio preservation"
+      description="Resize images by dimensions or percentage with intelligent aspect ratio preservation"
       icon={<Maximize2 className="h-8 w-8" />}
+      backgroundVariant="home"
     >
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="space-y-8">
         <ModernSection 
           title="Upload & Resize" 
           subtitle="Upload your image and choose your preferred resizing method"
           icon={<Zap className="h-6 w-6" />}
         >
-          {!file && (
-            <ModernUploadArea
-              onFileSelect={handleFileChange}
-              accept="image/*"
-              maxSize={50 * 1024 * 1024} // 50MB
-              title="Drop your image here"
-              subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"
-              icon={<ImageIcon className="h-12 w-12" />}
-            />
-          )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              {!file && (
+                <ModernUploadArea
+                  onFileSelect={handleFileChange}
+                  accept="image/*"
+                  maxSize={50 * 1024 * 1024} // 50MB
+                  title="Drop your image here"
+                  subtitle="Supports JPG, PNG, GIF, WEBP up to 50MB"
+                  icon={<ImageIcon className="h-12 w-12" />}
+                />
+              )}
 
-          {file && !result && (
-            <div className="flex flex-col items-center gap-6">
-              <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
-                <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
-              </div>
-              <div className="text-center space-y-2">
-                <p className="text-sm text-muted-foreground">
+              {file && !result && (
+                <div className="flex flex-col items-center gap-6">
+                  <div className="relative w-full max-w-md border rounded-lg overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 to-secondary/5">
+                    <Image src={file.preview} alt="Original preview" width={600} height={400} className="w-full h-auto object-contain" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="text-sm text-muted-foreground">
                   Original dimensions: <span className="font-semibold text-foreground">{file.width} x {file.height}</span> pixels
                 </p>
               </div>
@@ -340,12 +337,28 @@ export default function ImageResizerPage() {
               </div>
             </div>
           )}
+            </div>
+            <div className="lg:col-span-1">
+              <AIPoweredFeatures 
+                features={[
+                  "Maintains aspect ratio automatically",
+                  "Supports pixel and percentage modes",
+                  "Optimizes for clarity at target size",
+                  "Fast, AI-assisted resizing"
+                ]}
+              />
+            </div>
+          </div>
         </ModernSection>
 
-        <ToolSections 
-          toolName="Image Resizing" 
-          sections={getCustomToolSections("Image Resizing")} 
-        />
+        <div className="mt-8">
+          <ProTip tip="Use pixel mode for precise dimensions; percentage for quick scaling." />
+        </div>
+
+      <ToolSections 
+        toolName="Image Resizing" 
+        sections={sections} 
+      />
 
         <FAQ />
         <AllTools />

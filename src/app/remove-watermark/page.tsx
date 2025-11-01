@@ -10,11 +10,12 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { AllTools } from '@/components/all-tools';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 type Stage = 'upload' | 'processing' | 'result';
 
 export default function RemoveWatermarkPage() {
+    const { sections } = useToolSections('Watermark Removal');
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -241,7 +242,7 @@ export default function RemoveWatermarkPage() {
             <AllTools />
             <ToolSections
                 toolName="Watermark Removal"
-                sections={getCustomToolSections("Watermark Removal")}
+                sections={sections}
             />
         </ModernPageLayout>
     );

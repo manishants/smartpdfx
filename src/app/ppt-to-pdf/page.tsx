@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -56,6 +56,7 @@ const FAQ = () => (
 
 
 export default function PptToPdfPage() {
+  const { sections } = useToolSections('PowerPoint to PDF');
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<{ pdfUri: string } | null>(null);
@@ -171,7 +172,7 @@ export default function PptToPdfPage() {
       <FAQ />
       <ToolSections
         toolName="PowerPoint to PDF"
-        sections={getCustomToolSections("PowerPoint to PDF")}
+        sections={sections}
       />
     </main>
     <AllTools />

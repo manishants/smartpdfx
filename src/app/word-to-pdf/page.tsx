@@ -20,7 +20,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
 interface ConversionResult {
@@ -94,6 +94,7 @@ const ToolDescription = () => (
   </ModernSection>
 );
 export default function WordToPdfPage() {
+  const { sections } = useToolSections('Word to PDF');
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
@@ -335,7 +336,7 @@ export default function WordToPdfPage() {
 
         <ToolDescription />
 
-        <ToolSections toolName="Word to PDF" sections={getCustomToolSections('Word to PDF')} />
+  <ToolSections toolName="Word to PDF" sections={sections} />
       </div>
     </ModernPageLayout>
   );

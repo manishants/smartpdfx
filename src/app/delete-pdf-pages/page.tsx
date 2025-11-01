@@ -42,7 +42,7 @@ const ToolDescription = () => (
 );
 
 const FAQ = () => (
-    <div className="mt-12">
+    <div className="mt-12 max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold text-center mb-6">Frequently Asked Questions</h2>
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">

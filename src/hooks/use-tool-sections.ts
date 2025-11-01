@@ -15,6 +15,7 @@ interface ToolSection {
     icon: any;
     text: string;
   };
+  imageUrl?: string;
   gradient?: string;
   iconColor?: string;
 }
@@ -87,6 +88,7 @@ const convertCMSSection = (cmsSection: any): ToolSection => {
         icon: getIcon(cmsSection.content.imagePlaceholder?.icon),
         text: cmsSection.content.imagePlaceholder?.text || 'Preview'
       },
+      imageUrl: cmsSection.content.imageUrl || undefined,
       gradient: cmsSection.content.gradient || 'bg-gradient-to-br from-blue-500/10 to-blue-500/5',
       iconColor: cmsSection.content.iconColor || 'text-blue-500'
     };

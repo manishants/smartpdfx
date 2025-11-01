@@ -20,7 +20,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
 
@@ -37,6 +37,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Split className="h-6 w-6" />}
     className="mt-12"
+    contentClassName="max-w-4xl mx-auto"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -69,6 +70,7 @@ const FAQ = () => (
 
 
 export default function SplitPdfPage() {
+  const { sections } = useToolSections('PDF Splitting');
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +82,7 @@ export default function SplitPdfPage() {
     
     useEffect(() => {
         (pdfjsLib.GlobalWorkerOptions as any).workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
     }, []);
 
     const arrayBufferFromFile = (file: File): Promise<ArrayBuffer> => {
@@ -635,7 +637,7 @@ export default function SplitPdfPage() {
 
             <ToolSections 
                 toolName="PDF Splitting" 
-                sections={getCustomToolSections("PDF Splitting")} 
+                sections={sections} 
             />
 
             <FAQ />

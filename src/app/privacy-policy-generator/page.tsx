@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 const FAQ = () => (
     <div className="mt-12">
@@ -35,6 +35,7 @@ const FAQ = () => (
 );
 
 export default function PrivacyPolicyGeneratorPage() {
+  const { sections } = useToolSections('Privacy Policy Generation');
   const [companyName, setCompanyName] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -155,10 +156,10 @@ If you have any questions about this Privacy Policy, You can contact us:
             </Card>
         )}
         
-        <ToolSections 
-          toolName="Privacy Policy Generation" 
-          sections={getCustomToolSections("Privacy Policy Generation")} 
-        />
+      <ToolSections 
+        toolName="Privacy Policy Generation" 
+        sections={sections} 
+      />
         
         <FAQ />
       </div>

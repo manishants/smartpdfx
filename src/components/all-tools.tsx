@@ -61,7 +61,7 @@ export function AllTools() {
 
         <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tools.map((tool, index) => (
-            <Link href={tool.href} key={tool.title} className="group">
+            <Link href={tool.href} key={tool.title} className="group" prefetch={false}>
               <Card className="relative h-full overflow-hidden bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm border border-white/10 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 cursor-pointer group-hover:scale-[1.02]">
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

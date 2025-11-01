@@ -111,6 +111,7 @@ export interface ToolSection {
   description: string;
   features?: { icon: string; text: string }[];
   imagePlaceholder?: { icon: string; text: string };
+  imageUrl?: string;
   gradient?: string;
   iconColor?: string;
   order: number;

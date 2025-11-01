@@ -12,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -32,7 +32,7 @@ const ToolDescription = () => (
 
 
 const FAQ = () => (
-  <div className="mt-12">
+  <div className="mt-12 max-w-4xl mx-auto">
     <Card className="border-2 border-purple-200/50 bg-gradient-to-br from-purple-50/30 to-pink-50/20">
       <CardContent className="p-8">
         <div className="flex items-center justify-center gap-3 mb-8">
@@ -109,6 +109,7 @@ const FAQ = () => (
 );
 
 export default function CaseConverterPage() {
+  const { sections } = useToolSections('Text Case Conversion');
   const [text, setText] = useState('');
   const [hasCopied, setHasCopied] = useState(false);
   const { toast } = useToast();
@@ -264,10 +265,10 @@ export default function CaseConverterPage() {
             </CardContent>
           </Card>
           
-          <ToolSections 
-            toolName="Text Case Conversion" 
-            sections={getCustomToolSections("Text Case Conversion")} 
-          />
+      <ToolSections 
+        toolName="Text Case Conversion" 
+        sections={sections} 
+      />
           
           <ToolDescription />
           <FAQ />

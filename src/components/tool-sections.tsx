@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { LucideIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface HeroSectionProps {
   title: string;
@@ -14,6 +15,7 @@ interface HeroSectionProps {
     icon: LucideIcon;
     text: string;
   };
+  imageUrl?: string;
   gradient: string;
   iconColor: string;
   reverse?: boolean;
@@ -30,6 +32,7 @@ export const HeroSection = ({
   description, 
   features, 
   imagePlaceholder, 
+  imageUrl,
   gradient, 
   iconColor, 
   reverse = false 
@@ -60,10 +63,16 @@ export const HeroSection = ({
             </div>
           </div>
           <div className={`${gradient} rounded-2xl p-8 flex items-center justify-center min-h-[300px] ${reverse ? 'order-2 lg:order-1' : ''}`}>
-            <div className="text-center text-muted-foreground">
-              <ImagePlaceholder className="h-24 w-24 mx-auto mb-4 opacity-50" />
-              <p>{imagePlaceholder.text}</p>
-            </div>
+            {imageUrl ? (
+              <div className="relative w-full h-[280px] max-w-md overflow-hidden rounded-xl border border-border bg-card">
+                <Image src={imageUrl} alt={title} fill className="object-contain" />
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <ImagePlaceholder className="h-24 w-24 mx-auto mb-4 opacity-50" />
+                <p>{imagePlaceholder.text}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -93,7 +102,7 @@ export const ContentSection = ({
 interface ToolSectionsProps {
   toolName: string;
   sections: Array<{
-    type: 'hero' | 'content';
+    type: 'hero' | 'hero';
     title: string;
     description: string;
     features?: Array<{
@@ -104,6 +113,7 @@ interface ToolSectionsProps {
       icon: LucideIcon;
       text: string;
     };
+    imageUrl?: string;
     gradient?: string;
     iconColor?: string;
   }>;
@@ -121,7 +131,7 @@ export const ToolSections = ({ toolName, sections }: ToolSectionsProps) => {
               description={section.description}
               features={section.features || []}
               imagePlaceholder={section.imagePlaceholder || { icon: () => null, text: '' }}
-              gradient={section.gradient || 'bg-gradient-to-br from-primary/10 to-primary/5'}
+              gradient={section.gradient || 'bg-card border border-border dark:bg-gradient-to-br dark:from-primary/10 dark:to-primary/5'}
               iconColor={section.iconColor || 'text-primary'}
               reverse={index % 4 === 2} // Alternate hero sections (every 2nd hero section is reversed)
             />

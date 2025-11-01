@@ -50,6 +50,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cmsStore } from '@/lib/cms/store';
 import { ToolSection, HomePageSection, SectionStats } from '@/types/cms';
+import Link from 'next/link';
 
 export default function SectionsManagement() {
   const [toolSections, setToolSections] = useState<ToolSection[]>([]);
@@ -505,6 +506,11 @@ export default function SectionsManagement() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/superadmin/sections/edit/${section.id}?type=tool`}>
+                              <Settings className="h-4 w-4" />
+                            </Link>
+                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -566,6 +572,11 @@ export default function SectionsManagement() {
                             onClick={() => startEdit(section)}
                           >
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/superadmin/sections/edit/${section.id}?type=home`}>
+                              <Settings className="h-4 w-4" />
+                            </Link>
                           </Button>
                           <Button
                             variant="ghost"

@@ -13,7 +13,7 @@ import type { GenerateFaviconInput, GenerateFaviconOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 interface UploadedFile {
   file: File;
@@ -47,6 +47,7 @@ const FAQ = () => (
 );
 
 export default function FaviconGeneratorPage() {
+  const { sections } = useToolSections('Favicon Generation');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<GenerateFaviconOutput | null>(null);
@@ -199,7 +200,7 @@ export default function FaviconGeneratorPage() {
       
       <ToolSections 
         toolName="Favicon Generation" 
-        sections={getCustomToolSections("Favicon Generation")} 
+        sections={sections} 
       />
       
       <FAQ />

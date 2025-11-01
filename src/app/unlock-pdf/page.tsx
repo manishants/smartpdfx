@@ -16,7 +16,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +31,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Shield className="h-6 w-6" />}
     className="mt-12"
+    contentClassName="max-w-4xl mx-auto"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -63,6 +64,7 @@ const FAQ = () => (
 
 
 export default function UnlockPdfPage() {
+  const { sections } = useToolSections('PDF Unlock');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -319,9 +321,9 @@ export default function UnlockPdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections 
-        toolName="PDF Unlock" 
-        sections={getCustomToolSections("PDF Unlock")} 
+      <ToolSections
+        toolName="PDF Unlock"
+        sections={sections}
       />
 
       <FAQ />

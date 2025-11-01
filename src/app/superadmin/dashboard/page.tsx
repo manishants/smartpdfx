@@ -227,6 +227,9 @@ export default function SuperadminDashboard() {
             <Button variant="outline" asChild className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-all duration-200">
               <Link href="/superadmin/pages/seo">Page SEO Settings</Link>
             </Button>
+            <Button variant="outline" asChild className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-all duration-200">
+              <Link href="/superadmin/pages/tools">Edit Tool Pages</Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -252,27 +255,7 @@ export default function SuperadminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="group hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-0 shadow-lg bg-gradient-to-br from-violet-50 to-violet-100">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-3 text-violet-800 group-hover:text-violet-900 transition-colors">
-              <div className="p-2 bg-violet-600 rounded-lg group-hover:bg-violet-700 transition-colors duration-200">
-                <BarChart3 className="h-5 w-5 text-white" />
-              </div>
-              Sections Manager
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button asChild className="w-full bg-violet-600 hover:bg-violet-700 shadow-md hover:shadow-lg transition-all duration-200">
-              <Link href="/superadmin/sections">Manage Sections</Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full border-violet-600 text-violet-700 hover:bg-violet-50 transition-all duration-200">
-              <Link href="/superadmin/sections?tab=tool-sections">Tool Sections</Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full border-violet-600 text-violet-700 hover:bg-violet-50 transition-all duration-200">
-              <Link href="/superadmin/sections?tab=home-sections">Home Sections</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Sections Manager removed as requested */}
       </div>
 
       {/* Recent Activity */}

@@ -93,6 +93,7 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
                                     <Link
                                         key={tool.title}
                                         href={tool.href}
+                                        prefetch={false}
                                         onClick={() => handleToolSelect(tool)}
                                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                                     >
@@ -148,6 +149,7 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
                                         <Link
                                             key={tool.title}
                                             href={tool.href}
+                                            prefetch={false}
                                             onClick={() => handleToolSelect(tool)}
                                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
                                         >

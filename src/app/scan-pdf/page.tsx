@@ -12,13 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist';
 import { convertImagesToPdf } from '@/lib/actions/convert-images-to-pdf';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 import { AllTools } from '@/components/all-tools';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function ScanPdfPage() {
+  const { sections } = useToolSections('PDF to Scanned PDF');
   const [file, setFile] = useState<File | null>(null);
   const [resultUri, setResultUri] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -141,7 +142,7 @@ export default function ScanPdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections toolName="PDF to Scanned PDF" sections={getCustomToolSections('PDF to Scanned PDF')} />
+  <ToolSections toolName="PDF to Scanned PDF" sections={sections} />
 
       <ModernSection
         title="Frequently Asked Questions"

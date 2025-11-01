@@ -27,6 +27,16 @@ export default function VoterListExtractorPage() {
   const [result, setResult] = useState<ExtractVotersOutput | null>(null);
   const { toast } = useToast();
 
+  const isAbortError = (error: any) => {
+    const msg = String(error?.message || '');
+    return (
+      error?.name === 'AbortError' ||
+      msg.includes('AbortError') ||
+      msg.includes('ERR_ABORTED') ||
+      msg.toLowerCase().includes('aborted')
+    );
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
@@ -67,12 +77,14 @@ export default function VoterListExtractorPage() {
         throw new Error("Analysis process returned no data.");
       }
     } catch (error: any) {
-      console.error("Analysis failed:", error);
-      toast({
-        title: "An Error Occurred",
-        description: error.message || "Something went wrong while analyzing the file.",
-        variant: "destructive"
-      });
+      if (!isAbortError(error)) {
+        console.error("Analysis failed:", error);
+        toast({
+          title: "An Error Occurred",
+          description: error.message || "Something went wrong while analyzing the file.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsAnalyzing(false);
     }

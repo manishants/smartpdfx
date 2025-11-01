@@ -27,7 +27,7 @@ interface ConversionResult {
 
 
 const FAQ = () => (
-  <div className="mt-12">
+  <div className="mt-12 max-w-4xl mx-auto">
     <Card className="backdrop-blur-sm bg-background/80 border-border/50">
       <CardHeader>
         <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">

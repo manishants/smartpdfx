@@ -15,7 +15,9 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,53 +26,47 @@ interface UploadedFile {
   preview: string;
 }
 
+// Abort-aware error detection to suppress noisy logs when requests are canceled
+const isAbortError = (error: unknown) => {
+  if (!error) return false;
+  const msg = typeof error === 'string' ? error : (error as any)?.message || (error as any)?.toString?.() || '';
+  return (
+    msg.includes('AbortError') ||
+    msg.includes('The user aborted') ||
+    msg.includes('ERR_ABORTED') ||
+    msg.includes('DOMException: The operation was aborted')
+  );
+};
+
 const FAQ = () => (
-  <div className="relative">
-    {/* AI Background Elements */}
-    <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-pink-50/20 to-blue-50/30 rounded-2xl" />
-    <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-xl" />
-    <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-lg" />
-    
-    <div className="relative p-8">
-      <div className="flex items-center justify-center gap-3 mb-8">
-        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-          <Camera className="w-6 h-6 text-white" />
-        </div>
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-          Frequently Asked Questions
-        </h2>
-      </div>
-      
-      <Accordion type="single" collapsible className="w-full space-y-4">
-        <AccordionItem value="item-1" className="border border-purple-200/50 rounded-xl bg-white/50 backdrop-blur-sm px-6">
-          <AccordionTrigger className="text-lg font-semibold hover:text-purple-600 transition-colors">
-            How does the AI Photo Enhancer work?
-          </AccordionTrigger>
-          <AccordionContent className="text-gray-700 leading-relaxed">
-            Our advanced AI model analyzes your photo and intelligently enhances quality by improving resolution, clarity, lighting, and color balance. It uses state-of-the-art generative technology to create a superior, high-quality version of your image.
-          </AccordionContent>
-        </AccordionItem>
-        
-        <AccordionItem value="item-2" className="border border-pink-200/50 rounded-xl bg-white/50 backdrop-blur-sm px-6">
-          <AccordionTrigger className="text-lg font-semibold hover:text-pink-600 transition-colors">
-            Will this work on old or blurry photos?
-          </AccordionTrigger>
-          <AccordionContent className="text-gray-700 leading-relaxed">
-            Absolutely! Our AI excels at restoring old, blurry, or low-resolution photos. It can sharpen details, reduce noise, and correct colors dramatically. Results vary based on the original image quality, but improvements are typically remarkable.
-          </AccordionContent>
-        </AccordionItem>
-        
-        <AccordionItem value="item-3" className="border border-blue-200/50 rounded-xl bg-white/50 backdrop-blur-sm px-6">
-          <AccordionTrigger className="text-lg font-semibold hover:text-blue-600 transition-colors">
-            Are my photos kept private?
-          </AccordionTrigger>
-          <AccordionContent className="text-gray-700 leading-relaxed">
-            Your privacy is paramount. Photos are uploaded securely, processed by our AI, and permanently deleted from our servers after one hour. We never view, share, or use your photos for any other purpose.
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
-  </div>
+  <ModernSection 
+    title="Frequently Asked Questions" 
+    subtitle="Everything you need to know about photo enhancement"
+    icon={<Camera className="h-6 w-6" />}
+    className="mt-12"
+    contentClassName="max-w-4xl mx-auto"
+  >
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value="item-1">
+        <AccordionTrigger>How does the AI Photo Enhancer work?</AccordionTrigger>
+        <AccordionContent>
+          Our advanced AI model analyzes your photo and intelligently enhances quality by improving resolution, clarity, lighting, and color balance. It uses state-of-the-art generative technology to create a superior, high-quality version of your image.
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2">
+        <AccordionTrigger>Will this work on old or blurry photos?</AccordionTrigger>
+        <AccordionContent>
+          Absolutely! Our AI excels at restoring old, blurry, or low-resolution photos. It can sharpen details, reduce noise, and correct colors dramatically. Results vary based on the original image quality, but improvements are typically remarkable.
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-3">
+        <AccordionTrigger>Are my photos kept private?</AccordionTrigger>
+        <AccordionContent>
+          Your privacy is paramount. Photos are uploaded securely, processed by our AI, and permanently deleted from our servers after one hour. We never view, share, or use your photos for any other purpose.
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </ModernSection>
 );
 
 
@@ -80,6 +76,7 @@ export default function EnhancePhotoPage() {
   const [result, setResult] = useState<EnhancePhotoOutput | null>(null);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+  const { sections } = useToolSections('Photo Enhancement');
 
   const handleFileChange = (selectedFile: File) => {
     // Validate file type
@@ -123,13 +120,14 @@ export default function EnhancePhotoPage() {
 
     setIsProcessing(true);
     setProgress(0);
+    let progressInterval: ReturnType<typeof setInterval> | undefined;
 
     try {
       // Simulate progress updates
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) {
-            clearInterval(progressInterval);
+            if (progressInterval) clearInterval(progressInterval);
             return 90;
           }
           return prev + Math.random() * 15;
@@ -138,38 +136,42 @@ export default function EnhancePhotoPage() {
 
       const dataUri = await fileToDataUri(file);
       const input: EnhancePhotoInput = {
-        image: dataUri,
-        enhancementLevel: 'high'
+        photoUri: dataUri,
       };
 
       const enhancedResult = await enhancePhoto(input);
-      
-      clearInterval(progressInterval);
+
       setProgress(100);
       setResult(enhancedResult);
-      
+
       toast({
         title: "Enhancement Complete!",
         description: "Your photo has been successfully enhanced with AI.",
       });
-    } catch (error) {
-      console.error('Enhancement failed:', error);
-      toast({
-        title: "Enhancement Failed",
-        description: "There was an error enhancing your photo. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      if (isAbortError(error)) {
+        // Silently ignore aborted requests to reduce log noise during navigation/HMR
+        // console.debug('Enhancement aborted:', error);
+      } else {
+        console.error('Enhancement failed:', error);
+        toast({
+          title: "Enhancement Failed",
+          description: "There was an error enhancing your photo. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
+      if (progressInterval) clearInterval(progressInterval);
       setIsProcessing(false);
       setTimeout(() => setProgress(0), 1000);
     }
   };
 
   const handleDownload = () => {
-    if (!result?.enhancedImage) return;
+    if (!result?.enhancedPhotoUri) return;
 
     const link = document.createElement('a');
-    link.href = result.enhancedImage;
+    link.href = result.enhancedPhotoUri;
     link.download = `enhanced_${file?.name || 'photo'}.png`;
     document.body.appendChild(link);
     link.click();
@@ -193,6 +195,7 @@ export default function EnhancePhotoPage() {
       title="AI Photo Enhancer"
       description="Transform your photos with cutting-edge AI technology. Enhance quality, sharpen details, and restore old images with professional results."
       icon={<Camera className="w-8 h-8" />}
+      backgroundVariant="home"
     >
       <ModernSection>
         <div className="grid lg:grid-cols-2 gap-8">
@@ -202,7 +205,7 @@ export default function EnhancePhotoPage() {
               <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
                 <ImageIcon className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800">Upload Your Photo</h3>
+              <h3 className="text-xl font-semibold text-white-800">Upload Your Photo</h3>
             </div>
 
             <ModernUploadArea
@@ -240,7 +243,7 @@ export default function EnhancePhotoPage() {
                     </Button>
                   </div>
 
-                  <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        <div className="relative w-full h-[420px] bg-gray-100 rounded-lg overflow-hidden">
                     <Image
                       src={URL.createObjectURL(file)}
                       alt="Original photo"
@@ -289,16 +292,16 @@ export default function EnhancePhotoPage() {
               <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800">Enhanced Result</h3>
+              <h3 className="text-xl font-semibold text-white-800">Enhanced Result</h3>
             </div>
 
             {result ? (
               <Card className="border-2 border-blue-200/50 bg-gradient-to-br from-blue-50/50 to-purple-50/30">
                 <CardContent className="p-6">
                   <div className="space-y-6">
-                    <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                    <div className="relative w-full h-[420px] bg-gray-100 rounded-lg overflow-hidden">
                       <Image
-                        src={result.enhancedImage}
+                        src={result.enhancedPhotoUri}
                         alt="Enhanced photo"
                         fill
                         className="object-contain"
@@ -330,7 +333,7 @@ export default function EnhancePhotoPage() {
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                         <div className="text-center">
                           <p className="text-sm text-gray-600 mb-2">Before</p>
-                          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                          <div className="relative w-full h-[320px] bg-gray-100 rounded-lg overflow-hidden">
                             <Image
                               src={URL.createObjectURL(file)}
                               alt="Original"
@@ -341,9 +344,9 @@ export default function EnhancePhotoPage() {
                         </div>
                         <div className="text-center">
                           <p className="text-sm text-gray-600 mb-2">After</p>
-                          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                          <div className="relative w-full h-[320px] bg-gray-100 rounded-lg overflow-hidden">
                             <Image
-                              src={result.enhancedImage}
+                              src={result.enhancedPhotoUri}
                               alt="Enhanced"
                               fill
                               className="object-contain"
@@ -361,8 +364,8 @@ export default function EnhancePhotoPage() {
                   <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
                     <ImageIcon className="w-8 h-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-600 mb-2">Enhanced photo will appear here</p>
-                  <p className="text-sm text-gray-500">Upload and enhance a photo to see results</p>
+                  <p className="text-white-800 mb-2">Enhanced photo will appear here</p>
+                  <p className="text-sm text-white-800">Upload and enhance a photo to see results</p>
                 </CardContent>
               </Card>
             )}
@@ -370,14 +373,27 @@ export default function EnhancePhotoPage() {
         </div>
       </ModernSection>
 
+      <div className="mt-8">
+        <AIPoweredFeatures 
+          features={[
+            "Super-resolution for sharper details",
+            "Noise reduction and artifact cleanup",
+            "Color and lighting correction",
+            "Restoration for old photos"
+          ]}
+        />
+      </div>
+
+      <div className="mt-8">
+        <ProTip tip="Upload the highest quality photo available for the best enhancement results." />
+      </div>
+
       <ToolSections 
         toolName="Photo Enhancement" 
-        sections={getCustomToolSections("Photo Enhancement")} 
+        sections={sections} 
       />
 
-      <ModernSection>
-        <FAQ />
-      </ModernSection>
+      <FAQ />
 
       <ModernSection>
         <AllTools />

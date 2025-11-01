@@ -9,10 +9,11 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 import { pdfToExcel } from '@/lib/actions/pdf-to-excel';
 
 export default function PdfToExcelPage() {
+  const { sections } = useToolSections('PDF to Excel');
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [xlsxUri, setXlsxUri] = useState<string | null>(null);
@@ -131,7 +132,7 @@ export default function PdfToExcelPage() {
         </div>
       </ModernSection>
 
-      <ToolSections toolName="PDF to Excel" sections={getCustomToolSections('PDF to Excel')} />
+  <ToolSections toolName="PDF to Excel" sections={sections} />
     </ModernPageLayout>
   );
 }

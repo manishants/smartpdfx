@@ -11,6 +11,7 @@ interface ModernSectionProps {
   children: ReactNode;
   className?: string;
   variant?: 'default' | 'glass' | 'gradient';
+  contentClassName?: string;
 }
 
 export function ModernSection({
@@ -19,7 +20,8 @@ export function ModernSection({
   icon,
   children,
   className,
-  variant = 'default'
+  variant = 'default',
+  contentClassName
 }: ModernSectionProps) {
   const getVariantClasses = () => {
     switch (variant) {
@@ -61,7 +63,7 @@ export function ModernSection({
       
       {/* Content */}
       <Card className={getVariantClasses()}>
-        <CardContent className="p-6 md:p-8">
+        <CardContent className={cn("p-6 md:p-8", contentClassName)}>
           {children}
         </CardContent>
       </Card>

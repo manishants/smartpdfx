@@ -14,7 +14,7 @@ import type { GenerateQrCodeInput, GenerateQrCodeOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 const FAQ = () => (
     <div className="mt-12">
@@ -38,6 +38,7 @@ const FAQ = () => (
 
 
 export default function QrCodeGeneratorPage() {
+  const { sections } = useToolSections('QR Code Generation');
   const [text, setText] = useState('');
   const [result, setResult] = useState<GenerateQrCodeOutput | null>(null);
   const { toast } = useToast();
@@ -127,10 +128,10 @@ export default function QrCodeGeneratorPage() {
             </Card>
         )}
         
-        <ToolSections 
-          toolName="QR Code Generation" 
-          sections={getCustomToolSections("QR Code Generation")} 
-        />
+      <ToolSections 
+        toolName="QR Code Generation" 
+        sections={sections} 
+      />
         
         <FAQ />
       </div>

@@ -22,13 +22,13 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 export const dynamic = 'force-dynamic';
 
 // It's recommended to host this worker file yourself
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 
 interface UploadedFile {
@@ -96,6 +96,7 @@ const FAQ = () => (
 
 
 export default function CompressPdfPage() {
+  const { sections } = useToolSections('PDF Compression');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<CompressPdfOutput | null>(null);
@@ -501,7 +502,7 @@ export default function CompressPdfPage() {
 
       <ToolSections 
         toolName="PDF Compression" 
-        sections={getCustomToolSections("PDF Compression")} 
+        sections={sections}
       />
 
       <FAQ />

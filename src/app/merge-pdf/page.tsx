@@ -15,7 +15,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { ToolSections } from '@/components/tool-sections';
-import { getCustomToolSections } from '@/lib/tool-sections-config';
+import { useToolSections } from '@/hooks/use-tool-sections';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +30,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Layers className="h-6 w-6" />}
     className="mt-12"
+    contentClassName="max-w-4xl mx-auto"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -62,6 +63,7 @@ const FAQ = () => (
 
 
 export default function MergePdfPage() {
+  const { sections } = useToolSections('PDF Merging');
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isMerging, setIsMerging] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -362,7 +364,7 @@ export default function MergePdfPage() {
 
       <ToolSections 
         toolName="PDF Merging" 
-        sections={getCustomToolSections("PDF Merging")} 
+        sections={sections} 
       />
 
       <FAQ />

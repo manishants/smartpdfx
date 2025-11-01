@@ -23,7 +23,7 @@ interface UploadedFile {
 }
 
 const FAQ = () => (
-  <div className="relative">
+  <div className="relative max-w-4xl mx-auto">
     {/* AI Background Elements */}
     <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-cyan-50/30 rounded-2xl" />
     <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-xl" />
@@ -80,6 +80,17 @@ export default function PdfOcrPage() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
+  const isAbortError = (error: any) => {
+    const msg = String(error?.message || '');
+    // Detect common abort patterns across browsers and environments
+    return (
+      error?.name === 'AbortError' ||
+      msg.includes('AbortError') ||
+      msg.includes('ERR_ABORTED') ||
+      msg.toLowerCase().includes('aborted')
+    );
+  };
+
   const handleFileChange = (selectedFile: File) => {
     if (selectedFile.type === 'application/pdf') {
       setFile(selectedFile);
@@ -116,10 +127,10 @@ export default function PdfOcrPage() {
     setIsExtracting(true);
     setResult(null);
     setProgress(0);
-    
+    let progressInterval: any;
     try {
       // Simulate progress updates
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 200);
 
@@ -141,14 +152,17 @@ export default function PdfOcrPage() {
         throw new Error("Text extraction returned no data.");
       }
     } catch (error: any) {
-      console.error("Extraction failed:", error);
-      toast({
-        title: "Extraction Failed",
-        description: error.message || "Something went wrong while extracting text. Please try again.",
-        variant: "destructive"
-      });
-      setProgress(0);
+      if (!isAbortError(error)) {
+        console.error("Extraction failed:", error);
+        toast({
+          title: "Extraction Failed",
+          description: error.message || "Something went wrong while extracting text. Please try again.",
+          variant: "destructive"
+        });
+        setProgress(0);
+      }
     } finally {
+      if (progressInterval) clearInterval(progressInterval);
       setIsExtracting(false);
     }
   };

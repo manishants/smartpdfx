@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const languages = [
     { value: 'eng', label: 'English' },
@@ -59,6 +59,16 @@ export default function ExtractDataToExcelPage() {
 
 
   const { toast } = useToast();
+
+  const isAbortError = (error: any) => {
+    const msg = String(error?.message || '');
+    return (
+      error?.name === 'AbortError' ||
+      msg.includes('AbortError') ||
+      msg.includes('ERR_ABORTED') ||
+      msg.toLowerCase().includes('aborted')
+    );
+  };
 
   useEffect(() => {
     if (columns.length > 0 && !activeColumnId) {
@@ -140,12 +150,14 @@ export default function ExtractDataToExcelPage() {
         throw new Error("AI could not detect any text or image elements on the first page of the PDF.");
       }
     } catch (error: any) {
-      console.error("Analysis failed:", error);
-      toast({
-        title: "Analysis Failed",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (!isAbortError(error)) {
+        console.error("Analysis failed:", error);
+        toast({
+          title: "Analysis Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsAnalyzing(false);
       setProgress(0);
@@ -219,7 +231,9 @@ export default function ExtractDataToExcelPage() {
             toast({ title: `${allSelectedElements.length} items extracted from ${numPages} pages.` });
 
         } catch (error: any) {
-             toast({ title: "Extraction Error", description: `Failed to process page. ${error.message}`, variant: "destructive" });
+             if (!isAbortError(error)) {
+               toast({ title: "Extraction Error", description: `Failed to process page. ${error.message}`, variant: "destructive" });
+             }
         } finally {
             setIsAnalyzing(false);
             setProcessingMessage('');
