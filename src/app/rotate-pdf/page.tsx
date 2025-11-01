@@ -101,6 +101,7 @@ export default function RotatePdfPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [pages, setPages] = useState<PageToRender[]>([]);
     const [rotatedPdfUri, setRotatedPdfUri] = useState<string | null>(null);
+    const { sections } = useToolSections('PDF Rotation');
 
     const { toast } = useToast();
     
@@ -526,4 +527,3 @@ export default function RotatePdfPage() {
         </ModernPageLayout>
     );
 }
-    const { sections } = useToolSections('PDF Rotation');

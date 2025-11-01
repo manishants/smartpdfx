@@ -11,7 +11,7 @@ import { UploadCloud, FileDown, Loader2, RefreshCw, Pen, Type, Eraser, Check, Wa
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { eSignPdf } from '@/lib/actions/e-sign-pdf';
-import type { ESignPdfInput, SignaturePlacement } from '@/lib/types';
+import type { ESignPdfInput, SignaturePlacement, SignatureAsset } from '@/lib/types';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Rnd } from 'react-rnd';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,7 @@ interface PlacedSignature {
     y: number;
     width: number;
     height: number;
+    assetId: string;
 }
 
 export default function ESignPage() {
@@ -38,7 +39,7 @@ export default function ESignPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [numPages, setNumPages] = useState<number>(0);
     const [pageNumber, setPageNumber] = useState<number>(1);
-    const [signature, setSignature] = useState<string | null>(null);
+    const [signatureAssets, setSignatureAssets] = useState<SignatureAsset[]>([]);
     const [signatureMode, setSignatureMode] = useState<SignatureMode>('draw');
     const [typedSignature, setTypedSignature] = useState('');
     const [placedSignatures, setPlacedSignatures] = useState<PlacedSignature[]>([]);
@@ -47,6 +48,11 @@ export default function ESignPage() {
     const [zoom, setZoom] = useState(1);
     const [pageWidth, setPageWidth] = useState<number>(0);
     const [pageHeight, setPageHeight] = useState<number>(0);
+    const [uploadedSignatureUri, setUploadedSignatureUri] = useState<string | null>(null);
+    const [includeDate, setIncludeDate] = useState(false);
+    const [dateOffsetX, setDateOffsetX] = useState<number>(0);
+    const [dateOffsetY, setDateOffsetY] = useState<number>(0);
+    const [dateFontSize, setDateFontSize] = useState<number>(10);
 
     const sigCanvas = useRef<SignatureCanvas>(null);
     const { toast } = useToast();
@@ -58,6 +64,10 @@ export default function ESignPage() {
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });
+    };
+
+    const signatureFileToDataUri = async (file: File): Promise<string> => {
+        return fileToDataUri(file);
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,16 +96,18 @@ export default function ESignPage() {
         if (!file) return;
         setIsLoading(true);
         // The PDF will be loaded by react-pdf Document component
+        setStage('sign');
         setIsLoading(false);
     };
 
     const handleSignatureSave = () => {
+        let dataUri: string | null = null;
         if (signatureMode === 'draw' && sigCanvas.current) {
-            if(sigCanvas.current.isEmpty()) {
+            if (sigCanvas.current.isEmpty()) {
                 toast({ title: "Signature is empty", description: "Please draw your signature before saving.", variant: "destructive" });
                 return;
             }
-            setSignature(sigCanvas.current.toDataURL('image/png'));
+            dataUri = sigCanvas.current.toDataURL('image/png');
         } else if (signatureMode === 'type') {
             if (!typedSignature.trim()) {
                 toast({ title: "Signature is empty", description: "Please type your name before saving.", variant: "destructive" });
@@ -114,9 +126,24 @@ export default function ESignPage() {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(typedSignature, canvas.width / 2, canvas.height / 2);
-                setSignature(canvas.toDataURL('image/png'));
+                dataUri = canvas.toDataURL('image/png');
             }
+        } else if (signatureMode === 'upload') {
+            if (!uploadedSignatureUri) {
+                toast({ title: "No image selected", description: "Please upload a signature image.", variant: "destructive" });
+                return;
+            }
+            dataUri = uploadedSignatureUri;
         }
+
+        if (!dataUri) return;
+
+        const asset: SignatureAsset = {
+            id: Date.now().toString(),
+            imageUri: dataUri,
+        };
+        setSignatureAssets(prev => [asset, ...prev]);
+        setActiveSignatureId(asset.id);
         setStage('place');
     };
 
@@ -124,14 +151,19 @@ export default function ESignPage() {
         if (sigCanvas.current) {
             sigCanvas.current.clear();
         }
-        setSignature(null);
         setTypedSignature('');
+        setUploadedSignatureUri(null);
     };
 
     const handleDragStart = (e: React.DragEvent<HTMLImageElement>) => {
-        const signatureData = JSON.stringify({ width: 150, height: 75 });
+        const assetId = activeSignatureId ?? signatureAssets[0]?.id;
+        if (!assetId) {
+            toast({ title: "No signature selected", description: "Add or select a signature to place.", variant: "destructive" });
+            return;
+        }
+        const signatureData = JSON.stringify({ width: 150, height: 75, assetId });
         e.dataTransfer.setData("application/json", signatureData);
-    }
+    };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -148,6 +180,7 @@ export default function ESignPage() {
                 y: y / zoom,
                 width: signatureData.width / zoom,
                 height: signatureData.height / zoom,
+                assetId: signatureData.assetId,
             };
             setPlacedSignatures(prev => [...prev, newSignature]);
         } catch (error) {
@@ -160,7 +193,7 @@ export default function ESignPage() {
     };
 
     const handleApplySignatures = async () => {
-        if (!file || !signature || placedSignatures.length === 0) {
+        if (!file || placedSignatures.length === 0) {
             toast({ title: "Missing information", description: "Please place at least one signature.", variant: "destructive" });
             return;
         }
@@ -180,10 +213,23 @@ export default function ESignPage() {
                     y: ps.y * scaleY,
                     width: ps.width * scaleX,
                     height: ps.height * scaleY,
+                    signatureId: ps.assetId,
+                    ...(includeDate
+                        ? {
+                            dateText: `Signed on ${new Date().toLocaleDateString()}`,
+                            dateOffsetX,
+                            dateOffsetY,
+                            dateFontSize,
+                          }
+                        : {}),
                 };
             });
 
-            const input: ESignPdfInput = { pdfUri, signatureImageUri: signature, placements };
+            const input: ESignPdfInput = {
+                pdfUri,
+                signatures: signatureAssets,
+                placements,
+            };
             const result = await eSignPdf(input);
             
             setSignedPdfUri(result.signedPdfUri);
@@ -218,13 +264,18 @@ export default function ESignPage() {
     const handleStartOver = () => {
         setStage('upload');
         setFile(null);
-        setSignature(null);
+        setSignatureAssets([]);
         setPlacedSignatures([]);
         setSignedPdfUri(null);
         setActiveSignatureId(null);
         setPageNumber(1);
         setNumPages(0);
         setTypedSignature('');
+        setUploadedSignatureUri(null);
+        setIncludeDate(false);
+        setDateOffsetX(0);
+        setDateOffsetY(0);
+        setDateFontSize(10);
         if (sigCanvas.current) {
             sigCanvas.current.clear();
         }
@@ -266,7 +317,7 @@ export default function ESignPage() {
             </div>
             
             <Tabs value={signatureMode} onValueChange={(value) => setSignatureMode(value as SignatureMode)}>
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="draw" className="flex items-center gap-2">
                         <Pen className="h-4 w-4" />
                         Draw
@@ -274,6 +325,10 @@ export default function ESignPage() {
                     <TabsTrigger value="type" className="flex items-center gap-2">
                         <Type className="h-4 w-4" />
                         Type
+                    </TabsTrigger>
+                    <TabsTrigger value="upload" className="flex items-center gap-2">
+                        <UploadCloud className="h-4 w-4" />
+                        Upload
                     </TabsTrigger>
                 </TabsList>
                 
@@ -318,6 +373,40 @@ export default function ESignPage() {
                         </Button>
                     </div>
                 </TabsContent>
+
+                <TabsContent value="upload" className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Upload signature image (PNG/JPEG):</label>
+                        <Input
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (f) {
+                                    const uri = await signatureFileToDataUri(f);
+                                    setUploadedSignatureUri(uri);
+                                }
+                            }}
+                        />
+                    </div>
+                    {uploadedSignatureUri && (
+                        <div className="border rounded-lg p-2 bg-white">
+                            <Image
+                                src={uploadedSignatureUri}
+                                alt="Uploaded signature"
+                                width={200}
+                                height={100}
+                                className="mx-auto"
+                            />
+                        </div>
+                    )}
+                    <div className="text-center">
+                        <Button onClick={handleSignatureSave}>
+                            <Check className="mr-2 h-4 w-4" />
+                            Save Signature
+                        </Button>
+                    </div>
+                </TabsContent>
             </Tabs>
         </div>
     );
@@ -342,13 +431,43 @@ export default function ESignPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-1 space-y-4">
-                    {signature && (
+                    <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium">Signature Assets</label>
+                        <Button variant="outline" size="sm" onClick={() => setStage('sign')}>
+                            <FileSignature className="mr-2 h-4 w-4" /> Add
+                        </Button>
+                    </div>
+
+                    {signatureAssets.length === 0 && (
+                        <p className="text-xs text-muted-foreground">No signatures yet. Click Add to create or upload.</p>
+                    )}
+
+                    {signatureAssets.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2">
+                            {signatureAssets.map((asset) => (
+                                <div key={asset.id} className={cn("border rounded p-2 bg-white cursor-pointer", activeSignatureId === asset.id && "ring-2 ring-primary")}
+                                     onClick={() => setActiveSignatureId(asset.id)}>
+                                    <Image src={asset.imageUri} alt="Signature asset" width={120} height={60} className="object-contain mx-auto" />
+                                    <div className="flex justify-end gap-2 mt-1">
+                                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setActiveSignatureId(asset.id); }}>
+                                            Select
+                                        </Button>
+                                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSignatureAssets(prev => prev.filter(a => a.id !== asset.id)); if (activeSignatureId === asset.id) setActiveSignatureId(null); }}>
+                                            <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    { (activeSignatureId || signatureAssets[0]) && (
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Your Signature:</label>
+                            <label className="text-sm font-medium">Drag to place:</label>
                             <div className="border rounded-lg p-2 bg-white">
                                 <Image
-                                    src={signature}
-                                    alt="Your signature"
+                                    src={(signatureAssets.find(a => a.id === activeSignatureId) || signatureAssets[0])!.imageUri}
+                                    alt="Active signature"
                                     width={150}
                                     height={75}
                                     className="mx-auto cursor-move"
@@ -357,7 +476,7 @@ export default function ESignPage() {
                                 />
                             </div>
                             <p className="text-xs text-muted-foreground text-center">
-                                Drag this signature onto the PDF
+                                Drag this onto the PDF page
                             </p>
                         </div>
                     )}
@@ -381,6 +500,21 @@ export default function ESignPage() {
                             </div>
                         </div>
                     )}
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Date Options</label>
+                        <div className="flex items-center gap-2">
+                            <input type="checkbox" checked={includeDate} onChange={(e) => setIncludeDate(e.target.checked)} />
+                            <span className="text-sm">Include date near signature</span>
+                        </div>
+                        {includeDate && (
+                            <div className="grid grid-cols-3 gap-2">
+                                <Input type="number" value={dateOffsetX} onChange={(e) => setDateOffsetX(Number(e.target.value))} placeholder="Offset X" />
+                                <Input type="number" value={dateOffsetY} onChange={(e) => setDateOffsetY(Number(e.target.value))} placeholder="Offset Y" />
+                                <Input type="number" value={dateFontSize} onChange={(e) => setDateFontSize(Number(e.target.value))} placeholder="Font size" />
+                            </div>
+                        )}
+                    </div>
 
                     <Button onClick={handleApplySignatures} disabled={isLoading || placedSignatures.length === 0} className="w-full">
                         {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing...</> : <><Wand2 className="mr-2 h-4 w-4" /> Apply Signatures</>}
@@ -460,12 +594,12 @@ export default function ESignPage() {
                                                 bounds="parent"
                                                 className={cn(
                                                     "border-2 border-dashed border-primary/50 bg-primary/10",
-                                                    activeSignatureId === sig.id && "border-primary border-solid"
+                                                    activeSignatureId === sig.assetId && "border-primary border-solid"
                                                 )}
-                                                onClick={() => setActiveSignatureId(sig.id)}
+                                                onClick={() => setActiveSignatureId(sig.assetId)}
                                             >
                                                 <Image
-                                                    src={signature!}
+                                                    src={(signatureAssets.find(a => a.id === sig.assetId) || signatureAssets[0])?.imageUri || ''}
                                                     alt="Placed signature"
                                                     fill
                                                     className="object-contain pointer-events-none"

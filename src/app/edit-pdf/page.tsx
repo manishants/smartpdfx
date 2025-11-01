@@ -20,6 +20,7 @@ import { Slider } from '@/components/ui/slider';
 import Tesseract from 'tesseract.js';
 import { ToolSections } from '@/components/tool-sections';
 import { useToolSections } from '@/hooks/use-tool-sections';
+import { findPdfElements } from '@/ai/flows/find-pdf-elements';
 
 type Stage = 'upload' | 'edit' | 'download';
 type EditMode = 'select' | 'text' | 'image' | 'rectangle' | 'drawing' | 'highlight';
@@ -60,6 +61,7 @@ export default function EditPdfPage() {
     const [editMode, setEditMode] = useState<EditMode>('select');
     const [editedPdfUri, setEditedPdfUri] = useState<string | null>(null);
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
+    const [ocrLanguage, setOcrLanguage] = useState<string>('English');
 
     const [isDrawing, setIsDrawing] = useState(false);
     const drawingCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -71,28 +73,154 @@ export default function EditPdfPage() {
           `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
     }, []);
 
-    // OCR functionality
-    const performOCR = async () => {
+    // OCR functionality (robust: PDF.js text -> AI OCR -> Tesseract)
+    const aiPerformOCR = async () => {
         if (!pages[currentPageIndex]) return;
-        
+        setIsLoading(true);
+        setLoadingMessage('AI OCR: detecting text blocks...');
+        try {
+            const renderedPage = pages[currentPageIndex];
+            const aiResult = await findPdfElements({
+                imageUri: renderedPage.src,
+                pageWidth: renderedPage.width,
+                pageHeight: renderedPage.height,
+                language: ocrLanguage,
+            } as any);
+
+            const aiTextItems: EditableItem[] = (aiResult.elements || [])
+                .filter((el: any) => el.text && el.box)
+                .map((el: any, idx: number) => ({
+                    id: `ai-ocr-text-${Date.now()}-${idx}`,
+                    type: 'text' as const,
+                    pageIndex: currentPageIndex,
+                    x: el.box.x,
+                    y: el.box.y,
+                    width: el.box.width,
+                    height: el.box.height,
+                    content: el.text,
+                    fontSize: Math.max(12, el.box.height),
+                    rotation: 0,
+                }));
+
+            if (aiTextItems.length > 0) {
+                setEditableItems(prev => [...prev, ...aiTextItems]);
+                toast({ title: 'AI OCR Complete', description: `Detected ${aiTextItems.length} text blocks via Genkit AI.` });
+            } else {
+                toast({ title: 'No text found', description: 'AI OCR returned no text for this page.', variant: 'destructive' });
+            }
+        } catch (err: any) {
+            console.error('AI OCR failed', err);
+            toast({ title: 'AI OCR Failed', description: err?.message || 'Could not extract text with AI OCR.', variant: 'destructive' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    const performOCR = async () => {
+        if (!file || !pages[currentPageIndex]) return;
+
         setIsLoading(true);
         setLoadingMessage('Extracting text from page...');
-        
-        try {
-            const currentPage = pages[currentPageIndex];
-            const result = await Tesseract.recognize(currentPage.src, 'eng', {
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        setLoadingMessage(`Extracting text... ${Math.round(m.progress * 100)}%`);
-                    }
-                }
-            });
 
-            // Process OCR results and create text elements
-            if (result.data.words && result.data.words.length > 0) {
-                const newTextItems: EditableItem[] = result.data.words
-                    .filter(word => word.confidence > 60) // Filter out low confidence words
-                    .map((word, index) => ({
+        try {
+            const renderedPage = pages[currentPageIndex];
+
+            // 1) Attempt native PDF text extraction via pdf.js
+            try {
+                const pdfData = await arrayBufferFromFile(file);
+                const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                const page = await pdf.getPage(currentPageIndex + 1);
+                const originalViewport = page.getViewport({ scale: 1.0 });
+                const scale = renderedPage.width / originalViewport.width;
+
+                const textContent = await page.getTextContent();
+                const items = (textContent.items || []) as any[];
+
+                const extractedTextItems: EditableItem[] = items.map((item, idx) => {
+                    const t = item.transform || [1,0,0,1,0,0];
+                    const x = (t[4] || 0) * scale;
+                    const yScale = Math.abs(t[3] || 0);
+                    const fontHeight = (yScale || 12) * scale;
+                    const yTop = ((t[5] || 0) * scale) - fontHeight; // transform f is baseline
+                    const width = (item.width || (Math.abs(t[0] || 0))) * scale;
+                    const height = fontHeight;
+                    const content = item.str || '';
+                    return {
+                        id: `pdfjs-text-${Date.now()}-${idx}`,
+                        type: 'text' as const,
+                        pageIndex: currentPageIndex,
+                        x, y: yTop, width, height,
+                        content,
+                        fontSize: Math.max(12, height),
+                        rotation: 0,
+                    } as EditableItem;
+                }).filter(el => el.content && el.content.trim().length > 0 && el.width > 2 && el.height > 8);
+
+                if (extractedTextItems.length > 0) {
+                    setEditableItems(prev => [...prev, ...extractedTextItems]);
+                    toast({
+                        title: 'Text Extracted',
+                        description: `Found ${extractedTextItems.length} text chunks via PDF parsing.`,
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+            } catch (pdfParseErr) {
+                console.warn('PDF.js text extraction failed or found no text:', pdfParseErr);
+            }
+
+            // 2) AI OCR for bounding boxes if no native text found
+            try {
+                setLoadingMessage('AI OCR: detecting text blocks...');
+                const aiResult = await findPdfElements({
+                    imageUri: renderedPage.src,
+                    pageWidth: renderedPage.width,
+                    pageHeight: renderedPage.height,
+                    language: ocrLanguage,
+                } as any);
+
+                const aiTextItems: EditableItem[] = (aiResult.elements || [])
+                    .filter((el: any) => el.text && el.box)
+                    .map((el: any, idx: number) => ({
+                        id: `ai-ocr-text-${Date.now()}-${idx}`,
+                        type: 'text' as const,
+                        pageIndex: currentPageIndex,
+                        x: el.box.x,
+                        y: el.box.y,
+                        width: el.box.width,
+                        height: el.box.height,
+                        content: el.text,
+                        fontSize: Math.max(12, el.box.height),
+                        rotation: 0,
+                    }));
+
+                if (aiTextItems.length > 0) {
+                    setEditableItems(prev => [...prev, ...aiTextItems]);
+                    toast({
+                        title: 'AI OCR Complete',
+                        description: `Detected ${aiTextItems.length} text blocks via AI OCR.`,
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+            } catch (aiErr: any) {
+                console.warn('AI OCR failed or returned no elements:', aiErr?.message || aiErr);
+            }
+
+            // 3) Fallback to local Tesseract OCR
+            try {
+                setLoadingMessage('Local OCR: recognizing text...');
+                const result = await Tesseract.recognize(renderedPage.src, 'eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            setLoadingMessage(`Extracting text... ${Math.round((m.progress || 0) * 100)}%`);
+                        }
+                    }
+                });
+
+                const words = (result?.data?.words || []) as any[];
+                const newTextItems: EditableItem[] = words
+                    .filter((word: any) => (word.confidence || 0) > 60 && word.bbox)
+                    .map((word: any, index: number) => ({
                         id: `ocr-text-${Date.now()}-${index}`,
                         type: 'text' as const,
                         pageIndex: currentPageIndex,
@@ -101,29 +229,49 @@ export default function EditPdfPage() {
                         width: word.bbox.x1 - word.bbox.x0,
                         height: word.bbox.y1 - word.bbox.y0,
                         content: word.text,
-                        fontSize: Math.max(12, word.bbox.y1 - word.bbox.y0), // Estimate font size from height
+                        fontSize: Math.max(12, word.bbox.y1 - word.bbox.y0),
                         rotation: 0,
                     }));
 
-                setEditableItems(prev => [...prev, ...newTextItems]);
-                toast({ 
-                    title: "OCR Complete", 
-                    description: `Extracted ${newTextItems.length} text elements from the page.` 
-                });
-            } else {
-                toast({ 
-                    title: "No text found", 
-                    description: "No readable text was detected on this page.", 
-                    variant: "destructive" 
+                if (newTextItems.length > 0) {
+                    setEditableItems(prev => [...prev, ...newTextItems]);
+                    toast({
+                        title: 'OCR Complete',
+                        description: `Extracted ${newTextItems.length} text elements from the page.`,
+                    });
+                } else {
+                    // As a last resort, if Tesseract returns a raw text string, attach one text box
+                    const rawText = (result?.data?.text || '').trim();
+                    if (rawText.length > 0) {
+                        setEditableItems(prev => [...prev, {
+                            id: `ocr-text-${Date.now()}-raw`,
+                            type: 'text',
+                            pageIndex: currentPageIndex,
+                            x: 16,
+                            y: 16,
+                            width: Math.max(200, renderedPage.width - 32),
+                            height: 48,
+                            content: rawText,
+                            fontSize: 16,
+                            rotation: 0,
+                        }]);
+                        toast({ title: 'OCR Complete', description: 'Extracted raw text from page.' });
+                    } else {
+                        toast({
+                            title: 'No text found',
+                            description: 'No readable text was detected on this page.',
+                            variant: 'destructive',
+                        });
+                    }
+                }
+            } catch (tessErr: any) {
+                console.error('Local OCR (Tesseract) failed', tessErr);
+                toast({
+                    title: 'OCR Failed',
+                    description: tessErr?.message || 'Could not extract text from the page.',
+                    variant: 'destructive',
                 });
             }
-        } catch (error: any) {
-            console.error("OCR failed", error);
-            toast({ 
-                title: "OCR Failed", 
-                description: error.message || "Could not extract text from the page.", 
-                variant: "destructive" 
-            });
         } finally {
             setIsLoading(false);
         }
@@ -438,7 +586,19 @@ export default function EditPdfPage() {
                         <div className="flex items-center gap-1 bg-muted p-1 rounded-md">
                             <Button variant={editMode === 'select' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEditMode('select')} title="Select"><MousePointer /></Button>
                             <Button variant={editMode === 'text' ? 'secondary' : 'ghost'} size="icon" onClick={() => { setEditMode('text'); addText() }} title="Add Text"><Type /></Button>
-                            <Button variant="ghost" size="icon" onClick={performOCR} title="Extract Text (OCR)" disabled={isLoading}><ScanText /></Button>
+                            <select
+                                value={ocrLanguage}
+                                onChange={(e) => setOcrLanguage(e.target.value)}
+                                className="mx-2 text-sm border rounded-md px-2 py-1 bg-background"
+                                title="OCR Language"
+                            >
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                                <option>German</option>
+                                <option>Italian</option>
+                            </select>
+                            <Button variant="secondary" size="icon" onClick={aiPerformOCR} title="AI OCR" disabled={isLoading}><ScanText /></Button>
                             <Button variant={editMode === 'image' ? 'secondary' : 'ghost'} size="icon" onClick={() => document.getElementById(`image-upload`)?.click()} title="Add Image"><ImageIconLucide /></Button>
                             <Button variant={editMode === 'drawing' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEditMode('drawing')} title="Draw"><Pen /></Button>
                             <Button variant={editMode === 'highlight' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEditMode('highlight')} title="Highlight"><Highlighter /></Button>

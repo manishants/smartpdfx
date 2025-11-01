@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UploadCloud, FileDown, Loader2, RefreshCw, Scissors, FileArchive, Sparkles, Zap, FileText, Split } from "lucide-react";
+import { UploadCloud, FileDown, Loader2, RefreshCw, Scissors, FileArchive, Sparkles, Zap, FileText, Split, Plus, Trash } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { splitPdf } from '@/lib/actions/split-pdf';
 import type { SplitPdfInput, SplitPdfOutput, PageRange } from '@/lib/types';
@@ -25,6 +25,7 @@ import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
 
 type Stage = 'upload' | 'select' | 'download';
+type RangeMode = 'select' | 'custom' | 'fixed';
 
 interface PageToRender {
   src: string;
@@ -77,6 +78,9 @@ export default function SplitPdfPage() {
     const [pages, setPages] = useState<PageToRender[]>([]);
     const [selectedPages, setSelectedPages] = useState<number[]>([]);
     const [splitResult, setSplitResult] = useState<SplitPdfOutput | null>(null);
+    const [mode, setMode] = useState<RangeMode>('select');
+    const [customRanges, setCustomRanges] = useState<PageRange[]>([{ from: 1, to: 1 }]);
+    const [fixedSize, setFixedSize] = useState<number>(1);
 
     const { toast } = useToast();
     
@@ -180,6 +184,43 @@ export default function SplitPdfPage() {
         ranges.push({ from: start, to: end });
         return ranges;
     }, [selectedPages]);
+
+    const sanitizedCustomRanges = useMemo((): PageRange[] => {
+        if (pages.length === 0) return [];
+        return customRanges
+            .map(r => {
+                const from = Math.max(1, Math.min(pages.length, Math.floor(r.from || 1)));
+                const toRaw = Math.max(1, Math.min(pages.length, Math.floor(r.to || r.from || 1)));
+                const to = Math.max(from, toRaw);
+                return { from, to };
+            })
+            .filter(r => r.from <= r.to);
+    }, [customRanges, pages.length]);
+
+    const fixedRanges = useMemo((): PageRange[] => {
+        if (pages.length === 0 || fixedSize < 1) return [];
+        const size = Math.max(1, Math.min(pages.length, Math.floor(fixedSize)));
+        const ranges: PageRange[] = [];
+        let start = 1;
+        while (start <= pages.length) {
+            const end = Math.min(start + size - 1, pages.length);
+            ranges.push({ from: start, to: end });
+            start = end + 1;
+        }
+        return ranges;
+    }, [pages.length, fixedSize]);
+
+    const computedRanges = useMemo((): PageRange[] => {
+        switch (mode) {
+            case 'custom':
+                return sanitizedCustomRanges;
+            case 'fixed':
+                return fixedRanges;
+            case 'select':
+            default:
+                return pageRanges;
+        }
+    }, [mode, sanitizedCustomRanges, fixedRanges, pageRanges]);
     
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -191,14 +232,14 @@ export default function SplitPdfPage() {
     };
 
     const handleSplit = async () => {
-        if (!file || pageRanges.length === 0) {
+        if (!file || computedRanges.length === 0) {
             toast({ title: "No pages selected", description: "Please select at least one page to split.", variant: "destructive" });
             return;
         }
         setIsLoading(true);
         try {
             const pdfUri = await fileToDataUri(file);
-            const input: SplitPdfInput = { pdfUri, ranges: pageRanges };
+            const input: SplitPdfInput = { pdfUri, ranges: computedRanges };
             const result = await splitPdf(input);
             if (result && result.splitPdfs) {
                 setSplitResult(result);
@@ -260,33 +301,109 @@ export default function SplitPdfPage() {
                             <h2 className="text-xl font-semibold">Select Pages to Split</h2>
                             <p className="text-muted-foreground">Select one or more pages to create new PDF files.</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                           <Checkbox 
-                             id="select-all" 
-                             checked={selectedPages.length === pages.length}
-                             onCheckedChange={handleSelectAll}
-                           />
-                           <Label htmlFor="select-all">Select All</Label>
+                        <div className="flex items-center gap-2">
+                            <Label className="font-medium">Range mode:</Label>
+                            <div className="flex items-center gap-2">
+                                <Button variant={mode==='select' ? 'default' : 'outline'} size="sm" onClick={() => setMode('select')}>Pages</Button>
+                                <Button variant={mode==='custom' ? 'default' : 'outline'} size="sm" onClick={() => setMode('custom')}>Custom ranges</Button>
+                                <Button variant={mode==='fixed' ? 'default' : 'outline'} size="sm" onClick={() => setMode('fixed')}>Fixed ranges</Button>
+                            </div>
                         </div>
                     </div>
-                    <ScrollArea className="h-[60vh] w-full border rounded-md p-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {pages.map(page => (
-                            <div key={page.pageNumber} className="relative group cursor-pointer" onClick={() => handlePageSelect(page.pageNumber)}>
-                                <Card className="overflow-hidden">
-                                  <Image src={page.src} alt={`Page ${page.pageNumber}`} width={200} height={280} className="w-full h-auto" />
-                                </Card>
-                                <div className="absolute top-2 right-2">
-                                  <Checkbox checked={selectedPages.includes(page.pageNumber)} id={`page-${page.pageNumber}`} />
+                    {mode === 'select' && (
+                        <>
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox 
+                                        id="select-all" 
+                                        checked={selectedPages.length === pages.length}
+                                        onCheckedChange={handleSelectAll}
+                                    />
+                                    <Label htmlFor="select-all">Select All</Label>
                                 </div>
-                                <Label htmlFor={`page-${page.pageNumber}`} className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/80 px-2 py-1 rounded-full text-xs font-bold">{page.pageNumber}</Label>
+                                <p className="text-sm text-muted-foreground">{selectedPages.length} page(s) selected.</p>
                             </div>
-                        ))}
+                            <ScrollArea className="h-[60vh] w-full border rounded-md p-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {pages.map(page => (
+                                    <div key={page.pageNumber} className="relative group cursor-pointer" onClick={() => handlePageSelect(page.pageNumber)}>
+                                        <Card className="overflow-hidden">
+                                          <Image src={page.src} alt={`Page ${page.pageNumber}`} width={200} height={280} className="w-full h-auto" />
+                                        </Card>
+                                        <div className="absolute top-2 right-2">
+                                          <Checkbox checked={selectedPages.includes(page.pageNumber)} id={`page-${page.pageNumber}`} />
+                                        </div>
+                                        <Label htmlFor={`page-${page.pageNumber}`} className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/80 px-2 py-1 rounded-full text-xs font-bold">{page.pageNumber}</Label>
+                                    </div>
+                                ))}
+                                </div>
+                            </ScrollArea>
+                        </>
+                    )}
+
+                    {mode === 'custom' && (
+                        <div className="space-y-4">
+                            <div className="p-4 border rounded-md bg-muted/50">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-medium">Custom ranges</p>
+                                        <p className="text-xs text-muted-foreground">Enter one or more page ranges. Pages: 1–{pages.length}</p>
+                                    </div>
+                                    <Button variant="outline" size="sm" onClick={() => setCustomRanges(prev => [...prev, { from: 1, to: 1 }])}>
+                                        <Plus className="mr-2 h-4 w-4" /> Add range
+                                    </Button>
+                                </div>
+
+                                <div className="space-y-2">
+                                    {customRanges.map((range, idx) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <Label className="text-sm">Range {idx + 1}</Label>
+                                            <Input 
+                                                type="number" min={1} max={pages.length}
+                                                value={range.from}
+                                                onChange={(e) => {
+                                                    const v = Number(e.target.value);
+                                                    setCustomRanges(prev => prev.map((r, i) => i === idx ? { ...r, from: v } : r));
+                                                }}
+                                                className="w-24"
+                                            />
+                                            <span>-</span>
+                                            <Input 
+                                                type="number" min={1} max={pages.length}
+                                                value={range.to}
+                                                onChange={(e) => {
+                                                    const v = Number(e.target.value);
+                                                    setCustomRanges(prev => prev.map((r, i) => i === idx ? { ...r, to: v } : r));
+                                                }}
+                                                className="w-24"
+                                            />
+                                            <Button variant="ghost" size="icon" aria-label="Remove range" onClick={() => setCustomRanges(prev => prev.filter((_, i) => i !== idx))}>
+                                                <Trash className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{sanitizedCustomRanges.length} PDF file(s) will be created.</p>
+                    </div>
+                    )}
+
+                    {mode === 'fixed' && (
+                        <div className="space-y-4">
+                            <div className="p-4 border rounded-md bg-muted/50 flex items-center gap-3">
+                                <div className="flex-1">
+                                    <p className="font-medium">Fixed ranges</p>
+                                    <p className="text-xs text-muted-foreground">Split into files of N pages each.</p>
+                                </div>
+                                <Label className="text-sm">Pages per file</Label>
+                                <Input type="number" className="w-24" min={1} max={pages.length} value={fixedSize} onChange={(e) => setFixedSize(Number(e.target.value))} />
+                            </div>
+                            <p className="text-sm text-muted-foreground">{fixedRanges.length} PDF file(s) will be created.</p>
                         </div>
-                    </ScrollArea>
-                     <div className="mt-6 flex justify-between items-center">
-                         <p className="text-sm text-muted-foreground">{selectedPages.length} page(s) selected.</p>
-                       <Button size="lg" onClick={handleSplit} disabled={isLoading || selectedPages.length === 0}>
+                    )}
+
+                    <div className="mt-6 flex justify-end items-center">
+                       <Button size="lg" onClick={handleSplit} disabled={isLoading || computedRanges.length === 0}>
                             {isLoading ? <><Loader2 className="mr-2 animate-spin" />Splitting...</> : <><Scissors className="mr-2"/>Split PDF</>}
                         </Button>
                     </div>
@@ -457,51 +574,129 @@ export default function SplitPdfPage() {
                             </div>
                         </div>
 
-                        <ScrollArea className="h-[60vh] w-full border rounded-lg p-4">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {pages.map(page => (
-                                    <div 
-                                        key={page.pageNumber} 
-                                        className="relative group cursor-pointer transition-all duration-200 hover:scale-105" 
-                                        onClick={() => handlePageSelect(page.pageNumber)}
-                                    >
-                                        <Card className={`overflow-hidden transition-all duration-200 ${
-                                            selectedPages.includes(page.pageNumber) 
-                                                ? 'ring-2 ring-primary shadow-lg' 
-                                                : 'hover:shadow-md'
-                                        }`}>
-                                            <Image 
-                                                src={page.src} 
-                                                alt={`Page ${page.pageNumber}`} 
-                                                width={200} 
-                                                height={280} 
-                                                className="w-full h-auto" 
-                                            />
-                                        </Card>
-                                        <div className="absolute top-2 right-2">
-                                            <Checkbox 
-                                                checked={selectedPages.includes(page.pageNumber)} 
-                                                id={`page-${page.pageNumber}`}
-                                                className="bg-background/80 backdrop-blur-sm"
-                                            />
-                                        </div>
-                                        <Label 
-                                            htmlFor={`page-${page.pageNumber}`} 
-                                            className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border"
-                                        >
-                                            Page {page.pageNumber}
-                                        </Label>
-                                    </div>
-                                ))}
+                        {/* Range mode selector */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Label className="font-medium">Range mode:</Label>
+                                <div className="flex items-center gap-2">
+                                    <Button variant={mode==='select' ? 'default' : 'outline'} size="sm" onClick={() => setMode('select')}>Pages</Button>
+                                    <Button variant={mode==='custom' ? 'default' : 'outline'} size="sm" onClick={() => setMode('custom')}>Custom ranges</Button>
+                                    <Button variant={mode==='fixed' ? 'default' : 'outline'} size="sm" onClick={() => setMode('fixed')}>Fixed ranges</Button>
+                                </div>
                             </div>
-                            <ScrollBar orientation="vertical" />
-                        </ScrollArea>
+                            <div className="text-sm text-muted-foreground">
+                                {computedRanges.length > 0 ? `${computedRanges.length} file${computedRanges.length !== 1 ? 's' : ''} will be created.` : 'No ranges selected.'}
+                            </div>
+                        </div>
+
+                        {mode === 'select' && (
+                            <ScrollArea className="h-[60vh] w-full border rounded-lg p-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {pages.map(page => (
+                                        <div 
+                                            key={page.pageNumber} 
+                                            className="relative group cursor-pointer transition-all duration-200 hover:scale-105" 
+                                            onClick={() => handlePageSelect(page.pageNumber)}
+                                        >
+                                            <Card className={`overflow-hidden transition-all duration-200 ${
+                                                selectedPages.includes(page.pageNumber) 
+                                                    ? 'ring-2 ring-primary shadow-lg' 
+                                                    : 'hover:shadow-md'
+                                            }`}>
+                                                <Image 
+                                                    src={page.src} 
+                                                    alt={`Page ${page.pageNumber}`} 
+                                                    width={200} 
+                                                    height={280} 
+                                                    className="w-full h-auto" 
+                                                />
+                                            </Card>
+                                            <div className="absolute top-2 right-2">
+                                                <Checkbox 
+                                                    checked={selectedPages.includes(page.pageNumber)} 
+                                                    id={`page-${page.pageNumber}`}
+                                                    className="bg-background/80 backdrop-blur-sm"
+                                                />
+                                            </div>
+                                            <Label 
+                                                htmlFor={`page-${page.pageNumber}`} 
+                                                className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border"
+                                            >
+                                                Page {page.pageNumber}
+                                            </Label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <ScrollBar orientation="vertical" />
+                            </ScrollArea>
+                        )}
+
+                        {mode === 'custom' && (
+                            <div className="space-y-4">
+                                <div className="p-4 border rounded-lg bg-muted/50">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div>
+                                            <p className="font-medium">Custom ranges</p>
+                                            <p className="text-xs text-muted-foreground">Enter one or more page ranges. Pages: 1–{pages.length}</p>
+                                        </div>
+                                        <Button variant="outline" size="sm" onClick={() => setCustomRanges(prev => [...prev, { from: 1, to: 1 }])}>
+                                            <Plus className="mr-2 h-4 w-4" /> Add range
+                                        </Button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {customRanges.map((range, idx) => (
+                                            <div key={idx} className="flex items-center gap-2">
+                                                <Label className="text-sm">Range {idx + 1}</Label>
+                                                <Input 
+                                                    type="number" min={1} max={pages.length}
+                                                    value={range.from}
+                                                    onChange={(e) => {
+                                                        const v = Number(e.target.value);
+                                                        setCustomRanges(prev => prev.map((r, i) => i === idx ? { ...r, from: v } : r));
+                                                    }}
+                                                    className="w-24"
+                                                />
+                                                <span>-</span>
+                                                <Input 
+                                                    type="number" min={1} max={pages.length}
+                                                    value={range.to}
+                                                    onChange={(e) => {
+                                                        const v = Number(e.target.value);
+                                                        setCustomRanges(prev => prev.map((r, i) => i === idx ? { ...r, to: v } : r));
+                                                    }}
+                                                    className="w-24"
+                                                />
+                                                <Button variant="ghost" size="icon" aria-label="Remove range" onClick={() => setCustomRanges(prev => prev.filter((_, i) => i !== idx))}>
+                                                    <Trash className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{sanitizedCustomRanges.length} PDF file{sanitizedCustomRanges.length !== 1 ? 's' : ''} will be created.</p>
+                            </div>
+                        )}
+
+                        {mode === 'fixed' && (
+                            <div className="space-y-4">
+                                <div className="p-4 border rounded-lg bg-muted/50 flex items-center gap-3">
+                                    <div className="flex-1">
+                                        <p className="font-medium">Fixed ranges</p>
+                                        <p className="text-xs text-muted-foreground">Split into files of N pages each.</p>
+                                    </div>
+                                    <Label className="text-sm">Pages per file</Label>
+                                    <Input type="number" className="w-24" min={1} max={pages.length} value={fixedSize} onChange={(e) => setFixedSize(Number(e.target.value))} />
+                                </div>
+                                <p className="text-sm text-muted-foreground">{fixedRanges.length} PDF file{fixedRanges.length !== 1 ? 's' : ''} will be created.</p>
+                            </div>
+                        )}
 
                         <div className="flex justify-center">
                             <Button 
                                 size="lg" 
                                 onClick={handleSplit} 
-                                disabled={isLoading || selectedPages.length === 0}
+                                disabled={isLoading || computedRanges.length === 0}
                                 className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-500 hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
                             >
                                 {isLoading ? (
@@ -512,7 +707,9 @@ export default function SplitPdfPage() {
                                 ) : (
                                     <>
                                         <Scissors className="mr-2 h-5 w-5" />
-                                        Split {selectedPages.length} Page{selectedPages.length !== 1 ? 's' : ''} with AI
+                                        {mode === 'select' 
+                                            ? `Split ${selectedPages.length} Page${selectedPages.length !== 1 ? 's' : ''} with AI`
+                                            : `Split ${computedRanges.length} File${computedRanges.length !== 1 ? 's' : ''} with AI`}
                                     </>
                                 )}
                             </Button>

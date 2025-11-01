@@ -121,19 +121,65 @@ export type OrganiseWhatsappChatOutput = z.infer<
   typeof OrganiseWhatsappChatOutputSchema
 >;
 
+const SignatureAssetSchema = z.object({
+  id: z.string().describe("Unique identifier for the signature asset."),
+  imageUri: z.string().describe("Signature image as a data URI (PNG/JPEG)."),
+});
+export type SignatureAsset = z.infer<typeof SignatureAssetSchema>;
+
 const SignaturePlacementSchema = z.object({
-  pageIndex: z.number().int().describe("The 0-based index of the page to place the signature on."),
+  pageIndex: z
+    .number()
+    .int()
+    .describe("The 0-based index of the page to place the signature on."),
   x: z.number().describe("The x-coordinate for the signature placement."),
   y: z.number().describe("The y-coordinate for the signature placement."),
   width: z.number().describe("The width of the signature."),
   height: z.number().describe("The height of the signature."),
+  signatureId: z
+    .string()
+    .optional()
+    .describe(
+      "ID of the signature asset to use for this placement. If omitted, the single signatureImageUri will be used."
+    ),
+  dateText: z
+    .string()
+    .optional()
+    .describe(
+      "Optional date text to render near the signature (e.g., 'Signed on 2025-11-01')."
+    ),
+  dateOffsetX: z
+    .number()
+    .optional()
+    .describe("Horizontal offset for date text relative to the signature box."),
+  dateOffsetY: z
+    .number()
+    .optional()
+    .describe("Vertical offset for date text relative to the signature box."),
+  dateFontSize: z
+    .number()
+    .optional()
+    .describe("Font size for the date text."),
 });
 export type SignaturePlacement = z.infer<typeof SignaturePlacementSchema>;
 
 export const ESignPdfInputSchema = z.object({
   pdfUri: z.string().describe("The PDF file to be signed as a data URI."),
-  signatureImageUri: z.string().describe("The signature image as a data URI."),
-  placements: z.array(SignaturePlacementSchema).describe("An array of signature placements."),
+  signatureImageUri: z
+    .string()
+    .optional()
+    .describe(
+      "The signature image as a data URI for single-asset signing. Optional when using 'signatures'."
+    ),
+  signatures: z
+    .array(SignatureAssetSchema)
+    .optional()
+    .describe(
+      "Optional list of signature assets to support multi-signer placements."
+    ),
+  placements: z
+    .array(SignaturePlacementSchema)
+    .describe("An array of signature placements."),
 });
 export type ESignPdfInput = z.infer<typeof ESignPdfInputSchema>;
 

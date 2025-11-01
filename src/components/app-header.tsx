@@ -266,64 +266,53 @@ const AIToolsMenu = () => {
     );
 };
 
-const MobileNav = () => {
-    const [isOpen, setIsOpen] = useState(false);
+const MobileNav = ({ onClose }: { onClose: () => void }) => {
     return (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
-                    <span className="sr-only">Open Menu</span>
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-                <SheetHeader>
-                    <SheetTitle className="flex items-center gap-2">
-                        <Eraser className="h-6 w-6 text-primary" />
-                        <span>SmartPDFx</span>
-                    </SheetTitle>
-                </SheetHeader>
-                <ScrollArea className="h-[calc(100vh-80px)] w-full pr-4">
-                    <div className="flex flex-col space-y-4 py-4">
-                        <Link href="/" onClick={() => setIsOpen(false)} className="text-lg font-medium">Home</Link>
-                        
-                        {/* Popular Tools Section */}
-                        <div>
-                            <h3 className="font-semibold text-foreground mb-2 mt-4 flex items-center gap-2">
-                                <Star className="h-4 w-4" />
-                                Popular Tools
-                            </h3>
-                            <div className="flex flex-col space-y-2">
-                                <Link href="/pdf-to-word" onClick={() => setIsOpen(false)} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-                                    <FileText className="h-5 w-5" />
-                                    <span>PDF to Word</span>
-                                </Link>
-                                <Link href="/jpg-to-pdf" onClick={() => setIsOpen(false)} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-                                    <FileImage className="h-5 w-5" />
-                                    <span>JPG to PDF</span>
-                                </Link>
+        <SheetContent side="left">
+            <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                    <Eraser className="h-6 w-6 text-primary" />
+                    <span>SmartPDFx</span>
+                </SheetTitle>
+            </SheetHeader>
+            <ScrollArea className="h-[calc(100vh-80px)] w-full pr-4">
+                <div className="flex flex-col space-y-4 py-4">
+                    <Link href="/" onClick={onClose} className="text-lg font-medium">Home</Link>
 
-
-                            </div>
+                    {/* Popular Tools Section */}
+                    <div>
+                        <h3 className="font-semibold text-foreground mb-2 mt-4 flex items-center gap-2">
+                            <Star className="h-4 w-4" />
+                            Popular Tools
+                        </h3>
+                        <div className="flex flex-col space-y-2">
+                            <Link href="/pdf-to-word" onClick={onClose} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                                <FileText className="h-5 w-5" />
+                                <span>PDF to Word</span>
+                            </Link>
+                            <Link href="/jpg-to-pdf" onClick={onClose} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                                <FileImage className="h-5 w-5" />
+                                <span>JPG to PDF</span>
+                            </Link>
                         </div>
+                    </div>
 
-                        {toolCategories.map(category => (
-                             <div key={category.id}>
-                                <h3 className="font-semibold text-foreground mb-2 mt-4">{category.name}</h3>
-                                <div className="flex flex-col space-y-2">
+                    {toolCategories.map(category => (
+                        <div key={category.id}>
+                            <h3 className="font-semibold text-foreground mb-2 mt-4">{category.name}</h3>
+                            <div className="flex flex-col space-y-2">
                                 {tools.filter(tool => tool.category === category.id).map(tool => (
-                                    <Link href={tool.href} key={tool.title} onClick={() => setIsOpen(false)} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                                    <Link href={tool.href} key={tool.title} onClick={onClose} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                                         <tool.icon className="h-5 w-5" style={{ color: tool.color }} />
                                         <span>{tool.title}</span>
                                     </Link>
                                 ))}
-                                </div>
                             </div>
-                        ))}
-                    </div>
-                </ScrollArea>
-            </SheetContent>
-        </Sheet>
+                        </div>
+                    ))}
+                </div>
+            </ScrollArea>
+        </SheetContent>
     );
 }
 
@@ -496,7 +485,7 @@ export function AppHeader() {
                             <span className="sr-only">Toggle menu</span>
                         </Button>
                     </SheetTrigger>
-                    <MobileNav />
+                    <MobileNav onClose={() => setIsMobileMenuOpen(false)} />
                 </Sheet>
 
                 {/* Logo */}
