@@ -30,6 +30,9 @@ const inter = Inter({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
+
+// AdSense client ID: use env if set, otherwise default to provided ID
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? 'ca-pub-9014719958396297';
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,17 +47,13 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="apple-touch-icon" href="/favicon-192x192.png" />
-        {/* AdSense: load script and verification meta only when client ID is configured */}
-        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
-          <>
-            <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID} />
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-              crossOrigin="anonymous"
-            />
-          </>
-        )}
+        {/* Google AdSense */}
+        <meta name="google-adsense-account" content={ADSENSE_CLIENT_ID} />
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+        />
       </head>
       <body className={`${inter.className} font-body antialiased bg-background text-foreground`}>
         <ThemeProvider
