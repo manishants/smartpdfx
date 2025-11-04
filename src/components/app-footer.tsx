@@ -110,6 +110,9 @@ export function AppFooter() {
                             <Link href="/terms-and-conditions" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 Terms & Conditions
                             </Link>
+                            <Link href="/disclaimer" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Disclaimer
+                            </Link>
                         </nav>
                     </div>
                 </div>

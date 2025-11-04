@@ -10,13 +10,21 @@ declare global {
 }
 
 export function GoogleSidebarAd() {
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  const slot = process.env.NEXT_PUBLIC_ADSENSE_SIDEBAR_SLOT_ID;
+
   useEffect(() => {
+    if (!client || !slot) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (err) {
       console.error("AdSense error:", err);
     }
   }, []);
+
+  if (!client || !slot) {
+    return null;
+  }
 
   return (
     <div className="w-full h-full min-h-[250px] max-w-full">
@@ -32,8 +40,8 @@ export function GoogleSidebarAd() {
               width: '100%',
               height: '100%'
             }}
-            data-ad-client="ca-pub-YOUR_CLIENT_ID" // IMPORTANT: Replace with your Google AdSense Client ID
-            data-ad-slot="YOUR_SIDEBAR_AD_SLOT_ID" // IMPORTANT: Replace with your new Sidebar Ad Slot ID
+            data-ad-client={client}
+            data-ad-slot={slot}
             data-ad-format="auto"
             data-full-width-responsive="true"
           ></ins>

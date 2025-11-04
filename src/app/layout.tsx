@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { MainLayout } from '@/components/main-layout';
 import { ThemeProvider } from '@/components/theme-provider';
+import { SwRegister } from '@/components/sw-register';
 export const metadata: Metadata = {
   title: {
     default: 'SmartPDFx - Free PDF & Image Tools',
@@ -37,12 +38,15 @@ export default function RootLayout({
         ></link>
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#ffffff" />
-        <link rel="apple-touch-icon" href="/favion.png" />
-        <script 
-          async 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_CLIENT_ID"
-          crossOrigin="anonymous"
-        ></script>
+        <link rel="apple-touch-icon" href="/favicon-192x192.png" />
+        {/* Load AdSense script only when client ID is configured */}
+        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body className="font-body antialiased bg-background text-foreground">
         <ThemeProvider
@@ -53,6 +57,8 @@ export default function RootLayout({
         >
           <MainLayout>{children}</MainLayout>
           <Toaster />
+          {/* Register Service Worker for PWA functionality */}
+          <SwRegister />
         </ThemeProvider>
       </body>
     </html>

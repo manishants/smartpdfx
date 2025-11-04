@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
                 </CardHeader>
                 <CardContent className="prose dark:prose-invert max-w-none">
                     <p>
-                        Welcome to SmartPDFx. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our website and its tools.
+                        Welcome to SmartPDFx. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our website and tools.
                     </p>
 
                     <h2>1. Information We Collect</h2>
@@ -32,24 +32,32 @@ export default function PrivacyPolicyPage() {
                     <p>We take your privacy and security seriously.</p>
                     <ul>
                         <li><strong>File Processing:</strong> All file processing is done automatically. There is no manual intervention or viewing of your files by our team.</li>
-                        <li><strong>File Deletion:</strong> To protect your privacy, all uploaded files are automatically and permanently deleted from our servers within one hour of processing. We do not store your files longer than necessary to provide the service.</li>
+                        <li><strong>File Deletion:</strong> Uploaded files are automatically and permanently deleted from our servers within one hour of processing. We do not store your files longer than necessary to provide the service.</li>
                         <li><strong>Security Measures:</strong> We use standard security measures, including HTTPS encryption, to protect data transmitted between your browser and our servers.</li>
                     </ul>
 
-                    <h2>4. Advertising and Third-Party Services</h2>
-                    <p>We may use third-party advertising companies, such as Google AdSense, to serve ads when you visit our website. These companies may use information (not including your name, address, email address, or telephone number) about your visits to this and other websites in order to provide advertisements about goods and services of interest to you.</p>
+                    <h2>4. Advertising and Cookies (Google AdSense)</h2>
+                    <p>We use Google AdSense to display ads. AdSense may use cookies to serve ads based on a user's prior visits to this and other websites.</p>
                     <ul>
-                        <li>Google's use of the DART cookie enables it to serve ads to your users based on their visit to your sites and other sites on the Internet.</li>
-                        <li>Users may opt out of the use of the DART cookie by visiting the Google ad and content network privacy policy.</li>
+                        <li>Google and its partners use advertising cookies to serve ads based on your visits to this and other sites.</li>
+                        <li>You can opt out of personalized advertising by visiting Google's Ads Settings: <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">https://adssettings.google.com</a>.</li>
+                        <li>Alternatively, opt out of some third-party vendors' use of cookies for personalized ads at <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">https://www.aboutads.info/choices/</a>.</li>
+                        <li>Review Google's Privacy Policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a>.</li>
                     </ul>
 
-                    <h2>5. Your Rights</h2>
-                    <p>You have the right to use our service with the assurance that your data is handled responsibly. Since we do not create user accounts or store personal information, the primary right is the control you have over the files you upload. You can be assured that your files are not stored on our systems after the brief processing period.</p>
+                    <h3>Third-Party Links</h3>
+                    <p>Our site may include links to third-party websites. We are not responsible for their privacy practices. Please review the privacy policies of any external sites you visit.</p>
 
-                    <h2>6. Changes to This Privacy Policy</h2>
+                    <h2>5. Your Rights</h2>
+                    <p>You have the right to use our service with the assurance that your data is handled responsibly. Since we do not create user accounts or store personal information, your primary right is control over the files you upload.</p>
+
+                    <h2>6. Children's Privacy</h2>
+                    <p>Our services are not directed to children under 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us and we will delete it.</p>
+
+                    <h2>7. Changes to This Privacy Policy</h2>
                     <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
 
-                    <h2>7. Contact Us</h2>
+                    <h2>8. Contact Us</h2>
                     <p>If you have any questions about this Privacy Policy, please contact us through our contact page.</p>
                 </CardContent>
             </Card>

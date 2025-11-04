@@ -10,13 +10,22 @@ declare global {
 }
 
 export function GoogleAd() {
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  const slot = process.env.NEXT_PUBLIC_ADSENSE_AD_SLOT_ID;
+
   useEffect(() => {
+    if (!client || !slot) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (err) {
       console.error(err);
     }
   }, []);
+
+  if (!client || !slot) {
+    // Hide ad container if not configured
+    return null;
+  }
 
   return (
     <div className="w-full max-w-full mx-auto my-4 px-2 sm:px-4">
@@ -30,8 +39,8 @@ export function GoogleAd() {
               minHeight: '100px',
               maxWidth: '100%'
             }}
-            data-ad-client="ca-pub-YOUR_CLIENT_ID" // IMPORTANT: Replace with your Google AdSense Client ID
-            data-ad-slot="YOUR_AD_SLOT_ID"       // IMPORTANT: Replace with your Ad Slot ID
+            data-ad-client={client}
+            data-ad-slot={slot}
             data-ad-format="auto"
             data-full-width-responsive="true"
           ></ins>

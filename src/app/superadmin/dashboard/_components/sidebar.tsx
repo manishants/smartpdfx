@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   Crown, 
   LayoutDashboard, 
@@ -24,10 +24,14 @@ import {
   Calendar,
   TrendingUp,
   Activity,
-  Key as KeyIcon
+  Key as KeyIcon,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { setLocalSuperadminSession } from "@/lib/auth/middleware";
 
 const NavLink = ({ 
   href, 
@@ -60,9 +64,22 @@ const NavLink = ({
 
 export function SuperadminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
   const isBlogActive = pathname.startsWith('/superadmin/blog');
   const isPageActive = pathname.startsWith('/superadmin/pages');
   const isSEOActive = pathname.startsWith('/superadmin/seo');
+
+  const handleLogout = async () => {
+    try {
+      // Attempt to sign out Supabase user if present
+      await supabase.auth.signOut();
+    } catch {}
+    // Clear local superadmin session (local dev fallback)
+    setLocalSuperadminSession(false);
+    // Redirect to login
+    router.push('/superadmin/login');
+  };
 
   return (
     <div className="hidden border-r bg-gradient-to-b from-white to-slate-50 md:block w-72 shadow-lg">
@@ -208,6 +225,14 @@ export function SuperadminSidebar() {
               <NavLink href="/superadmin/settings" icon={Settings}>
                 System Settings
               </NavLink>
+            </div>
+
+            {/* Logout */}
+            <div className="pt-4 mt-4 border-t">
+              <Button variant="destructive" onClick={handleLogout} className="w-full">
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </Button>
             </div>
           </nav>
         </div>

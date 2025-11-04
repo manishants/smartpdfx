@@ -22,6 +22,13 @@ export default function TermsAndConditionsPage() {
                         SmartPDFx provides a collection of online tools for document and image processing. You agree to use our services for their intended purposes. You are responsible for the content of the files you upload. You agree not to upload any files that are illegal, malicious, or infringe on the copyrights of others.
                     </p>
 
+                    <h3>Acceptable Use</h3>
+                    <ul>
+                      <li>Do not attempt to disrupt, overload, or compromise the security of the Service.</li>
+                      <li>Do not use the Service to process content that is unlawful, harmful, or violates third‑party rights.</li>
+                      <li>Do not reverse engineer, duplicate, or resell the Service without permission.</li>
+                    </ul>
+
                     <h2>2. File Handling and Privacy</h2>
                     <p>
                         We are committed to user privacy. All files uploaded to our servers are processed automatically and are permanently deleted within one hour. We do not access, view, or store your files beyond this temporary processing window. Please review our Privacy Policy for more detailed information.
@@ -32,12 +39,22 @@ export default function TermsAndConditionsPage() {
                         The Service and its original content, features, and functionality are and will remain the exclusive property of SmartPDFx. You may not duplicate, copy, or reuse any portion of the HTML/CSS, Javascript, or visual design elements or concepts without express written permission from us.
                     </p>
 
+                    <h3>Third‑Party Links and Content</h3>
+                    <p>
+                      The Service may contain links to third‑party websites or display third‑party content (including advertisements). We do not control and are not responsible for the content or privacy practices of these sites. Your interactions with third parties are solely between you and those parties.
+                    </p>
+
                     <h2>4. Disclaimers and Limitation of Liability</h2>
                     <p>
                         The Service is provided on an "AS IS" and "AS AVAILABLE" basis. We do not warrant that the service will be uninterrupted, secure, or error-free.
                     </p>
                      <p>
                         While we strive for accuracy, we do not guarantee that the processing of your files will be flawless. The output from our tools should be reviewed for accuracy. SmartPDFx shall not be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses, resulting from the use of our services.
+                    </p>
+
+                    <h3>Ads and Monetization</h3>
+                    <p>
+                      The Service may display advertisements via Google AdSense and other providers. Ads are provided by third parties and may use cookies to personalize content. See our Privacy Policy for details and opt‑out options.
                     </p>
                     
                     <h2>5. Governing Law</h2>
@@ -50,7 +67,12 @@ export default function TermsAndConditionsPage() {
                         We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide notice of any changes by posting the new Terms and Conditions on this page. By continuing to access or use our Service after any revisions become effective, you agree to be bound by the revised terms.
                     </p>
 
-                    <h2>7. Contact Us</h2>
+                    <h2>7. Copyright and DMCA</h2>
+                    <p>
+                      If you believe that content processed via our Service infringes your copyright, please contact us with sufficient detail to identify the material and your ownership. We will review and respond in accordance with applicable law.
+                    </p>
+
+                    <h2>8. Contact Us</h2>
                     <p>
                         If you have any questions about these Terms, please contact us.
                     </p>
