@@ -11,19 +11,10 @@ export const metadata: Metadata = {
   description: 'A free online suite of tools to compress, convert, edit, and secure your PDF and image files. Fast, private, and easy to use.',
   keywords: ['PDF tools', 'image compressor', 'PDF converter', 'e-sign PDF', 'mask aadhar', 'online tools', 'free'],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? 'https://smartpdfx.com'),
+  // Unify favicon sitewide to use the default app/favicon.ico
+  // Removing per-page icon overrides prevents favicon from changing across routes
   icons: {
-    icon: [
-      { url: '/favion.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favion.png', sizes: '48x48', type: 'image/png' },
-      { url: '/favion.png', sizes: '72x72', type: 'image/png' },
-      { url: '/favion.png', sizes: '96x96', type: 'image/png' },
-      { url: '/favicon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/favion.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/favion.png', sizes: '180x180' },
-    ],
-    shortcut: '/favion.png',
+    icon: '/favicon.ico',
   },
 };
 export default function RootLayout({

@@ -83,12 +83,14 @@ function getAppPages(): StoredPage[] {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const URL = getSiteUrl()
+  // Temporarily exclude blog from sitemap until blog structure is finalized
+  const includeBlogInSitemap = false
 
   // Static pages
   const staticPages = [
     '',
     '/about',
-    '/blog',
+    // '/blog' excluded for now
     '/contact',
     '/privacy-policy',
     '/terms-and-conditions',
@@ -120,25 +122,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Blog posts from Supabase (published only)
   let blogPages: MetadataRoute.Sitemap = []
-  try {
-    const cookieStore = cookies()
-    const supabase = createClient()
-    // Graceful handling if supabase not configured
-    const { data, error } = await supabase
-      .from('blogs')
-      .select('slug, date, published')
-      .eq('published', true)
+  if (includeBlogInSitemap) {
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('slug, date, published')
+        .eq('published', true)
 
-    if (!error && Array.isArray(data)) {
-      blogPages = data.map((post: any) => ({
-        url: `${URL}/blog/${post.slug}`,
-        lastModified: new Date(post.date || Date.now()).toISOString(),
-        changeFrequency: 'weekly',
-        priority: 0.8,
-      }))
+      if (!error && Array.isArray(data)) {
+        blogPages = data.map((post: any) => ({
+          url: `${URL}/blog/${post.slug}`,
+          lastModified: new Date(post.date || Date.now()).toISOString(),
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        }))
+      }
+    } catch {
+      blogPages = []
     }
-  } catch {
-    blogPages = []
   }
 
   return [...staticPages, ...toolPages, ...appPagesMerged, ...blogPages]

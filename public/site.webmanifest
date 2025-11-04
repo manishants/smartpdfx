@@ -13,7 +13,7 @@
       "purpose": "any"
     },
     {
-      "src": "/favion.png",
+      "src": "/favicon-192x192.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

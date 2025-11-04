@@ -9,6 +9,12 @@ type AccessResult = {
 
 export async function checkRouteAccess(pathname: string): Promise<AccessResult> {
   try {
+    const openSuperadmin =
+      typeof process !== 'undefined' &&
+      process.env
+        ? process.env.NEXT_PUBLIC_SUPERADMIN_OPEN !== 'false'
+        : true
+
     // Allow all public routes
     if (!pathname.startsWith('/superadmin') && !pathname.startsWith('/admin')) {
       return { hasAccess: true };
@@ -24,6 +30,7 @@ export async function checkRouteAccess(pathname: string): Promise<AccessResult> 
     const isAdmin = typeof window !== 'undefined' && window.localStorage.getItem(LOCAL_ADMIN_KEY) === 'true';
 
     if (pathname.startsWith('/superadmin')) {
+      if (openSuperadmin) return { hasAccess: true };
       if (isSuperadmin) return { hasAccess: true };
       return { hasAccess: false, redirectTo: '/superadmin/login' };
     }
