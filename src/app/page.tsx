@@ -262,26 +262,6 @@ export default function Home() {
         </div>
       </section>
       <AllTools />
-      {/* Donation QR Section */}
-      <section className="w-full py-16 bg-gradient-to-b from-muted/30 to-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">
-              Support <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">SmartPDFx</span>
-            </h2>
-            <p className="text-muted-foreground">Scan the QR to donate via UPI. Thank you!</p>
-          </div>
-          <div className="flex flex-col items-center gap-4">
-            <div className="p-4 bg-white/90 rounded-2xl border border-white/20 shadow-lg">
-              <Image src="/qr.jpeg" alt="SmartPDFx UPI QR" width={220} height={220} className="rounded-xl" />
-            </div>
-            <div className="text-center">
-              <div className="text-sm text-muted-foreground">UPI ID</div>
-              <div className="font-semibold">manishants@ybl</div>
-            </div>
-          </div>
-        </div>
-      </section>
       <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} />
     </>
   );
