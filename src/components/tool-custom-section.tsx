@@ -13,8 +13,13 @@ interface RendererProps {
 }
 
 export function ToolCustomSectionRenderer({ slug, className }: RendererProps) {
-  const sections = toolCustomSections[slug];
-  if (!sections || sections.length === 0) return null;
+  const raw = toolCustomSections[slug] as unknown;
+  const sections = Array.isArray(raw)
+    ? raw
+    : raw && typeof raw === 'object'
+      ? [raw as any]
+      : [];
+  if (sections.length === 0) return null;
 
   const renderButtons = (buttons?: ToolCustomSectionData['buttons']) => {
     if (!buttons || buttons.length === 0) return null;
