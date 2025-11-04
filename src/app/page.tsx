@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import Link from "next/link";
 import { tools } from "@/lib/data";
 import Image from "next/image";
+import heroImage from "../../public/hero_section_smartpdfx.webp";
 import { ArrowDownUp, FileSignature, Scissors, FileJson, RotateCcw, Copy, Check, Heart, Grid, X, Sparkles, Zap, Star, ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -232,9 +233,12 @@ export default function Home() {
                   alt="SmartPDFx Hero"
                   className="relative mx-auto aspect-video overflow-hidden rounded-3xl object-cover w-full shadow-2xl border border-white/10"
                   data-ai-hint="digital tools files"
-                  height="400"
-                  src="/hero_section_smartpdfx.webp"
-                  width="600"
+                  height={400}
+                  width={600}
+                  src={heroImage}
+                  priority
+                  placeholder="blur"
+                  sizes="(max-width: 1024px) 100vw, 600px"
                 />
               </div>
             </div>

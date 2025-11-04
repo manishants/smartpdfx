@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { MainLayout } from '@/components/main-layout';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SwRegister } from '@/components/sw-register';
+import { Inter } from 'next/font/google';
 export const metadata: Metadata = {
   title: {
     default: 'SmartPDFx - Free PDF & Image Tools',
@@ -22,6 +23,13 @@ export const metadata: Metadata = {
     apple: '/favicon-192x192.png',
   },
 };
+
+// Self-host Inter to avoid render-blocking external font requests
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,16 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        ></link>
+        {/* Fonts loaded via next/font for better FCP and LCP */}
         {/* Explicit favicon link for broad browser support */}
         <link rel="icon" type="image/png" href="/favion.png" />
         <link rel="manifest" href="/site.webmanifest" />
@@ -57,7 +56,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className="font-body antialiased bg-background text-foreground">
+      <body className={`${inter.className} font-body antialiased bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

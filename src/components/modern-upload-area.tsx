@@ -3,6 +3,7 @@
 import { ReactNode, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent } from "@/components/ui/card";
+import { GoogleToolBelowUploadAd } from "@/components/google-tool-below-upload-ad";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -120,6 +121,8 @@ export function ModernUploadArea({
           </div>
         </CardContent>
       </Card>
+      {/* Ad: renders consistently below upload area across all tool pages */}
+      <GoogleToolBelowUploadAd />
     </div>
   );
 }
