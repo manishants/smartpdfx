@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Zap, Star, Heart, Mail, MapPin, Phone, Facebook, Instagram, Youtube, Twitter } from "lucide-react";
+import { Sparkles, Zap, Star, Heart, Mail, MapPin, Phone, Facebook, Instagram, Youtube, Twitter, Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function AppFooter() {
@@ -146,6 +146,9 @@ export function AppFooter() {
                                     </a>
                                     <a href="https://x.com/smartpdfx" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 hover:from-primary/20 hover:to-blue-600/20 hover:scale-105 transition">
                                         <Twitter className="h-4 w-4 text-primary" />
+                                    </a>
+                                    <a href="https://linkedin.com/company/smartpdfx" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 hover:from-primary/20 hover:to-blue-600/20 hover:scale-105 transition">
+                                        <Linkedin className="h-4 w-4 text-primary" />
                                     </a>
                                 </div>
                             </div>
