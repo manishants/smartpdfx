@@ -12,10 +12,14 @@ export const metadata: Metadata = {
   description: 'A free online suite of tools to compress, convert, edit, and secure your PDF and image files. Fast, private, and easy to use.',
   keywords: ['PDF tools', 'image compressor', 'PDF converter', 'e-sign PDF', 'mask aadhar', 'online tools', 'free'],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? 'https://smartpdfx.com'),
-  // Unify favicon sitewide to use the default app/favicon.ico
-  // Removing per-page icon overrides prevents favicon from changing across routes
+  // Use PNG icons from /public for consistent favicon across routes
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favion.png', type: 'image/png' },
+      { url: '/favicon-192x192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/favicon512.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/favicon-192x192.png',
   },
 };
 export default function RootLayout({
@@ -36,6 +40,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         ></link>
+        {/* Explicit favicon link for broad browser support */}
+        <link rel="icon" type="image/png" href="/favion.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="apple-touch-icon" href="/favicon-192x192.png" />
