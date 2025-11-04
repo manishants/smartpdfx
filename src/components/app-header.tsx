@@ -342,7 +342,7 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
           <div className="flex flex-col items-center gap-4">
              <div className="p-2 bg-white rounded-lg border">
                 <Image
-                  src="donation_qr_smartpdfx.webp"
+                  src="/qr.jpeg"
                   alt="Scan to pay"
                   width={200}
                   height={200}

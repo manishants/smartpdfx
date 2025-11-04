@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Zap, Star, Heart, Mail, MapPin, Phone } from "lucide-react";
+import { Sparkles, Zap, Star, Heart, Mail, MapPin, Phone, Facebook, Instagram, Youtube, Twitter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function AppFooter() {
@@ -126,12 +126,29 @@ export function AppFooter() {
                             </div>
                         </div>
                         
-                        {/* AI Badge */}
-                        <div className="flex items-center gap-2">
+                        {/* AI Badge + Socials */}
+                        <div className="flex items-center gap-4">
                             <Badge variant="outline" className="px-3 py-1 bg-gradient-to-r from-primary/5 to-blue-600/5 border-primary/20 text-primary">
                                 <Sparkles className="w-3 h-3 mr-1" />
                                 Powered by AI
                             </Badge>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">Follow us</span>
+                                <div className="flex items-center gap-2">
+                                    <a href="https://facebook.com/smartpdfx" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 hover:from-primary/20 hover:to-blue-600/20 hover:scale-105 transition">
+                                        <Facebook className="h-4 w-4 text-primary" />
+                                    </a>
+                                    <a href="https://instagram.com/smartpdfx" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 hover:from-primary/20 hover:to-blue-600/20 hover:scale-105 transition">
+                                        <Instagram className="h-4 w-4 text-primary" />
+                                    </a>
+                                    <a href="https://youtube.com/@smartpdfx" aria-label="YouTube" target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 hover:from-primary/20 hover:to-blue-600/20 hover:scale-105 transition">
+                                        <Youtube className="h-4 w-4 text-primary" />
+                                    </a>
+                                    <a href="https://x.com/smartpdfx" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-blue-600/10 border border-primary/20 hover:from-primary/20 hover:to-blue-600/20 hover:scale-105 transition">
+                                        <Twitter className="h-4 w-4 text-primary" />
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

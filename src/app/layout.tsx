@@ -17,7 +17,7 @@ export const metadata: Metadata = {
       { url: '/favion.png', sizes: '48x48', type: 'image/png' },
       { url: '/favion.png', sizes: '72x72', type: 'image/png' },
       { url: '/favion.png', sizes: '96x96', type: 'image/png' },
-      { url: '/favion.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/favion.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
