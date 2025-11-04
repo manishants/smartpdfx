@@ -14,8 +14,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Tool-specific sections removed
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +63,7 @@ const FAQ = () => (
 
 
 export default function MergePdfPage() {
-  const { sections } = useToolSections('PDF Merging');
+  // Tool-specific sections removed
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isMerging, setIsMerging] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -362,12 +362,10 @@ export default function MergePdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections 
-        toolName="PDF Merging" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed */}
 
       <FAQ />
+      <ToolCustomSectionRenderer slug="merge-pdf" />
       <AllTools />
     </ModernPageLayout>
   );

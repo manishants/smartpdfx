@@ -8,23 +8,14 @@ const teamMembers = [
   {
     id: 1,
     name: "Manish Singh",
-    title: "CEO & Co-Founder of Smartpdfx",
+    title: "Founder And CEO of Smartpdfx",
     description: "Manish Singh, the visionary CEO and Co-Founder of Smartpdfx, comes from a strong technical background and has always been passionate about building digital solutions that empower people. The idea of Smartpdfx was born when Manish noticed that most of the popular online PDF tools were developed by foreign companies and charged users for even basic features. Believing that technology should be accessible to everyone, he envisioned creating a 100% free, made-in-India alternative.\n\nWith his deep understanding of web technologies, Manish took the initiative to design, develop, and launch Smartpdfx from the ground up. He later shared this innovative idea with Nishant Singh, his like-minded partner, who also came from a technical background. Together, they refined the vision and laid the foundation for what is now one of India's most promising free PDF tool platforms.\n\nManish's leadership is driven by innovation, transparency, and a mission to make Smartpdfx a global name in digital productivity — proudly built in India, for the world.",
     seoKeywords: "Manish Singh Smartpdfx, CEO of Smartpdfx, Indian free PDF tools founder, made in India PDF website",
     image: "/team/ceo_cofounder_manish_singh_smartpdfx.png",
     role: "Visionary Leader",
-    badges: ["CEO", "Co-Founder", "Tech Visionary"]
+    badges: ["CEO", "Founder", "Tech Visionary"]
   },
-  {
-    id: 2,
-    name: "Ranjeet Shukla",
-    title: "Investor",
-    description: "Ranjeet Shukla, one of the key investors in Smartpdfx, brings with him the discipline, leadership, and vision shaped by his proud service in the Indian Army. During a vacation, Ranjeet met Manish Singh and Nishant Singh, who shared their dream of creating a free, Indian-built PDF tool platform. Inspired by their passion and the patriotic mission behind it, he immediately decided to support the venture.\n\nRanjeet saw Smartpdfx as more than just a digital tool — he saw it as an opportunity to empower millions of users in India who rely on document tools daily but often face high subscription costs. His belief that technology should be accessible and free for all aligned perfectly with the team's mission.\n\nAs an investor, Ranjeet continues to provide strategic guidance and moral support, helping Smartpdfx grow responsibly while staying true to its founding vision. His contribution reflects not only his faith in the project but also his dedication to promoting self-reliance in Indian technology.",
-    seoKeywords: "Ranjeet Shukla Smartpdfx investor, Indian Army investor, free PDF tools investor India, Smartpdfx funding",
-    image: "/team/investor_ranjeet_shukla.png",
-    role: "Strategic Investor",
-    badges: ["Investor", "Ex-Army", "Strategic Advisor"]
-  },
+  
   {
     id: 3,
     name: "Sumitra Singh",

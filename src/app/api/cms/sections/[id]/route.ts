@@ -8,23 +8,8 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'tool' or 'home'
-
-    let section = null;
-
-    if (type === 'tool') {
-      const toolSections = await cmsStore.getToolSections();
-      section = toolSections.find(s => s.id === id);
-    } else if (type === 'home') {
-      const homeSections = await cmsStore.getHomePageSections();
-      section = homeSections.find(s => s.id === id);
-    } else {
-      // Search in both types
-      const toolSections = await cmsStore.getToolSections();
-      const homeSections = await cmsStore.getHomePageSections();
-      section = [...toolSections, ...homeSections].find(s => s.id === id);
-    }
+    const homeSections = await cmsStore.getAllHomePageSections();
+    const section = homeSections.find(s => s.id === id) || null;
 
     if (!section) {
       return NextResponse.json(
@@ -53,23 +38,8 @@ export async function PUT(
 ) {
   try {
     const { id } = params;
-    const body = await request.json();
-    const { type, ...updateData } = body;
-
-    if (!type || !['tool', 'home'].includes(type)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid section type. Must be "tool" or "home"' },
-        { status: 400 }
-      );
-    }
-
-    let updatedSection;
-
-    if (type === 'tool') {
-      updatedSection = await cmsStore.updateToolSection(id, updateData);
-    } else {
-      updatedSection = await cmsStore.updateHomePageSection(id, updateData);
-    }
+    const updateData = await request.json();
+    const updatedSection = await cmsStore.updateHomePageSection(id, updateData);
 
     if (!updatedSection) {
       return NextResponse.json(
@@ -98,23 +68,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = params;
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'tool' or 'home'
-
-    if (!type || !['tool', 'home'].includes(type)) {
-      return NextResponse.json(
-        { success: false, error: 'Section type is required. Must be "tool" or "home"' },
-        { status: 400 }
-      );
-    }
-
-    let success = false;
-
-    if (type === 'tool') {
-      success = await cmsStore.deleteToolSection(id);
-    } else {
-      success = await cmsStore.deleteHomePageSection(id);
-    }
+    const success = await cmsStore.deleteHomePageSection(id);
 
     if (!success) {
       return NextResponse.json(

@@ -8,47 +8,19 @@ export async function POST(
 ) {
   try {
     const { id } = params;
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'tool' or 'home'
+    const homeSections = await cmsStore.getAllHomePageSections();
+    const section = homeSections.find(s => s.id === id);
 
-    if (!type || !['tool', 'home'].includes(type)) {
+    if (!section) {
       return NextResponse.json(
-        { success: false, error: 'Section type is required. Must be "tool" or "home"' },
-        { status: 400 }
+        { success: false, error: 'Section not found' },
+        { status: 404 }
       );
     }
 
-    let updatedSection;
-
-    if (type === 'tool') {
-      const toolSections = await cmsStore.getToolSections();
-      const section = toolSections.find(s => s.id === id);
-      
-      if (!section) {
-        return NextResponse.json(
-          { success: false, error: 'Section not found' },
-          { status: 404 }
-        );
-      }
-
-      updatedSection = await cmsStore.updateToolSection(id, {
-        isActive: !section.isActive
-      });
-    } else {
-      const homeSections = await cmsStore.getHomePageSections();
-      const section = homeSections.find(s => s.id === id);
-      
-      if (!section) {
-        return NextResponse.json(
-          { success: false, error: 'Section not found' },
-          { status: 404 }
-        );
-      }
-
-      updatedSection = await cmsStore.updateHomePageSection(id, {
-        isActive: !section.isActive
-      });
-    }
+    const updatedSection = await cmsStore.updateHomePageSection(id, {
+      isActive: !section.isActive
+    });
 
     if (!updatedSection) {
       return NextResponse.json(

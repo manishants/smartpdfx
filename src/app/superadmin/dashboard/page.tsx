@@ -8,25 +8,13 @@ import {
   Globe, 
   TrendingUp, 
   Eye, 
-  Clock, 
-  CheckCircle,
   Crown,
-  BarChart3,
   Activity,
   PenTool,
   Search,
   Target,
-  Layout,
   Home
 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { cmsStore } from '@/lib/cms/store';
@@ -153,20 +141,7 @@ export default function SuperadminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="group hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-lg bg-gradient-to-br from-teal-50 to-teal-100">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-teal-700">Tool Sections</CardTitle>
-            <div className="p-2 bg-teal-600 rounded-lg group-hover:bg-teal-700 transition-colors duration-200">
-              <Layout className="h-4 w-4 text-white" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-teal-900 mb-1">{stats?.totalToolSections || 0}</div>
-            <p className="text-sm text-teal-600">
-              Across {stats?.toolsWithSections || 0} tools
-            </p>
-          </CardContent>
-        </Card>
+        {/* Tool Sections card removed: home-only sections architecture */}
 
         <Card className="group hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">

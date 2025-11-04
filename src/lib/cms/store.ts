@@ -1,4 +1,4 @@
-import { BlogPost, Page, DashboardStats, ActivityLog, Category, Tag, MediaFile, ToolSection, ToolSectionTemplate, HomePageSection, SectionStats } from '@/types/cms';
+import { BlogPost, Page, DashboardStats, ActivityLog, Category, Tag, MediaFile, HomePageSection, SectionStats } from '@/types/cms';
 import { SEOAnalyzer, generateSlug, calculateReadingTime } from '@/lib/seo/analyzer';
 
 class CMSStore {
@@ -9,8 +9,6 @@ class CMSStore {
     TAGS: 'cms_tags',
     MEDIA: 'cms_media',
     ACTIVITY: 'cms_activity',
-    TOOL_SECTIONS: 'cms_tool_sections',
-    TOOL_SECTION_TEMPLATES: 'cms_tool_section_templates',
     HOME_PAGE_SECTIONS: 'cms_home_page_sections'
   };
 
@@ -212,7 +210,7 @@ class CMSStore {
       
       // Log activity
       await this.logActivity({
-        type: 'page_created',
+        type: 'page_updated',
         message: `Created new page: ${createdPage.title}`,
         entityId: createdPage.id
       });
@@ -263,10 +261,9 @@ class CMSStore {
       totalViews,
       recentActivity: activity.slice(0, 10),
       // Section statistics
-      totalToolSections: sectionStats.totalToolSections,
       totalHomePageSections: sectionStats.totalHomePageSections,
       activeSections: sectionStats.activeSections,
-      toolsWithSections: sectionStats.toolsWithSections
+      // Tool section stats removed
     };
   }
 
@@ -402,126 +399,9 @@ class CMSStore {
     ];
   }
 
-  // Tool Sections Management
-  async getAllToolSections(): Promise<ToolSection[]> {
-    // Server-side: persist to local JSON file for superadmin edits
-    if (typeof window === 'undefined') {
-      const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'src', 'lib', 'cms', 'toolSections.json');
-      try {
-        if (!fs.existsSync(filePath)) {
-          fs.writeFileSync(filePath, JSON.stringify([], null, 2), 'utf-8');
-        }
-        const raw = fs.readFileSync(filePath, 'utf-8');
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
-    }
-    // Client-side fallback: localStorage (no database)
-    const sections = localStorage.getItem(this.STORAGE_KEYS.TOOL_SECTIONS);
-    return sections ? JSON.parse(sections) : [];
-  }
+  // Tool sections management has been removed.
 
-  async getToolSections(toolName: string): Promise<ToolSection[]> {
-    const allSections = await this.getAllToolSections();
-    return allSections.filter(section => section.toolName === toolName);
-  }
-
-  async createToolSection(sectionData: Omit<ToolSection, 'id' | 'createdAt' | 'updatedAt'>): Promise<ToolSection> {
-    const sections = await this.getAllToolSections();
-    const newSection: ToolSection = {
-      ...sectionData,
-      id: this.generateId(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    sections.push(newSection);
-    if (typeof window === 'undefined') {
-      const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'src', 'lib', 'cms', 'toolSections.json');
-      fs.writeFileSync(filePath, JSON.stringify(sections, null, 2), 'utf-8');
-    } else {
-      localStorage.setItem(this.STORAGE_KEYS.TOOL_SECTIONS, JSON.stringify(sections));
-    }
-    await this.logActivity('create', 'tool_section', newSection.id, `Created section "${newSection.title}" for ${newSection.toolName}`);
-    return newSection;
-  }
-
-  async updateToolSection(id: string, updates: Partial<ToolSection>): Promise<ToolSection | null> {
-    const sections = await this.getAllToolSections();
-    const index = sections.findIndex(section => section.id === id);
-    if (index === -1) return null;
-    sections[index] = { ...sections[index], ...updates, updatedAt: new Date() };
-    if (typeof window === 'undefined') {
-      const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'src', 'lib', 'cms', 'toolSections.json');
-      fs.writeFileSync(filePath, JSON.stringify(sections, null, 2), 'utf-8');
-    } else {
-      localStorage.setItem(this.STORAGE_KEYS.TOOL_SECTIONS, JSON.stringify(sections));
-    }
-    await this.logActivity('update', 'tool_section', id, `Updated section "${sections[index].title}"`);
-    return sections[index];
-  }
-
-  async deleteToolSection(id: string): Promise<boolean> {
-    const sections = await this.getAllToolSections();
-    const index = sections.findIndex(section => section.id === id);
-    if (index === -1) return false;
-    const deletedSection = sections[index];
-    sections.splice(index, 1);
-    if (typeof window === 'undefined') {
-      const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'src', 'lib', 'cms', 'toolSections.json');
-      fs.writeFileSync(filePath, JSON.stringify(sections, null, 2), 'utf-8');
-    } else {
-      localStorage.setItem(this.STORAGE_KEYS.TOOL_SECTIONS, JSON.stringify(sections));
-    }
-    await this.logActivity('delete', 'tool_section', id, `Deleted section "${deletedSection.title}"`);
-    return true;
-  }
-
-  async bulkCreateToolSections(toolName: string, sectionsData: Omit<ToolSection, 'id' | 'toolName' | 'createdAt' | 'updatedAt'>[]): Promise<ToolSection[]> {
-    const createdSections: ToolSection[] = [];
-    
-    for (const sectionData of sectionsData) {
-      const section = await this.createToolSection({
-        ...sectionData,
-        toolName
-      });
-      createdSections.push(section);
-    }
-    
-    return createdSections;
-  }
-
-  // Tool Section Templates
-  async getAllToolSectionTemplates(): Promise<ToolSectionTemplate[]> {
-    if (typeof window === 'undefined') return [];
-    const templates = localStorage.getItem(this.STORAGE_KEYS.TOOL_SECTION_TEMPLATES);
-    return templates ? JSON.parse(templates) : this.getDefaultToolSectionTemplates();
-  }
-
-  async createToolSectionTemplate(templateData: Omit<ToolSectionTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<ToolSectionTemplate> {
-    const templates = await this.getAllToolSectionTemplates();
-    
-    const newTemplate: ToolSectionTemplate = {
-      ...templateData,
-      id: this.generateId(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    templates.push(newTemplate);
-    localStorage.setItem(this.STORAGE_KEYS.TOOL_SECTION_TEMPLATES, JSON.stringify(templates));
-    
-    await this.logActivity('create', 'tool_section_template', newTemplate.id, `Created template "${newTemplate.name}"`);
-    return newTemplate;
-  }
+  // Tool section templates have been removed.
 
   // Home Page Sections Management
   async getAllHomePageSections(): Promise<HomePageSection[]> {
@@ -576,60 +456,20 @@ class CMSStore {
 
   // Section Statistics
   async getSectionStats(): Promise<SectionStats> {
-    const toolSections = await this.getAllToolSections();
     const homePageSections = await this.getAllHomePageSections();
     
-    const activeSections = [...toolSections, ...homePageSections].filter(section => section.isActive).length;
-    const inactiveSections = [...toolSections, ...homePageSections].filter(section => !section.isActive).length;
-    
-    const toolsWithSections = new Set(toolSections.map(section => section.toolName)).size;
+    const activeSections = homePageSections.filter(section => section.isActive).length;
+    const inactiveSections = homePageSections.filter(section => !section.isActive).length;
     
     return {
-      totalToolSections: toolSections.length,
       totalHomePageSections: homePageSections.length,
       activeSections,
       inactiveSections,
-      toolsWithSections,
-      totalTools: 50, // This should be dynamic based on your actual tools
       lastUpdated: new Date()
     };
   }
 
-  private getDefaultToolSectionTemplates(): ToolSectionTemplate[] {
-    return [
-      {
-        id: 'template-default',
-        name: 'Default Tool Sections',
-        description: 'Standard sections for all tools',
-        isDefault: true,
-        sections: [
-          {
-            type: 'hero',
-            title: 'Professional Solution',
-            description: 'Transform your workflow with our advanced technology.',
-            features: [
-              { icon: 'Zap', text: 'Lightning Fast' },
-              { icon: 'Shield', text: 'Secure Processing' }
-            ],
-            imagePlaceholder: { icon: 'FileArchive', text: 'Tool Preview' },
-            gradient: 'bg-gradient-to-br from-blue-500/10 to-blue-500/5',
-            iconColor: 'text-blue-500',
-            order: 1,
-            isActive: true
-          },
-          {
-            type: 'content',
-            title: 'Why Choose Our Platform?',
-            description: 'We provide enterprise-grade processing with consumer-friendly simplicity.',
-            order: 2,
-            isActive: true
-          }
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-  }
+  // Default tool section templates removed.
 
   private getDefaultHomePageSections(): HomePageSection[] {
     return [

@@ -8,15 +8,16 @@ import { FileSpreadsheet, FileText, Upload, Download, Loader2, RefreshCw, FileUp
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Tool-specific sections removed
 import { pdfToExcel } from '@/lib/actions/pdf-to-excel';
+import { pdfToExcelAi } from '@/ai/flows/pdf-to-excel';
 
 export default function PdfToExcelPage() {
-  const { sections } = useToolSections('PDF to Excel');
+  // Tool-specific sections removed
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [xlsxUri, setXlsxUri] = useState<string | null>(null);
+  const [mode, setMode] = useState<'no_ocr' | 'ai_ocr'>('ai_ocr');
   const { toast } = useToast();
 
   const handleFileChange = (f: File) => {
@@ -40,11 +41,17 @@ export default function PdfToExcelPage() {
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      const res = await pdfToExcel({ pdfUri });
-      if (res.error) throw new Error(res.error);
-      if (!res.xlsxUri) throw new Error('No XLSX output');
-      setXlsxUri(res.xlsxUri);
-      toast({ title: 'Conversion Successful', description: 'Your Excel file is ready to download.' });
+      if (mode === 'no_ocr') {
+        const res = await pdfToExcel({ pdfUri });
+        if (res.error) throw new Error(res.error);
+        if (!res.xlsxUri) throw new Error('No XLSX output');
+        setXlsxUri(res.xlsxUri);
+        toast({ title: 'Conversion complete', description: 'Your Excel file is ready to download.' });
+      } else {
+        const res = await pdfToExcelAi({ pdfUri, conversionMode: 'ai_ocr' });
+        setXlsxUri(res.xlsxUri);
+        toast({ title: 'Conversion complete', description: 'Tables and text extracted into Excel.' });
+      }
     } catch (e: any) {
       toast({ title: 'Conversion Failed', description: e.message || 'LibreOffice export error.', variant: 'destructive' });
     } finally {
@@ -74,7 +81,7 @@ export default function PdfToExcelPage() {
     <ModernPageLayout>
       <ModernSection
         title="PDF to Excel"
-        subtitle="Export tables and text from PDF into an XLSX spreadsheet via LibreOffice"
+        subtitle="Convert PDFs to Excel with two modes: No OCR (LibreOffice) or AI OCR for scanned documents."
         icon={<FileSpreadsheet className="h-8 w-8" />}
         className="text-center"
       >
@@ -101,6 +108,28 @@ export default function PdfToExcelPage() {
                     </div>
                   </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label
+                    className={`cursor-pointer rounded-lg border p-4 flex items-start gap-3 ${mode === 'no_ocr' ? 'border-primary' : 'border-border/50'}`}
+                    onClick={() => setMode('no_ocr')}
+                  >
+                    <input type="radio" name="mode" className="mt-1" checked={mode === 'no_ocr'} readOnly />
+                    <div>
+                      <div className="font-medium">No OCR</div>
+                      <div className="text-xs text-muted-foreground">Convert PDFs with selectable text using local LibreOffice. No API key required.</div>
+                    </div>
+                  </label>
+                  <label
+                    className={`cursor-pointer rounded-lg border p-4 flex items-start gap-3 ${mode === 'ai_ocr' ? 'border-primary' : 'border-border/50'}`}
+                    onClick={() => setMode('ai_ocr')}
+                  >
+                    <input type="radio" name="mode" className="mt-1" checked={mode === 'ai_ocr'} readOnly />
+                    <div>
+                      <div className="font-medium">AI OCR</div>
+                      <div className="text-xs text-muted-foreground">Use AI to read scanned PDFs and output tables and text into Excel.</div>
+                    </div>
+                  </label>
+                </div>
                 <div className="flex flex-wrap gap-4">
                   <Button onClick={handleConvert} disabled={isConverting}>
                     {isConverting ? (
@@ -111,7 +140,7 @@ export default function PdfToExcelPage() {
                     ) : (
                       <>
                         <FileUp className="mr-2 h-4 w-4" />
-                        Convert with LibreOffice
+                        Convert
                       </>
                     )}
                   </Button>
@@ -132,7 +161,7 @@ export default function PdfToExcelPage() {
         </div>
       </ModernSection>
 
-  <ToolSections toolName="PDF to Excel" sections={sections} />
+  {/* Tool-specific sections removed */}
     </ModernPageLayout>
   );
 }

@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 type Stage = 'upload' | 'organize' | 'download';
 
@@ -518,6 +519,7 @@ export default function OrganizePdfPage() {
             </ModernSection>
 
             <FAQ />
+            <ToolCustomSectionRenderer slug="organize-pdf" />
             <AllTools />
         </ModernPageLayout>
     );

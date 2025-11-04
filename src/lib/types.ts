@@ -648,6 +648,23 @@ export const PdfToWordOutputSchema = z.object({
 });
 export type PdfToWordOutput = z.infer<typeof PdfToWordOutputSchema>;
 
+// PDF to Excel
+export const PdfToExcelInputSchema = z.object({
+  pdfUri: z.string().describe("The PDF to convert as a data URI."),
+  conversionMode: z
+    .enum(["no_ocr", "ai_ocr"]) // no_ocr: selectable text PDFs; ai_ocr: scanned PDFs
+    .optional()
+    .describe(
+      'Conversion mode: "no_ocr" for PDFs with selectable text using local converter; "ai_ocr" for scanned PDFs using AI OCR.'
+    ),
+});
+export type PdfToExcelInput = z.infer<typeof PdfToExcelInputSchema>;
+
+export const PdfToExcelOutputSchema = z.object({
+  xlsxUri: z.string().describe("The converted Excel workbook as a data URI."),
+});
+export type PdfToExcelOutput = z.infer<typeof PdfToExcelOutputSchema>;
+
 
 // Text to Image
 export const TextToImageInputSchema = z.object({

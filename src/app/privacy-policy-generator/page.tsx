@@ -11,8 +11,8 @@ import { Clipboard, ClipboardCheck, ShieldQuestion } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 
 const FAQ = () => (
     <div className="mt-12">
@@ -35,7 +35,6 @@ const FAQ = () => (
 );
 
 export default function PrivacyPolicyGeneratorPage() {
-  const { sections } = useToolSections('Privacy Policy Generation');
   const [companyName, setCompanyName] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -156,12 +155,10 @@ If you have any questions about this Privacy Policy, You can contact us:
             </Card>
         )}
         
-      <ToolSections 
-        toolName="Privacy Policy Generation" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed (home-only CMS sections) */}
         
         <FAQ />
+        <ToolCustomSectionRenderer slug="privacy-policy-generator" />
       </div>
     </div>
     <AllTools />

@@ -15,8 +15,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +64,6 @@ const FAQ = () => (
 
 
 export default function ProtectPdfPage() {
-  const { sections } = useToolSections('PDF Protection');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -346,12 +345,10 @@ export default function ProtectPdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections 
-        toolName="PDF Protection" 
-        sections={sections}
-      />
+      {/* Tool-specific sections removed (home-only CMS sections) */}
 
       <FAQ />
+      <ToolCustomSectionRenderer slug="protect-pdf" />
       <AllTools />
     </ModernPageLayout>
   );

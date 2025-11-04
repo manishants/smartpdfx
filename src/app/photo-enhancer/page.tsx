@@ -14,10 +14,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// Removed ToolSections and useToolSections imports as part of home-only sections refactor
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +76,7 @@ export default function EnhancePhotoPage() {
   const [result, setResult] = useState<EnhancePhotoOutput | null>(null);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
-  const { sections } = useToolSections('Photo Enhancement');
+  // Tool-specific sections removed; page now relies on home-only CMS content
 
   const handleFileChange = (selectedFile: File) => {
     // Validate file type
@@ -388,13 +388,11 @@ export default function EnhancePhotoPage() {
         <ProTip tip="Upload the highest quality photo available for the best enhancement results." />
       </div>
 
-      <ToolSections 
-        toolName="Photo Enhancement" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed as part of home-only sections refactor */}
 
       <FAQ />
 
+      <ToolCustomSectionRenderer slug="photo-enhancer" />
       <ModernSection>
         <AllTools />
       </ModernSection>

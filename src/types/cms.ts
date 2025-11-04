@@ -96,39 +96,11 @@ export interface DashboardStats {
   totalViews: number;
   recentActivity: ActivityLog[];
   // Section statistics
-  totalToolSections?: number;
   totalHomePageSections?: number;
   activeSections?: number;
-  toolsWithSections?: number;
 }
 
-// Tool Sections Management
-export interface ToolSection {
-  id: string;
-  toolName: string;
-  type: 'hero' | 'content';
-  title: string;
-  description: string;
-  features?: { icon: string; text: string }[];
-  imagePlaceholder?: { icon: string; text: string };
-  imageUrl?: string;
-  gradient?: string;
-  iconColor?: string;
-  order: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface ToolSectionTemplate {
-  id: string;
-  name: string;
-  description: string;
-  sections: Omit<ToolSection, 'id' | 'toolName' | 'createdAt' | 'updatedAt'>[];
-  isDefault: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Tool sections have been removed from the CMS.
 
 // Home Page Sections Management
 export interface HomePageSection {
@@ -153,12 +125,9 @@ export interface HomePageSection {
 
 // Section Management Stats
 export interface SectionStats {
-  totalToolSections: number;
   totalHomePageSections: number;
   activeSections: number;
   inactiveSections: number;
-  toolsWithSections: number;
-  totalTools: number;
   lastUpdated: Date;
 }
 

@@ -75,10 +75,11 @@ export default function BlogManager() {
 
     // Search filter
     if (searchTerm) {
+      const q = searchTerm.toLowerCase();
       filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.seo.focusKeyword?.toLowerCase().includes(searchTerm.toLowerCase())
+        post.title.toLowerCase().includes(q) ||
+        post.content.toLowerCase().includes(q) ||
+        (post.seo?.focusKeyword?.toLowerCase().includes(q) ?? false)
       );
     }
 
@@ -304,7 +305,7 @@ export default function BlogManager() {
                         <div>
                           <div className="font-medium">{post.title}</div>
                           <div className="text-sm text-muted-foreground truncate max-w-[200px]">
-                            {post.seo.metaDescription || 'No description'}
+                            {post.seo?.metaDescription || 'No description'}
                           </div>
                         </div>
                       </TableCell>

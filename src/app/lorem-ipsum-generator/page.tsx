@@ -12,8 +12,7 @@ import { Clipboard, ClipboardCheck, Pilcrow } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -72,7 +71,7 @@ const FAQ = () => (
 const loremIpsumText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
 export default function LoremIpsumGeneratorPage() {
-  const { sections } = useToolSections('Lorem Ipsum Generation');
+  // Tool-specific sections removed; page now relies on home-only CMS content
   const [text, setText] = useState('');
   const [type, setType] = useState<'paragraphs' | 'sentences' | 'words'>('paragraphs');
   const [count, setCount] = useState<number | ''>(5);
@@ -197,13 +196,11 @@ export default function LoremIpsumGeneratorPage() {
           </CardContent>
         </Card>
         
-        <ToolSections 
-          toolName="Lorem Ipsum Generation" 
-          sections={sections} 
-        />
+        {/* Tool-specific sections removed as part of home-only sections refactor */}
         
         <ToolDescription />
         <FAQ />
+        <ToolCustomSectionRenderer slug="lorem-ipsum-generator" />
       </div>
     </div>
     <AllTools />

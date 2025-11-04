@@ -15,6 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -416,6 +417,7 @@ export default function PdfOcrPage() {
       <ModernSection>
         <FAQ />
       </ModernSection>
+      <ToolCustomSectionRenderer slug="pdf-ocr" />
       
       <AllTools />
     </ModernPageLayout>

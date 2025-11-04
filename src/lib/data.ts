@@ -106,6 +106,14 @@ export const tools = [
     color: '#f97316' // orange
   },
   {
+    title: "PDF to Excel",
+    description: "Convert PDF to an Excel spreadsheet.",
+    icon: FileUp,
+    href: "/pdf-to-excel",
+    category: 'convert',
+    color: '#f97316' // orange
+  },
+  {
     title: "PDF to PPT",
     description: "Convert PDF to PowerPoint.",
     icon: FileUp,
@@ -222,14 +230,6 @@ export const tools = [
     description: "Extract data from voter lists.",
     icon: Users,
     href: "/voter-list-extractor",
-    category: 'ai',
-    color: '#10b981'
-  },
-  {
-    title: "Extract Data from PDF to Excel",
-    description: "Visually extract data to Excel.",
-    icon: Users,
-    href: "/extract-pdf-data-to-excel",
     category: 'ai',
     color: '#10b981'
   },

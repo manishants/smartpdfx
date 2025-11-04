@@ -9,8 +9,8 @@ import { UploadCloud, FileDown, Loader2, RefreshCw, FileType, CheckCircle, FileU
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -56,7 +56,6 @@ const FAQ = () => (
 
 
 export default function PptToPdfPage() {
-  const { sections } = useToolSections('PowerPoint to PDF');
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<{ pdfUri: string } | null>(null);
@@ -170,10 +169,8 @@ export default function PptToPdfPage() {
       </div>
       <ToolDescription />
       <FAQ />
-      <ToolSections
-        toolName="PowerPoint to PDF"
-        sections={sections}
-      />
+      <ToolCustomSectionRenderer slug="ppt-to-pdf" />
+      {/* Tool-specific sections removed (home-only CMS sections) */}
     </main>
     <AllTools />
     </>

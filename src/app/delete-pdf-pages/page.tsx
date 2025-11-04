@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 
 type Stage = 'upload' | 'select' | 'download';
@@ -329,6 +330,7 @@ export default function DeletePdfPagesPage() {
             </div>
             <ToolDescription />
             <FAQ />
+            <ToolCustomSectionRenderer slug="delete-pdf-pages" />
             <AllTools/>
         </div>
     )

@@ -16,8 +16,8 @@ import { ModernPageLayout } from "@/components/modern-page-layout";
 import { ModernSection } from "@/components/modern-section";
 import { ModernUploadArea } from "@/components/modern-upload-area";
 import { AllTools } from "@/components/all-tools";
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Tool-specific sections removed
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 interface ConversionResult {
   success: boolean;
@@ -77,7 +77,7 @@ export default function PdfToWordPage() {
   const [progress, setProgress] = useState(0);
   const [mode, setMode] = useState<'no_ocr' | 'ai_ocr'>('ai_ocr');
   const { toast } = useToast();
-  const { sections } = useToolSections('PDF to Word');
+  // Tool-specific sections removed
 
   const handleFileChange = (selectedFile: File) => {
     if (selectedFile.type !== "application/pdf") {
@@ -119,13 +119,17 @@ export default function PdfToWordPage() {
 
     setIsConverting(true);
     setProgress(0);
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
 
     try {
       // Simulate progress updates
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) {
-            clearInterval(progressInterval);
+            if (progressInterval) {
+              clearInterval(progressInterval);
+              progressInterval = null;
+            }
             return 90;
           }
           return prev + 10;
@@ -135,42 +139,34 @@ export default function PdfToWordPage() {
       const pdfUri = await fileToDataUri(file);
       const { docxUri } = await pdfToWord({ pdfUri, conversionMode: mode });
 
-      clearInterval(progressInterval);
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
       setProgress(100);
 
       if (docxUri) {
-        setResult({
-          success: true,
-          docxUri,
-        });
-        toast({
-          title: "Conversion successful!",
-          description: "Your PDF has been converted to Word format.",
-        });
+        setResult({ success: true, docxUri });
+        toast({ title: "Conversion successful!", description: "Your PDF has been converted to Word format." });
       } else {
-        setResult({
-          success: false,
-          error: "Conversion failed"
-        });
-        toast({
-          title: "Conversion failed",
-          description: "An error occurred during conversion.",
-          variant: "destructive",
-        });
+        setResult({ success: false, error: "Conversion failed" });
+        toast({ title: "Conversion failed", description: "An error occurred during conversion.", variant: "destructive" });
       }
     } catch (error) {
       console.error("Conversion error:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred";
-      setResult({
-        success: false,
-        error: message,
-      });
-      toast({
-        title: "Conversion failed",
-        description: message,
-        variant: "destructive",
-      });
+      setResult({ success: false, error: message });
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      setProgress(0);
+      toast({ title: "Conversion failed", description: message, variant: "destructive" });
     } finally {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
       setIsConverting(false);
     }
   };
@@ -490,13 +486,11 @@ export default function PdfToWordPage() {
         </div>
       </ModernPageLayout>
       
-      <ToolSections 
-        toolName="PDF to Word" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed */}
       <ModernSection>
         <FAQ />
       </ModernSection>
+      <ToolCustomSectionRenderer slug="pdf-to-word" />
       <AllTools />
     </>
   );

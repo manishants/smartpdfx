@@ -9,6 +9,7 @@ import { Clipboard, ClipboardCheck, AppWindow } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -130,6 +131,7 @@ export default function WhatsMyIpPage() {
         </Card>
         <ToolDescription />
         <FAQ />
+        <ToolCustomSectionRenderer slug="whats-my-ip" />
       </div>
     </div>
     <AllTools />

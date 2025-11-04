@@ -22,11 +22,28 @@ const EXCLUDE_DIRS = new Set([
   '_components',
 ])
 
+function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'page.js' } {
+  const candidates: Array<{ dir: string; pageFileName: 'page.tsx' | 'page.js' }> = [
+    { dir: path.join(process.cwd(), 'src', 'app'), pageFileName: 'page.tsx' },
+    { dir: path.join(process.cwd(), 'app'), pageFileName: 'page.tsx' },
+    { dir: path.join(process.cwd(), '.next', 'server', 'app'), pageFileName: 'page.js' },
+  ]
+
+  for (const c of candidates) {
+    if (fs.existsSync(c.dir)) return c
+  }
+  return { appDir: path.join(process.cwd(), 'src', 'app'), pageFileName: 'page.tsx' }
+}
+
 function getAppPages(): StoredPage[] {
-  const appDir = path.join(process.cwd(), 'src', 'app')
+  const { appDir, pageFileName } = resolveScanContext()
   const pages: StoredPage[] = []
 
-  const rootPagePath = path.join(appDir, 'page.tsx')
+  if (!fs.existsSync(appDir)) {
+    return pages
+  }
+
+  const rootPagePath = path.join(appDir, pageFileName)
   if (fs.existsSync(rootPagePath)) {
     const stat = fs.statSync(rootPagePath)
     pages.push({
@@ -46,7 +63,7 @@ function getAppPages(): StoredPage[] {
     if (EXCLUDE_DIRS.has(name)) continue
     if (name.startsWith('(') || name.startsWith('[')) continue
 
-    const pageFile = path.join(appDir, name, 'page.tsx')
+    const pageFile = path.join(appDir, name, pageFileName)
     if (fs.existsSync(pageFile)) {
       const stat = fs.statSync(pageFile)
       const slug = `${name}`

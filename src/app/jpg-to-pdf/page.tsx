@@ -14,8 +14,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Tool-specific sections removed
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +63,7 @@ const FAQ = () => (
 
 
 export default function JpgToPdfPage() {
-  const { sections } = useToolSections('JPG to PDF');
+  // Tool-specific sections removed
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isConverting, setIsConverting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -310,12 +310,10 @@ export default function JpgToPdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections 
-        toolName="JPG to PDF" 
-          sections={sections}
-      />
+      {/* Tool-specific sections removed */}
 
       <FAQ />
+      <ToolCustomSectionRenderer slug="jpg-to-pdf" />
     </ModernPageLayout>
   );
 }

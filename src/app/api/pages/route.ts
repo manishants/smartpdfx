@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { StoredPage, mergeFilesystemPages } from '@/lib/pageStore'
@@ -17,12 +17,31 @@ function toTitle(slug: string) {
   return s.replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'page.js' } {
+  const candidates: Array<{ dir: string; pageFileName: 'page.tsx' | 'page.js' }> = [
+    { dir: path.join(process.cwd(), 'src', 'app'), pageFileName: 'page.tsx' },
+    { dir: path.join(process.cwd(), 'app'), pageFileName: 'page.tsx' },
+    { dir: path.join(process.cwd(), '.next', 'server', 'app'), pageFileName: 'page.js' },
+  ]
+
+  for (const c of candidates) {
+    if (fs.existsSync(c.dir)) return c
+  }
+  // Fallback: return src/app to avoid crashes; caller will guard exists
+  return { appDir: path.join(process.cwd(), 'src', 'app'), pageFileName: 'page.tsx' }
+}
+
 function getAppPages(): StoredPage[] {
-  const appDir = path.join(process.cwd(), 'src', 'app')
+  const { appDir, pageFileName } = resolveScanContext()
   const pages: StoredPage[] = []
 
-  // Include root page.tsx as '/'
-  const rootPagePath = path.join(appDir, 'page.tsx')
+  if (!fs.existsSync(appDir)) {
+    // No app directory available at runtime (standalone builds). Return defaults from store only.
+    return pages
+  }
+
+  // Include root page as '/'
+  const rootPagePath = path.join(appDir, pageFileName)
   if (fs.existsSync(rootPagePath)) {
     const stat = fs.statSync(rootPagePath)
     pages.push({
@@ -35,7 +54,7 @@ function getAppPages(): StoredPage[] {
     })
   }
 
-  // Scan top-level directories in src/app for page.tsx
+  // Scan top-level directories for page files
   const entries = fs.readdirSync(appDir, { withFileTypes: true })
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
@@ -44,10 +63,10 @@ function getAppPages(): StoredPage[] {
     if (EXCLUDE_DIRS.has(name)) continue
     if (name.startsWith('(') || name.startsWith('[')) continue
 
-    const pageFile = path.join(appDir, name, 'page.tsx')
+    const pageFile = path.join(appDir, name, pageFileName)
     if (fs.existsSync(pageFile)) {
       const stat = fs.statSync(pageFile)
-      const slug = `${name}` // store without leading slash
+      const slug = `${name}`
       pages.push({
         id: name,
         title: toTitle(slug),

@@ -5,22 +5,12 @@ import { cmsStore } from '@/lib/cms/store';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'tool' or 'home'
-    const toolName = searchParams.get('toolName');
+    const type = searchParams.get('type'); // only 'home' is supported
     const active = searchParams.get('active');
 
     let sections = [];
-
-    if (type === 'tool') {
-      sections = await cmsStore.getToolSections(toolName || undefined);
-    } else if (type === 'home') {
-      sections = await cmsStore.getHomePageSections();
-    } else {
-      // Get all sections
-      const toolSections = await cmsStore.getToolSections();
-      const homeSections = await cmsStore.getHomePageSections();
-      sections = [...toolSections, ...homeSections];
-    }
+    // Only home page sections are supported
+    sections = await cmsStore.getAllHomePageSections();
 
     // Filter by active status if specified
     if (active !== null) {
@@ -46,28 +36,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, ...sectionData } = body;
-
-    if (!type || !['tool', 'home'].includes(type)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid section type. Must be "tool" or "home"' },
-        { status: 400 }
-      );
-    }
-
-    let newSection;
-
-    if (type === 'tool') {
-      if (!sectionData.toolName) {
-        return NextResponse.json(
-          { success: false, error: 'toolName is required for tool sections' },
-          { status: 400 }
-        );
-      }
-      newSection = await cmsStore.createToolSection(sectionData);
-    } else {
-      newSection = await cmsStore.createHomePageSection(sectionData);
-    }
+    const sectionData = body;
+    const newSection = await cmsStore.createHomePageSection(sectionData);
 
     return NextResponse.json({
       success: true,

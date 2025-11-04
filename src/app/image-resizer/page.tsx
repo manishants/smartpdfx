@@ -19,8 +19,8 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +57,6 @@ const FAQ = () => (
 );
 
 export default function ImageResizerPage() {
-  const { sections } = useToolSections('Image Resizing');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [result, setResult] = useState<ResizeImageOutput | null>(null);
@@ -355,12 +354,10 @@ export default function ImageResizerPage() {
           <ProTip tip="Use pixel mode for precise dimensions; percentage for quick scaling." />
         </div>
 
-      <ToolSections 
-        toolName="Image Resizing" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed (home-only CMS sections) */}
 
         <FAQ />
+        <ToolCustomSectionRenderer slug="image-resizer" />
         <AllTools />
       </div>
     </ModernPageLayout>

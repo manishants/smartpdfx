@@ -11,15 +11,14 @@ import { FileDown, Loader2, RefreshCw, ScanText, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist';
 import { convertImagesToPdf } from '@/lib/actions/convert-images-to-pdf';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Tool-specific sections removed
 import { AllTools } from '@/components/all-tools';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function ScanPdfPage() {
-  const { sections } = useToolSections('PDF to Scanned PDF');
+  // Tool-specific sections removed
   const [file, setFile] = useState<File | null>(null);
   const [resultUri, setResultUri] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -142,7 +141,7 @@ export default function ScanPdfPage() {
         </div>
       </ModernSection>
 
-  <ToolSections toolName="PDF to Scanned PDF" sections={sections} />
+  {/* Tool-specific sections removed */}
 
       <ModernSection
         title="Frequently Asked Questions"

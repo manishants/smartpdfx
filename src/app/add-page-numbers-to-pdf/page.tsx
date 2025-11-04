@@ -11,6 +11,7 @@ import { addPageNumbersToPdf } from '@/lib/actions/add-page-numbers-to-pdf';
 import type { AddPageNumbersInput, AddPageNumbersOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {
   file: File;
@@ -203,6 +204,7 @@ export default function AddPageNumbersPage() {
           </CardContent>
         </Card>
         <FAQ />
+        <ToolCustomSectionRenderer slug="add-page-numbers-to-pdf" />
       </div>
     </div>
     <AllTools />

@@ -12,8 +12,7 @@ import { generateFavicon } from '@/lib/actions/generate-favicon';
 import type { GenerateFaviconInput, GenerateFaviconOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 interface UploadedFile {
   file: File;
@@ -47,7 +46,7 @@ const FAQ = () => (
 );
 
 export default function FaviconGeneratorPage() {
-  const { sections } = useToolSections('Favicon Generation');
+  // Tool-specific sections removed; page now uses home-only CMS content
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<GenerateFaviconOutput | null>(null);
@@ -198,12 +197,10 @@ export default function FaviconGeneratorPage() {
         </Card>
       </div>
       
-      <ToolSections 
-        toolName="Favicon Generation" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed as part of home-only sections refactor */}
       
       <FAQ />
+      <ToolCustomSectionRenderer slug="favicon-generator" />
     </main>
     <AllTools />
     </>

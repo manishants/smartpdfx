@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Layout, Wrench, ArrowLeft, Search } from "lucide-react";
+import { Layout, Wrench, ArrowLeft, Search, Layers } from "lucide-react";
 
 export default function ToolsPageBuilder() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function ToolsPageBuilder() {
               <h1 className="text-2xl font-bold">Tools Page Builder</h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              Edit the content of each tool page in one place
+              Tool pages no longer have per-page sections. Use Home Sections to manage site sections.
             </p>
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function ToolsPageBuilder() {
             Tools ({filtered.length})
           </CardTitle>
           <CardDescription>
-            Choose a tool to edit its page content and sections
+            Choose a tool to edit its page content. Use “Edit Section Below FAQ” to add Type A/B sections saved to code.
           </CardDescription>
         </CardHeader>
         <div className="grid gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
@@ -92,15 +92,17 @@ export default function ToolsPageBuilder() {
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
-                <Button asChild size="sm" className="bg-primary">
-                  <Link href={`/superadmin/pages/tools/edit/${toSlug(tool.href)}`}>Edit Page</Link>
-                </Button>
                 <Button asChild size="sm" variant="outline">
                   <Link href={tool.href} target="_blank">Open Public</Link>
                 </Button>
+                <Button asChild size="sm">
+                  <Link href={`/superadmin/pages/tools/section-builder/${toSlug(tool.href)}`}>
+                    <Layers className="mr-2 h-4 w-4" /> Edit Section Below FAQ
+                  </Link>
+                </Button>
               </div>
-            </Card>
-          ))}
+          </Card>
+        ))}
         </div>
       </Card>
     </div>

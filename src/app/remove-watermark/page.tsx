@@ -9,13 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { AllTools } from '@/components/all-tools';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 
 type Stage = 'upload' | 'processing' | 'result';
 
 export default function RemoveWatermarkPage() {
-    const { sections } = useToolSections('Watermark Removal');
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -240,10 +238,7 @@ export default function RemoveWatermarkPage() {
             </ModernSection>
 
             <AllTools />
-            <ToolSections
-                toolName="Watermark Removal"
-                sections={sections}
-            />
+            {/* Tool-specific sections removed (home-only CMS sections) */}
         </ModernPageLayout>
     );
 }

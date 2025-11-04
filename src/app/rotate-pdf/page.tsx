@@ -17,8 +17,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 type Stage = 'upload' | 'rotate' | 'download';
 
@@ -101,7 +100,7 @@ export default function RotatePdfPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [pages, setPages] = useState<PageToRender[]>([]);
     const [rotatedPdfUri, setRotatedPdfUri] = useState<string | null>(null);
-    const { sections } = useToolSections('PDF Rotation');
+    // Tool-specific sections removed; page now relies on home-only CMS content
 
     const { toast } = useToast();
     
@@ -517,12 +516,10 @@ export default function RotatePdfPage() {
                 </div>
             </ModernSection>
 
-            <ToolSections 
-                toolName="PDF Rotation" 
-                sections={sections} 
-            />
+            {/* Tool-specific sections removed as part of home-only sections refactor */}
 
             <FAQ />
+            <ToolCustomSectionRenderer slug="rotate-pdf" />
             <AllTools />
         </ModernPageLayout>
     );

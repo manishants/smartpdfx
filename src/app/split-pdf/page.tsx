@@ -19,8 +19,8 @@ import { AllTools } from '@/components/all-tools';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
 
@@ -71,7 +71,6 @@ const FAQ = () => (
 
 
 export default function SplitPdfPage() {
-  const { sections } = useToolSections('PDF Splitting');
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -832,12 +831,10 @@ export default function SplitPdfPage() {
                 </div>
             </ModernSection>
 
-            <ToolSections 
-                toolName="PDF Splitting" 
-                sections={sections} 
-            />
+            {/* Tool-specific sections removed (home-only CMS sections) */}
 
             <FAQ />
+            <ToolCustomSectionRenderer slug="split-pdf" />
             <AllTools />
         </ModernPageLayout>
     )

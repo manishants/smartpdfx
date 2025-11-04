@@ -18,8 +18,7 @@ import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import Tesseract from 'tesseract.js';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Removed ToolSections and useToolSections imports as part of home-only sections refactor
 import { findPdfElements } from '@/ai/flows/find-pdf-elements';
 
 type Stage = 'upload' | 'edit' | 'download';
@@ -50,7 +49,7 @@ interface EditableItem {
 }
 
 export default function EditPdfPage() {
-  const { sections } = useToolSections('PDF Editor');
+  // Tool-specific sections removed; page now relies on home-only CMS content
     const [stage, setStage] = useState<Stage>('upload');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -967,13 +966,7 @@ export default function EditPdfPage() {
                 </div>
             )}
             
-            {/* SEO Sections */}
-            {stage === 'upload' && (
-                <ToolSections
-                    toolName="PDF Editor"
-        sections={sections}
-                />
-            )}
+            {/* Tool-specific sections removed as part of home-only sections refactor */}
         </div>
     )
 }

@@ -11,8 +11,8 @@ import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -109,7 +109,6 @@ const FAQ = () => (
 );
 
 export default function CaseConverterPage() {
-  const { sections } = useToolSections('Text Case Conversion');
   const [text, setText] = useState('');
   const [hasCopied, setHasCopied] = useState(false);
   const { toast } = useToast();
@@ -265,13 +264,11 @@ export default function CaseConverterPage() {
             </CardContent>
           </Card>
           
-      <ToolSections 
-        toolName="Text Case Conversion" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed (home-only CMS sections) */}
           
           <ToolDescription />
           <FAQ />
+          <ToolCustomSectionRenderer slug="case-converter" />
           <AllTools />
         </div>
       </ModernSection>

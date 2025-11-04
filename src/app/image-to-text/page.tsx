@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { imageToText } from '@/ai/flows/image-to-text';
 import type { ImageToTextInput, ImageToTextOutput } from '@/lib/types';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 
 export const dynamic = 'force-dynamic';
@@ -253,6 +254,7 @@ export default function ImageToTextPage() {
         </Card>
       </div>
       <FAQ />
+    <ToolCustomSectionRenderer slug="image-to-text" />
     </main>
     <AllTools />
     </>

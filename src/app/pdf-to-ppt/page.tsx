@@ -9,6 +9,7 @@ import { UploadCloud, FileUp, Loader2, RefreshCw, FileType } from "lucide-react"
 import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import * as pdfjsLib from 'pdfjs-dist';
 import PptxGenJS from 'pptxgenjs';
 import { saveAs } from 'file-saver';
@@ -302,6 +303,7 @@ export default function PdfToPptPage() {
         </Card>
       </div>
       <FAQ />
+      <ToolCustomSectionRenderer slug="pdf-to-ppt" />
     </main>
     <AllTools />
     </>

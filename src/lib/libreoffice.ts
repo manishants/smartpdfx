@@ -92,16 +92,46 @@ export async function convertWithLibreOffice(opts: LibreOfficeConvertOptions): P
   const args = ['--headless', '--norestore', '--convert-to', filter, '--outdir', opts.outputDir, opts.inputPath];
 
   return await new Promise((resolve) => {
-    const proc = spawn(soffice, args, { windowsHide: true });
+    let stdout = '';
+    let stderr = '';
+    const env = { ...process.env } as NodeJS.ProcessEnv;
+    // LibreOffice bundles Python; external PYTHONHOME/PYTHONPATH can break LO scripts, causing
+    // "Could not find platform independent libraries <prefix>". Remove them for this process.
+    delete (env as any).PYTHONHOME;
+    delete (env as any).PYTHONPATH;
+    const proc = spawn(soffice, args, { windowsHide: true, env });
+    proc.stdout?.on('data', (d) => (stdout += d.toString()));
+    proc.stderr?.on('data', (d) => (stderr += d.toString()));
     proc.on('error', (err) => resolve({ success: false, error: String(err) }));
     proc.on('close', (code) => {
-      if (code !== 0) return resolve({ success: false, error: `LibreOffice exited with code ${code}` });
+      if (code !== 0) return resolve({ success: false, error: `LibreOffice exited with code ${code}. stderr: ${stderr}` });
       // Try to infer output filename (LibreOffice uses input base name)
       const base = opts.inputPath.split(/[\\/]/).pop() || 'output';
       const name = base.replace(/\.[^.]+$/, '');
       const outExt = filter || 'output';
       const outputGuess = join(opts.outputDir, `${name}.${outExt}`);
-      resolve({ success: true, outputPath: outputGuess });
+
+      try {
+        const { existsSync, readdirSync } = require('fs');
+        if (existsSync(outputGuess)) {
+          return resolve({ success: true, outputPath: outputGuess });
+        }
+        // Fallback: search for files matching name + extension (case-insensitive)
+        const files: string[] = readdirSync(opts.outputDir)
+          .filter((f: string) => {
+            const lower = f.toLowerCase();
+            return lower.startsWith(name.toLowerCase()) && lower.endsWith(`.${outExt.toLowerCase()}`);
+          })
+          .map((f: string) => join(opts.outputDir, f))
+          .sort((a: string, b: string) => a.localeCompare(b));
+        if (files.length) {
+          return resolve({ success: true, outputPath: files[0] });
+        }
+      } catch (e) {
+        // ignore fs access errors, we'll return a diagnostic error below
+      }
+
+      return resolve({ success: false, error: `LibreOffice reported success but output file not found. Tried: ${outputGuess}. stdout: ${stdout} stderr: ${stderr}` });
     });
   });
 }

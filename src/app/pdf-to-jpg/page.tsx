@@ -17,9 +17,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// Tool-specific sections removed
 import { pdfToPng } from '@/lib/actions/pdf-to-png';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 
 type PdfToJpgOutput = {
@@ -121,7 +121,7 @@ const FAQ = () => (
 
 
 export default function PdfToJpgPage() {
-  const { sections } = useToolSections('PDF to JPG');
+  // Tool-specific sections removed
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<PdfToJpgOutput | null>(null);
@@ -386,12 +386,10 @@ export default function PdfToJpgPage() {
 
       <ToolDescription />
 
-      <ToolSections 
-        toolName="PDF to JPG" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed */}
 
       <FAQ />
+      <ToolCustomSectionRenderer slug="pdf-to-jpg" />
       <AllTools />
     </ModernPageLayout>
   );

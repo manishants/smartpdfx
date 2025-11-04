@@ -15,8 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +63,6 @@ const FAQ = () => (
 
 
 export default function UnlockPdfPage() {
-  const { sections } = useToolSections('PDF Unlock');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -321,12 +319,10 @@ export default function UnlockPdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections
-        toolName="PDF Unlock"
-        sections={sections}
-      />
+      {/* Tool-specific sections removed as part of home-only sections refactor */}
 
       <FAQ />
+      <ToolCustomSectionRenderer slug="unlock-pdf" />
       <AllTools />
     </ModernPageLayout>
   );

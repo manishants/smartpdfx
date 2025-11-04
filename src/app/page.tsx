@@ -37,7 +37,7 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
               <div className="flex flex-col items-center gap-4">
                  <div className="p-3 bg-white/90 rounded-2xl border border-white/20 shadow-lg">
                 <Image
-                  src="/qr.jpeg"
+                  src="/qr.jpg"
                   alt="Scan to pay"
                   width={200}
                   height={200}

@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 interface UploadedFile {
   file: File;
@@ -223,6 +224,7 @@ export default function ImageColorPickerPage() {
         </Card>
       </div>
       <FAQ />
+    <ToolCustomSectionRenderer slug="image-color-picker" />
     </div>
     <AllTools />
     </>

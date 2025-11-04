@@ -21,8 +21,8 @@ import { Slider } from '@/components/ui/slider';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+// Tool-specific sections removed
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +96,7 @@ const FAQ = () => (
 
 
 export default function CompressPdfPage() {
-  const { sections } = useToolSections('PDF Compression');
+  // Tool-specific sections removed
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<CompressPdfOutput | null>(null);
@@ -500,12 +500,10 @@ export default function CompressPdfPage() {
         </div>
       </ModernSection>
 
-      <ToolSections 
-        toolName="PDF Compression" 
-        sections={sections}
-      />
+      {/* Tool-specific sections removed */}
 
       <FAQ />
+      <ToolCustomSectionRenderer slug="compress-pdf" />
       <AllTools />
     </ModernPageLayout>
   );

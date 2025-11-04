@@ -14,8 +14,7 @@ import { compressImage } from '@/lib/actions/compress-image';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 export const dynamic = 'force-dynamic';
@@ -60,7 +59,6 @@ const ToolDescription = () => (
     </ModernSection>
 );
 export default function CompressImagePage() {
-    const { sections } = useToolSections('Image Compression');
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [result, setResult] = useState<CompressImageOutput | null>(null);
@@ -307,10 +305,7 @@ export default function CompressImagePage() {
           />
         </div>
         
-      <ToolSections 
-        toolName="Image Compression" 
-        sections={sections} 
-      />
+      {/* Tool-specific sections removed (home-only CMS sections) */}
         
         <ToolDescription />
         <AllTools />

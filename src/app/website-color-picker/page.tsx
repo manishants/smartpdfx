@@ -15,6 +15,7 @@ import { getWebsiteScreenshot } from '@/lib/actions/get-website-screenshot';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 interface Screenshot {
   preview: string;
@@ -345,6 +346,7 @@ export default function WebsiteColorPickerPage() {
       </ModernSection>
       
       <FAQ />
+      <ToolCustomSectionRenderer slug="website-color-picker" />
     </ModernPageLayout>
   );
 }

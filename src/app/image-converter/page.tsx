@@ -17,10 +17,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-import { ToolSections } from '@/components/tool-sections';
-import { useToolSections } from '@/hooks/use-tool-sections';
+// ToolSections and useToolSections removed as part of home-only sections architecture
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +80,7 @@ export default function ImageConverterPage() {
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<ConvertImageOutput | null>(null);
   const { toast } = useToast();
-  const { sections } = useToolSections('Image Conversion');
+  // Tool-specific sections removed
 
   const handleFileChange = (file: File) => {
     if (file.type.startsWith('image/')) {
@@ -303,12 +303,10 @@ export default function ImageConverterPage() {
           <ProTip tip="For web use, WEBP offers excellent compression; PNG/TIFF for highest quality." />
         </div>
 
-        <ToolSections 
-          toolName="Image Conversion" 
-          sections={sections} 
-        />
+        {/* Tool-specific sections removed (home-only CMS sections) */}
 
         <FAQ />
+        <ToolCustomSectionRenderer slug="image-converter" />
         <AllTools />
       </div>
     </ModernPageLayout>

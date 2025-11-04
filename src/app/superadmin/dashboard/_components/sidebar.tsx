@@ -144,28 +144,7 @@ export function SuperadminSidebar() {
               </Collapsible>
             </div>
 
-            {/* Sections Management */}
-            <div className="mt-2">
-              <Collapsible>
-                <CollapsibleTrigger className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-slate-700 transition-all duration-200 hover:text-slate-900 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 hover:shadow-sm [&[data-state=open]>svg]:rotate-180">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-200">
-                      <PenTool className="h-3.5 w-3.5 text-white" />
-                    </div>
-                    <span className="font-semibold">Sections</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-8 mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
-                  <NavLink href="/superadmin/sections" icon={PenTool}>
-                    Tool Sections
-                  </NavLink>
-                  <NavLink href="/superadmin/home-sections" icon={Globe}>
-                    Home Sections
-                  </NavLink>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
+            {/* Sections Manager removed: Use Page Builder to edit page content and sections */}
 
             {/* SEO Tools */}
             <div className="mt-2">
