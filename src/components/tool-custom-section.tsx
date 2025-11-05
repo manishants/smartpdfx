@@ -1,11 +1,11 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ModernSection } from '@/components/modern-section';
 import { cn } from '@/lib/utils';
 import { isExternalUrl, toolCustomSections, type ToolCustomSectionData } from '@/lib/tool-custom-sections';
+import { useEffect, useMemo, useState } from 'react';
 
 interface RendererProps {
   slug: string;
@@ -13,13 +13,40 @@ interface RendererProps {
 }
 
 export function ToolCustomSectionRenderer({ slug, className }: RendererProps) {
-  const raw = toolCustomSections[slug] as unknown;
-  const sections = Array.isArray(raw)
-    ? raw
-    : raw && typeof raw === 'object'
-      ? [raw as any]
-      : [];
-  if (sections.length === 0) return null;
+  // Initial sections from build-time JSON as a fallback
+  const initial = useMemo(() => {
+    const raw = toolCustomSections[slug] as unknown;
+    const arr = Array.isArray(raw)
+      ? raw
+      : raw && typeof raw === 'object'
+        ? [raw as any]
+        : [];
+    return arr as ToolCustomSectionData[];
+  }, [slug]);
+
+  const [sections, setSections] = useState<ToolCustomSectionData[]>(initial);
+
+  // Fetch latest sections at runtime to avoid stale build-time content
+  useEffect(() => {
+    let cancelled = false;
+    const fetchSections = async () => {
+      try {
+        const res = await fetch(`/api/tools/custom-section/${slug}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const arr = Array.isArray(json?.sections) ? (json.sections as ToolCustomSectionData[]) : [];
+        if (!cancelled && arr.length > 0) {
+          setSections(arr);
+        }
+      } catch {
+        // Silent fallback to initial build-time data
+      }
+    };
+    fetchSections();
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (!sections || sections.length === 0) return null;
 
   const renderButtons = (buttons?: ToolCustomSectionData['buttons']) => {
     if (!buttons || buttons.length === 0) return null;
@@ -63,17 +90,46 @@ export function ToolCustomSectionRenderer({ slug, className }: RendererProps) {
     );
   };
 
+  // Image with extension fallback logic
+  const ImageWithFallback = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+    const hasExtension = (s: string) => /\.[a-zA-Z0-9]+$/.test(s);
+    const normalizedAlt = (alt || '').trim();
+    const buildPath = (ext: string) => (normalizedAlt ? `/page/${normalizedAlt}.${ext}` : '');
+
+    const initialSrc = hasExtension(src) ? src : (buildPath('webp') || src);
+    const [currentSrc, setCurrentSrc] = useState<string>(initialSrc);
+    const [attempt, setAttempt] = useState<number>(0);
+
+    const handleError = () => {
+      // Try png -> jpg -> jpeg as fallbacks
+      const next = attempt === 0 ? buildPath('png')
+        : attempt === 1 ? buildPath('jpg')
+        : attempt === 2 ? buildPath('jpeg')
+        : '';
+      if (next) {
+        setAttempt((a) => a + 1);
+        setCurrentSrc(next);
+      }
+    };
+
+    if (!currentSrc) {
+      return (
+        <div className="w-full h-48 bg-muted rounded-xl" />
+      );
+    }
+
+    return (
+      <img src={currentSrc} alt={alt} className={className} onError={handleError} />
+    );
+  };
+
   return (
     <div className={cn('mt-12 mb-12 space-y-12', className)}>
       {sections.map((section, idx) => {
         const ImageEl = (
           <div className="w-full">
-            {/* Use standard img for maximum compatibility; Next/Image for local images when allowed */}
-            {section.image.src.startsWith('/') ? (
-              <Image src={section.image.src} alt={section.image.alt} width={800} height={600} className="w-full h-auto rounded-xl shadow-sm" />
-            ) : (
-              <img src={section.image.src} alt={section.image.alt} className="w-full h-auto rounded-xl shadow-sm" />
-            )}
+            {/* Use standard <img> with robust src fallback for maximum cross-environment compatibility */}
+            <ImageWithFallback src={section.image.src} alt={section.image.alt} className="w-full h-auto rounded-xl shadow-sm" />
           </div>
         );
 
