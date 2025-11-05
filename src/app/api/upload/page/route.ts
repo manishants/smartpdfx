@@ -21,16 +21,10 @@ export async function POST(req: Request) {
     const publicDir = path.resolve(process.cwd(), 'public', 'page');
     await fs.mkdir(publicDir, { recursive: true });
 
-    // Create safe filename
-    const origName = desiredName || (file as any).name || 'uploaded-image';
-    const ext = path.extname(origName) || '.png';
-    const base = path.basename(origName, ext)
-      .toLowerCase()
-      .replace(/[^a-z0-9-_]+/g, '-')
-      .replace(/-{2,}/g, '-')
-      .replace(/^-+|-+$/g, '') || 'image';
-    const stamp = Date.now();
-    const filename = `${base}-${stamp}${ext}`;
+    // Use original filename without automatic renaming or stamping
+    // Keep the exact name provided by the user or the file itself
+    const rawName = desiredName || (file as any).name || 'uploaded-image.png';
+    const filename = path.basename(rawName); // prevent directory traversal
 
     const targetPath = path.join(publicDir, filename);
     await fs.writeFile(targetPath, buffer);

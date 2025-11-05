@@ -35,5 +35,27 @@
       "updatedAt": "2025-11-02T11:19:12.241Z"
     }
   ],
-  "rotate-pdf": []
+  "rotate-pdf": [],
+  "jpg-to-pdf": [
+    {
+      "type": "A",
+      "heading": "JPG to PDF Document Converter",
+      "paragraph": "If you want your document to be converted using our JPG to PDF Document Converter, then you are at the right place. With our advanced AI integration, you can convert your documents fast and securely. We don’t store your data — our AI-built platform is designed to protect user privacy. We use client-side storage, which means your files stay safely in your browser.\n\nBut if you are looking for a PDF to JPG, JPEG Converter OR want to Convert PDF Document to JPG, please click the button below to reach the destination.",
+      "image": {
+        "src": "jpg_to_pdf_document_convertor",
+        "alt": "jpg_to_pdf_document_convertor"
+      },
+      "buttons": [
+        {
+          "text": "PDF to JPG, JPEG Convertor",
+          "href": "/pdf-to-jpg"
+        },
+        {
+          "text": "Convert PDF Document to JPG",
+          "href": "/pdf-to-jpg"
+        }
+      ],
+      "updatedAt": "2025-11-05T14:49:31.561Z"
+    }
+  ]
 }

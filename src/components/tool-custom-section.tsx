@@ -29,15 +29,34 @@ export function ToolCustomSectionRenderer({ slug, className }: RendererProps) {
           const external = isExternalUrl(btn.href);
           if (external) {
             return (
-              <Button key={idx} asChild>
+              <Button
+                key={idx}
+                asChild
+                className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl"
+              >
                 <a href={btn.href} target="_blank" rel="noopener noreferrer">{btn.text}</a>
               </Button>
             );
           }
           return (
-            <Button key={idx} asChild variant={idx === 0 ? 'default' : 'outline'}>
-              <Link href={btn.href}>{btn.text}</Link>
-            </Button>
+            idx === 0 ? (
+              <Button
+                key={idx}
+                asChild
+                className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl"
+              >
+                <Link href={btn.href}>{btn.text}</Link>
+              </Button>
+            ) : (
+              <Button
+                key={idx}
+                asChild
+                variant="outline"
+                className="border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+              >
+                <Link href={btn.href}>{btn.text}</Link>
+              </Button>
+            )
           );
         })}
       </div>

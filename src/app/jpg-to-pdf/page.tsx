@@ -30,7 +30,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Sparkles className="h-6 w-6" />}
     className="mt-12"
-    contentClassName="max-w-4xl mx-auto"
+    contentClassName="w-full"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -169,8 +169,9 @@ export default function JpgToPdfPage() {
   return (
     <ModernPageLayout
       title="AI Image to PDF Converter"
-      subtitle="Transform your images into professional PDFs with intelligent layout optimization"
+      description="Transform your images into professional PDFs with intelligent layout optimization"
       icon={<FileText className="h-8 w-8" />}
+      backgroundVariant="home"
     >
       <ModernSection
         title="Smart PDF Creation"
@@ -223,7 +224,7 @@ export default function JpgToPdfPage() {
                     size="lg" 
                     onClick={handleConvert}
                     disabled={files.length === 0 || isConverting}
-                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     {isConverting ? (
                       <>

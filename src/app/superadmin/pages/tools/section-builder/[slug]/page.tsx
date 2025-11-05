@@ -89,7 +89,7 @@ export default function ToolSectionBuilderPage() {
 
   const handleSave = async () => {
     if (!heading || !paragraph || !imageSrc || !imageAlt) {
-      toast({ title: 'Missing required fields', description: 'Heading, paragraph, image URL and alt text are required.', variant: 'destructive' });
+      toast({ title: 'Missing required fields', description: 'Heading, paragraph, uploaded image, and alt text are required.', variant: 'destructive' });
       return;
     }
     try {
@@ -180,7 +180,7 @@ export default function ToolSectionBuilderPage() {
       setIsUploading(true);
       const fd = new FormData();
       fd.append('file', file);
-      fd.append('filename', `${slug}-${file.name}`);
+      // Do not alter the original filename; server will save using the exact name
       const res = await fetch('/api/upload/page', { method: 'POST', body: fd });
       const json = await res.json();
       if (res.ok && json?.path) {
@@ -285,13 +285,15 @@ export default function ToolSectionBuilderPage() {
               <Textarea id="paragraph" value={paragraph} onChange={(e) => setParagraph(e.target.value)} placeholder="Enter supporting text" rows={6} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="imgSrc">Image URL (or /path in public)</Label>
-              <Input id="imgSrc" value={imageSrc} onChange={(e) => setImageSrc(e.target.value)} placeholder="https://... or /page/your-image.jpg" />
-              <div className="flex items-center gap-2">
+              <Label>Upload Image</Label>
+              <div className="flex items-center gap-3">
                 <input type="file" accept="image/*" onChange={(e) => e.target.files && e.target.files[0] && handleUploadImage(e.target.files[0])} />
-                <Button size="sm" disabled className="opacity-60 cursor-not-allowed">{isUploading ? 'Uploading...' : 'Upload Image (stores in /public/page)'}</Button>
+                <Button size="sm" disabled={isUploading}>{isUploading ? 'Uploading...' : 'Upload to /public/page'}</Button>
               </div>
-              <p className="text-xs text-muted-foreground">Upload will store the image under public/page and auto-fill the URL field.</p>
+              <p className="text-xs text-muted-foreground">The original filename will be preserved. No automatic renaming or stamping.</p>
+              {!!imageSrc && (
+                <p className="text-xs text-muted-foreground">Selected image: <span className="font-mono">{imageSrc}</span></p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="imgAlt">Image Alt Text</Label>
