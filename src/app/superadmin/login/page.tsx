@@ -31,6 +31,25 @@ export default function SuperadminLoginPage() {
         setIsLoading(true);
 
         try {
+            // First attempt: server-side session via API
+            try {
+                const apiResp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                if (apiResp.ok) {
+                    // Set local flag so client-side route guard passes too
+                    setLocalSuperadminSession(true);
+                    toast({
+                        title: 'Login Successful',
+                        description: 'Welcome to SuperAdmin Dashboard!',
+                    });
+                    router.push('/superadmin/dashboard');
+                    return;
+                }
+            } catch {}
+
             const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
 
             if (canUseSupabase) {

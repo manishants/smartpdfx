@@ -75,8 +75,15 @@ export function SuperadminSidebar() {
       // Attempt to sign out Supabase user if present
       await supabase.auth.signOut();
     } catch {}
-    // Clear local superadmin session (local dev fallback)
+
+    // Clear server-side admin session cookie
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+
+    // Clear local superadmin session (client-side flag)
     setLocalSuperadminSession(false);
+
     // Redirect to login
     router.push('/superadmin/login');
   };
