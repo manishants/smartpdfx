@@ -39,7 +39,7 @@ export default async function BlogListPage() {
 
     return (
         <div className="px-4 py-8 md:py-12">
-            <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
                 <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog' }]} />
                 <header className="text-center my-8 md:my-12">
                     <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tight">The SmartPDFx Blog</h1>

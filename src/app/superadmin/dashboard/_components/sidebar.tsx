@@ -23,7 +23,6 @@ import {
   PenTool,
   Calendar,
   TrendingUp,
-  Activity,
   Key as KeyIcon,
   LogOut
 } from "lucide-react";
@@ -69,6 +68,7 @@ export function SuperadminSidebar() {
   const isBlogActive = pathname.startsWith('/superadmin/blog');
   const isPageActive = pathname.startsWith('/superadmin/pages');
   const isSEOActive = pathname.startsWith('/superadmin/seo');
+  const isAnalyticsActive = pathname.startsWith('/superadmin/analytics');
 
   const handleLogout = async () => {
     try {
@@ -82,8 +82,8 @@ export function SuperadminSidebar() {
   };
 
   return (
-    <div className="hidden border-r bg-gradient-to-b from-white to-slate-50 md:block w-72 shadow-lg">
-      <div className="flex h-full max-h-screen flex-col gap-2">
+    <div className="hidden md:block w-72 border-r bg-gradient-to-b from-white to-slate-50 shadow-lg sticky top-0 h-screen">
+      <div className="flex h-full flex-col gap-2">
         <div className="flex h-16 items-center border-b border-slate-200 px-6 bg-gradient-to-r from-yellow-50 to-orange-50">
           <Link href="/" className="group flex items-center gap-3 font-bold text-slate-800 hover:text-slate-900 transition-colors duration-200">
             <div className="p-1.5 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-200">
@@ -99,9 +99,28 @@ export function SuperadminSidebar() {
               Dashboard
             </NavLink>
             
-            <NavLink href="/superadmin/analytics" icon={BarChart3}>
-              Analytics
-            </NavLink>
+            {/* Analytics Section */}
+            <div className="mt-2">
+              <Collapsible defaultOpen={isAnalyticsActive}>
+                <CollapsibleTrigger className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-slate-700 transition-all duration-200 hover:text-slate-900 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:shadow-sm [&[data-state=open]>svg]:rotate-180">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-200">
+                      <BarChart3 className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <span className="font-semibold">Analytics</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-8 mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
+                  <NavLink href="/superadmin/analytics/overview" icon={BarChart3}>
+                    Overview
+                  </NavLink>
+                  <NavLink href="/superadmin/analytics/config" icon={KeyIcon}>
+                    Credentials
+                  </NavLink>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
             {/* Blog Management */}
             <div className="mt-4">
@@ -154,8 +173,8 @@ export function SuperadminSidebar() {
                   <NavLink href="/superadmin/pages/create" icon={PlusCircle}>
                     Create Page
                   </NavLink>
-                  <NavLink href="/superadmin/pages/templates" icon={Edit}>
-                    Page Templates
+                  <NavLink href="/superadmin/pages/tools" icon={PenTool}>
+                    Edit Tool Pages
                   </NavLink>
                 </CollapsibleContent>
               </Collapsible>
@@ -198,9 +217,7 @@ export function SuperadminSidebar() {
                 System & Settings
               </div>
               
-              <NavLink href="/superadmin/activity" icon={Activity}>
-                Activity Logs
-              </NavLink>
+              {/* Activity Logs removed per request */}
               
               <NavLink href="/superadmin/profile" icon={User}>
                 Profile Settings

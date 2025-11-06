@@ -30,7 +30,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Layers className="h-6 w-6" />}
     className="mt-12"
-    contentClassName="max-w-4xl mx-auto"
+    contentClassName="w-full"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -166,6 +166,7 @@ export default function MergePdfPage() {
       icon={<Combine className="h-8 w-8" />}
       badge="AI Enhanced"
       gradient="from-purple-600 via-blue-600 to-cyan-500"
+      backgroundVariant="home"
     >
       {!pdfUrl ? (
         <ModernSection
@@ -228,7 +229,7 @@ export default function MergePdfPage() {
                   size="lg"
                   onClick={handleMerge}
                   disabled={files.length < 2 || isMerging}
-                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 transition-all duration-200 shadow-lg hover:shadow-xl text-white"
                 >
                   {isMerging ? (
                     <>
@@ -296,7 +297,7 @@ export default function MergePdfPage() {
               <Button
                 size="lg"
                 onClick={handleDownload}
-                className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 transition-all duration-200 shadow-lg hover:shadow-xl text-white"
               >
                 <FileDown className="mr-2 h-5 w-5" />
                 Download Merged PDF

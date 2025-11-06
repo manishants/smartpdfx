@@ -1,14 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { WysiwygEditor } from '@/components/ui/wysiwyg-editor';
+import { MediaLibraryModal } from '@/components/media-library';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import { BlogTOC, type TOCHeading } from '@/components/blog/BlogTOC';
+import { BlogRightSidebar } from '@/components/blog/BlogRightSidebar';
 import {
   Select,
   SelectContent,
@@ -33,7 +39,7 @@ import {
   Redo,
   Clock
 } from 'lucide-react';
-import { BlogPost, BlogPostForm, SEOData } from '@/types/cms';
+import { BlogPost, BlogPostForm, SEOData, Category, SEOIssue } from '@/types/cms';
 import { cmsStore } from '@/lib/cms/store';
 import { SEOAnalyzer } from '@/lib/seo/analyzer';
 import { useAutoSave } from '@/hooks/use-auto-save';
@@ -56,6 +62,7 @@ export default function CreateBlogPost() {
     categories: [],
     tags: [],
     featuredImage: '',
+    featuredImageAlt: '',
     seo: {
       metaTitle: '',
       metaDescription: '',
@@ -65,11 +72,23 @@ export default function CreateBlogPost() {
       issues: [],
       suggestions: []
     },
-    scheduledAt: undefined
+    scheduledAt: undefined,
+    layoutSettings: {
+      showBreadcrumbs: true,
+      leftSidebarEnabled: true,
+      rightSidebarEnabled: true,
+      leftSticky: false,
+      tocFontSize: 'text-sm',
+      tocH3Indent: 12,
+      tocHoverColor: 'hover:text-primary'
+    }
   });
 
   const [seoAnalysis, setSeoAnalysis] = useState<SEOData | null>(null);
   const [previewMode, setPreviewMode] = useState<'edit' | 'preview'>('edit');
+  const [showTocMobile, setShowTocMobile] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
+  const [tagInput, setTagInput] = useState<string>('');
 
   // Version control
   const {
@@ -114,6 +133,14 @@ export default function CreateBlogPost() {
     }
   }, [formData.title]);
 
+  // Load available categories for selection
+  useEffect(() => {
+    (async () => {
+      const cats = await cmsStore.getAllCategories();
+      setAvailableCategories(cats);
+    })();
+  }, []);
+
   // Auto-generate meta title from title
   useEffect(() => {
     if (formData.title && !formData.seo.metaTitle) {
@@ -127,15 +154,14 @@ export default function CreateBlogPost() {
   // SEO Analysis
   useEffect(() => {
     if (formData.title || formData.content || formData.seo.metaDescription) {
-      const analyzer = new SEOAnalyzer();
-      const analysis = analyzer.analyzePage({
-        title: formData.seo.metaTitle || formData.title,
-        metaDescription: formData.seo.metaDescription,
-        content: formData.content,
-        focusKeyword: formData.seo.focusKeyword,
-        url: formData.slug
-      });
-      
+      const analyzer = new SEOAnalyzer(
+        formData.content || '',
+        (formData.seo.metaTitle || formData.title || ''),
+        (formData.seo.metaDescription || ''),
+        (formData.seo.focusKeyword || '')
+      );
+      const analysis = analyzer.analyze();
+
       setSeoAnalysis(analysis);
       setFormData(prev => ({
         ...prev,
@@ -161,14 +187,27 @@ export default function CreateBlogPost() {
     }));
   };
 
+  const handleLayoutChange = (key: keyof NonNullable<BlogPostForm['layoutSettings']>, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      layoutSettings: { ...(prev.layoutSettings || {}), [key]: value }
+    }));
+  };
+
   const handleSave = async (status: 'draft' | 'published' | 'scheduled') => {
     setLoading(true);
     try {
-      const postData: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'> = {
-        ...formData,
+      // Flatten nested SEO fields when constructing post data
+      const { seo, ...rest } = formData;
+      const postData: Partial<BlogPost> = {
+        ...rest,
         status,
         publishedAt: status === 'published' ? new Date() : undefined,
-        views: 0
+        views: 0,
+        metaTitle: seo.metaTitle,
+        metaDescription: seo.metaDescription,
+        canonicalUrl: seo.canonicalUrl,
+        focusKeyword: seo.focusKeyword
       };
 
       const savedPost = await cmsStore.createPost(postData);
@@ -209,13 +248,13 @@ export default function CreateBlogPost() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-white-900 flex items-center gap-2">
               <FileText className="h-8 w-8 text-yellow-600" />
               Create New Post
             </h1>
             <div className="flex items-center gap-4 mt-1">
               <div className="flex items-center gap-2">
-                <p className="text-gray-600 text-sm">
+                <p className="text-white-600 text-sm">
                   {autoSaving ? 'Auto-saving...' : lastSaved ? `Last saved: ${lastSaved.toLocaleTimeString()}` : 'Not saved'}
                 </p>
                 {autoSaving && <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-600"></div>}
@@ -336,28 +375,100 @@ export default function CreateBlogPost() {
 
                   <div>
                     <Label htmlFor="content">Content *</Label>
-                    <Textarea
-                      id="content"
+                    <WysiwygEditor
                       value={formData.content}
-                      onChange={(e) => handleInputChange('content', e.target.value)}
-                      placeholder="Write your blog post content here..."
-                      rows={15}
-                      className="font-mono"
+                      onChange={(html) => handleInputChange('content', html)}
+                      height={500}
+                      placeholder="Write or paste your content, add images, embeds, tables, etc."
+                      className="mt-2"
                     />
                     <p className="text-sm text-muted-foreground mt-1">
-                      {formData.content.length} characters, ~{Math.ceil(formData.content.split(' ').length / 200)} min read
+                      {formData.content.replace(/<[^>]*>/g, '').length} characters, ~{Math.ceil(formData.content.replace(/<[^>]*>/g, ' ').split(' ').filter(Boolean).length / 200)} min read
                     </p>
                   </div>
                 </>
               ) : (
-                <div className="prose max-w-none">
-                  <h1>{formData.title || 'Untitled Post'}</h1>
-                  {formData.excerpt && (
-                    <p className="lead text-muted-foreground">{formData.excerpt}</p>
-                  )}
-                  <div className="whitespace-pre-wrap">
-                    {formData.content || 'No content yet...'}
-                  </div>
+                <div className="max-w-none">
+                  {(() => {
+                    const html = formData.content || '';
+                    const addIdsAndExtract = (h: string): { contentWithIds: string; headings: TOCHeading[] } => {
+                      let contentWithIds = h;
+                      const headings: TOCHeading[] = [];
+                      const slugify = (str: string) => str
+                        .toLowerCase()
+                        .replace(/<[^>]*>/g, '')
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .trim()
+                        .replace(/\s+/g, '-');
+                      const process = (tag: 'h2' | 'h3') => {
+                        const regex = new RegExp(`<${tag}[^>]*>(.*?)<\/${tag}>`, 'gi');
+                        contentWithIds = contentWithIds.replace(regex, (full, inner) => {
+                          const text = String(inner).replace(/<[^>]*>/g, '').trim();
+                          const id = slugify(text);
+                          headings.push({ id, text, level: tag === 'h2' ? 2 : 3 });
+                          if (full.includes(' id=')) return full;
+                          return full.replace(`<${tag}`, `<${tag} id="${id}"`);
+                        });
+                      };
+                      process('h2');
+                      process('h3');
+                      return { contentWithIds, headings };
+                    };
+
+                    const { contentWithIds, headings } = addIdsAndExtract(html);
+                    const categoryName = Array.isArray(formData.categories) && formData.categories[0] ? formData.categories[0] : 'General';
+                    const breadcrumbItems = [
+                      { label: 'Home', href: '/' },
+                      { label: 'Blog', href: '/blog' },
+                      ...(formData.layoutSettings?.showBreadcrumbs && categoryName
+                        ? [{ label: categoryName, href: `/blog?category=${encodeURIComponent(categoryName)}` }]
+                        : []),
+                      { label: formData.title || 'Untitled Post' },
+                    ];
+                    const fontSizeClass = formData.layoutSettings?.tocFontSize || 'text-sm';
+                    const h3Indent = formData.layoutSettings?.tocH3Indent ?? 12;
+                    const hoverClass = formData.layoutSettings?.tocHoverColor || 'hover:text-primary';
+                    const sticky = !!formData.layoutSettings?.leftSticky;
+                    const mockPost: any = {
+                      title: formData.title || 'Untitled Post',
+                      category: categoryName,
+                    };
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        {formData.layoutSettings?.leftSidebarEnabled && headings.length > 0 && (
+                          <aside className="hidden md:block md:col-span-3">
+                            <BlogTOC
+                              headings={headings}
+                              sticky={sticky}
+                              fontSizeClass={fontSizeClass}
+                              h3Indent={h3Indent}
+                              hoverClass={hoverClass}
+                            />
+                          </aside>
+                        )}
+                        <main className={formData.layoutSettings?.rightSidebarEnabled && formData.layoutSettings?.leftSidebarEnabled ? 'md:col-span-6' : formData.layoutSettings?.leftSidebarEnabled || formData.layoutSettings?.rightSidebarEnabled ? 'md:col-span-9' : 'md:col-span-12'}>
+                          {formData.layoutSettings?.showBreadcrumbs && (
+                            <div className="mb-4">
+                              <Breadcrumbs items={breadcrumbItems} />
+                            </div>
+                          )}
+                          <article className="prose max-w-none">
+                            <h1 className="text-3xl font-bold">{formData.title || 'Untitled Post'}</h1>
+                            {formData.excerpt && (
+                              <p className="mt-2 text-muted-foreground">{formData.excerpt}</p>
+                            )}
+                            <div dangerouslySetInnerHTML={{ __html: contentWithIds }} />
+                          </article>
+                        </main>
+                        {formData.layoutSettings?.rightSidebarEnabled && (
+                          <aside className="md:col-span-3">
+                            <BlogRightSidebar post={mockPost} />
+                          </aside>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </CardContent>
@@ -470,10 +581,10 @@ export default function CreateBlogPost() {
                             Issues to Fix
                           </h4>
                           <ul className="space-y-1">
-                            {seoAnalysis.issues.map((issue, index) => (
+                            {seoAnalysis.issues.map((issue: SEOIssue, index) => (
                               <li key={index} className="text-sm text-red-600 flex items-start gap-2">
                                 <span className="w-1 h-1 bg-red-600 rounded-full mt-2 flex-shrink-0"></span>
-                                {issue}
+                                {issue.message}
                               </li>
                             ))}
                           </ul>
@@ -555,24 +666,19 @@ export default function CreateBlogPost() {
               <div>
                 <Label>Categories</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {['Technology', 'Business', 'Lifestyle', 'Health', 'Education'].map((category) => (
+                  {(availableCategories.length ? availableCategories.map(c => c.name) : ['Technology', 'Business', 'Lifestyle', 'Health', 'Education']).map((category) => (
                     <Badge
                       key={category}
-                      variant={formData.categories.some(c => c.name === category) ? 'default' : 'outline'}
+                      variant={formData.categories.includes(category) ? 'default' : 'outline'}
                       className="cursor-pointer"
                       onClick={() => {
-                        const exists = formData.categories.some(c => c.name === category);
-                        if (exists) {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: prev.categories.filter(c => c.name !== category)
-                          }));
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: [...prev.categories, { id: category.toLowerCase(), name: category }]
-                          }));
-                        }
+                        const exists = formData.categories.includes(category);
+                        setFormData(prev => ({
+                          ...prev,
+                          categories: exists
+                            ? prev.categories.filter(c => c !== category)
+                            : [...prev.categories, category]
+                        }));
                       }}
                     >
                       {category}
@@ -582,17 +688,44 @@ export default function CreateBlogPost() {
               </div>
 
               <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Label htmlFor="tags">Tags (press Enter to add, max 20)</Label>
                 <Input
                   id="tags"
-                  value={formData.tags.map(t => t.name).join(', ')}
-                  onChange={(e) => {
-                    const tagNames = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
-                    const tags = tagNames.map(name => ({ id: name.toLowerCase(), name }));
-                    handleInputChange('tags', tags);
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const name = tagInput.trim();
+                      if (!name) return;
+                      if (formData.tags.includes(name)) {
+                        setTagInput('');
+                        return;
+                      }
+                      if (formData.tags.length >= 20) return;
+                      setFormData(prev => ({ ...prev, tags: [...prev.tags, name] }));
+                      setTagInput('');
+                    }
                   }}
-                  placeholder="tag1, tag2, tag3"
+                  placeholder="Type a tag and press Enter"
                 />
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.tags.map((t) => (
+                      <Badge key={t} variant="secondary" className="gap-2">
+                        {t}
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, tags: prev.tags.filter(x => x !== t) }))}
+                          title="Remove"
+                          className="ml-1"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -603,11 +736,20 @@ export default function CreateBlogPost() {
               <CardTitle>Featured Image</CardTitle>
             </CardHeader>
             <CardContent>
-              <Input
-                value={formData.featuredImage}
-                onChange={(e) => handleInputChange('featuredImage', e.target.value)}
-                placeholder="Image URL or upload..."
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  value={formData.featuredImage}
+                  onChange={(e) => handleInputChange('featuredImage', e.target.value)}
+                  placeholder="Image URL or upload..."
+                />
+                <MediaLibraryModal
+                  title="Select Featured Image"
+                  onSelect={(file: any) => {
+                    handleInputChange('featuredImage', file.url);
+                  }}
+                  trigger={<Button variant="outline" size="sm">Browse</Button>}
+                />
+              </div>
               {formData.featuredImage && (
                 <div className="mt-2">
                   <img
@@ -620,6 +762,96 @@ export default function CreateBlogPost() {
                   />
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Layout Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="breadcrumbs">Show Breadcrumbs</Label>
+                <Switch
+                  id="breadcrumbs"
+                  checked={!!formData.layoutSettings?.showBreadcrumbs}
+                  onCheckedChange={(val) => handleLayoutChange('showBreadcrumbs', val)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="leftSidebar">Enable Left Sidebar (TOC)</Label>
+                <Switch
+                  id="leftSidebar"
+                  checked={!!formData.layoutSettings?.leftSidebarEnabled}
+                  onCheckedChange={(val) => handleLayoutChange('leftSidebarEnabled', val)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="leftSticky">Left Sidebar Sticky (desktop)</Label>
+                <Switch
+                  id="leftSticky"
+                  checked={!!formData.layoutSettings?.leftSticky}
+                  onCheckedChange={(val) => handleLayoutChange('leftSticky', val)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="rightSidebar">Enable Right Sidebar</Label>
+                <Switch
+                  id="rightSidebar"
+                  checked={!!formData.layoutSettings?.rightSidebarEnabled}
+                  onCheckedChange={(val) => handleLayoutChange('rightSidebarEnabled', val)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tocFontSize">TOC Font Size</Label>
+                <Select
+                  value={formData.layoutSettings?.tocFontSize || 'text-sm'}
+                  onValueChange={(val) => handleLayoutChange('tocFontSize', val)}
+                >
+                  <SelectTrigger id="tocFontSize" className="mt-1">
+                    <SelectValue placeholder="Select size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text-xs">Small</SelectItem>
+                    <SelectItem value="text-sm">Default</SelectItem>
+                    <SelectItem value="text-base">Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="tocIndent">H3 Indent (px)</Label>
+                <Input
+                  id="tocIndent"
+                  type="number"
+                  min={0}
+                  value={formData.layoutSettings?.tocH3Indent ?? 12}
+                  onChange={(e) => handleLayoutChange('tocH3Indent', parseInt(e.target.value || '0', 10))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tocHover">TOC Hover Color</Label>
+                <Select
+                  value={formData.layoutSettings?.tocHoverColor || 'hover:text-primary'}
+                  onValueChange={(val) => handleLayoutChange('tocHoverColor', val)}
+                >
+                  <SelectTrigger id="tocHover" className="mt-1">
+                    <SelectValue placeholder="Select hover color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hover:text-primary">Primary</SelectItem>
+                    <SelectItem value="hover:text-blue-600">Blue</SelectItem>
+                    <SelectItem value="hover:text-emerald-600">Green</SelectItem>
+                    <SelectItem value="hover:text-rose-600">Rose</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
         </div>

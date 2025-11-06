@@ -28,7 +28,7 @@ export function GoogleAd() {
   }
 
   return (
-    <div className="w-full max-w-full mx-auto my-4 px-2 sm:px-4">
+    <div className="w-full max-w-full my-4">
       <Card className="overflow-hidden">
         <CardContent className="p-2 sm:p-4 flex justify-center items-center min-h-[100px] sm:min-h-[120px] bg-muted/50">
           <ins

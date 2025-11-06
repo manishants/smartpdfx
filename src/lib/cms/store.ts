@@ -49,7 +49,16 @@ class CMSStore {
       categories: postData.categories || [],
       tags: postData.tags || [],
       views: 0,
-      readingTime: calculateReadingTime(postData.content || '')
+      readingTime: calculateReadingTime(postData.content || ''),
+      layoutSettings: postData.layoutSettings || {
+        showBreadcrumbs: true,
+        leftSidebarEnabled: true,
+        rightSidebarEnabled: true,
+        leftSticky: false,
+        tocFontSize: 'text-sm',
+        tocH3Indent: 12,
+        tocHoverColor: 'hover:text-primary'
+      }
     };
 
     // Calculate SEO score
@@ -235,6 +244,100 @@ class CMSStore {
     return tags ? JSON.parse(tags) : [];
   }
 
+  private saveCategories(categories: Category[]): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    }
+  }
+
+  private saveTags(tags: Tag[]): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.STORAGE_KEYS.TAGS, JSON.stringify(tags));
+    }
+  }
+
+  async createCategory(data: Omit<Category, 'id' | 'postCount' | 'slug'> & { slug?: string }): Promise<Category> {
+    const categories = await this.getAllCategories();
+    const name = (data.name || '').trim();
+    const slug = (data.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+    const newCategory: Category = {
+      id: this.generateId(),
+      name,
+      slug,
+      description: data.description || '',
+      postCount: 0
+    };
+    categories.push(newCategory);
+    this.saveCategories(categories);
+    await this.logActivity({ type: 'page_updated', message: `Created category: ${newCategory.name}`, entityId: newCategory.id });
+    return newCategory;
+  }
+
+  async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+    const categories = await this.getAllCategories();
+    const idx = categories.findIndex(c => c.id === id);
+    if (idx === -1) return null;
+    const updated: Category = { ...categories[idx], ...updates };
+    // Normalize slug if name changed and slug not provided
+    if (updates.name && !updates.slug) {
+      updated.slug = updates.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+    categories[idx] = updated;
+    this.saveCategories(categories);
+    await this.logActivity({ type: 'page_updated', message: `Updated category: ${updated.name}`, entityId: updated.id });
+    return updated;
+  }
+
+  async deleteCategory(id: string): Promise<boolean> {
+    const categories = await this.getAllCategories();
+    const idx = categories.findIndex(c => c.id === id);
+    if (idx === -1) return false;
+    const [deleted] = categories.splice(idx, 1);
+    this.saveCategories(categories);
+    await this.logActivity({ type: 'page_updated', message: `Deleted category: ${deleted.name}`, entityId: deleted.id });
+    return true;
+  }
+
+  async createTag(data: Omit<Tag, 'id' | 'postCount' | 'slug'> & { slug?: string }): Promise<Tag> {
+    const tags = await this.getAllTags();
+    const name = (data.name || '').trim();
+    const slug = (data.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+    const newTag: Tag = {
+      id: this.generateId(),
+      name,
+      slug,
+      postCount: 0
+    };
+    tags.push(newTag);
+    this.saveTags(tags);
+    await this.logActivity({ type: 'page_updated', message: `Created tag: ${newTag.name}`, entityId: newTag.id });
+    return newTag;
+  }
+
+  async updateTag(id: string, updates: Partial<Tag>): Promise<Tag | null> {
+    const tags = await this.getAllTags();
+    const idx = tags.findIndex(t => t.id === id);
+    if (idx === -1) return null;
+    const updated: Tag = { ...tags[idx], ...updates };
+    if (updates.name && !updates.slug) {
+      updated.slug = updates.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+    tags[idx] = updated;
+    this.saveTags(tags);
+    await this.logActivity({ type: 'page_updated', message: `Updated tag: ${updated.name}`, entityId: updated.id });
+    return updated;
+  }
+
+  async deleteTag(id: string): Promise<boolean> {
+    const tags = await this.getAllTags();
+    const idx = tags.findIndex(t => t.id === id);
+    if (idx === -1) return false;
+    const [deleted] = tags.splice(idx, 1);
+    this.saveTags(tags);
+    await this.logActivity({ type: 'page_updated', message: `Deleted tag: ${deleted.name}`, entityId: deleted.id });
+    return true;
+  }
+
   // Dashboard Stats
   async getDashboardStats(): Promise<DashboardStats> {
     const posts = await this.getAllPosts();
@@ -268,19 +371,33 @@ class CMSStore {
   }
 
   // Activity Logging
-  async logActivity(activity: Omit<ActivityLog, 'id' | 'timestamp' | 'userId'>): Promise<void> {
+  async logActivity(activityOrAction: Omit<ActivityLog, 'id' | 'timestamp' | 'userId'> | 'create' | 'update' | 'delete', entityType?: string, entityId?: string, message?: string): Promise<void> {
     if (typeof window === 'undefined') return;
-    
+
     const activities = await this.getRecentActivity();
+
+    let payload: Omit<ActivityLog, 'id' | 'timestamp' | 'userId'>;
+    if (typeof activityOrAction === 'string') {
+      // Backward-compatible signature: (action, entityType, entityId, message)
+      const action = activityOrAction;
+      payload = {
+        type: `${entityType || 'entity'}_${action}`,
+        message: message || '',
+        entityId: entityId || ''
+      } as any;
+    } else {
+      payload = activityOrAction;
+    }
+
     const newActivity: ActivityLog = {
       id: this.generateId(),
       timestamp: new Date(),
       userId: 'superadmin',
-      ...activity
+      ...payload
     };
-    
+
     activities.unshift(newActivity);
-    
+
     // Keep only last 100 activities
     const trimmedActivities = activities.slice(0, 100);
     localStorage.setItem(this.STORAGE_KEYS.ACTIVITY, JSON.stringify(trimmedActivities));

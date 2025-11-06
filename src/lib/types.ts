@@ -384,6 +384,22 @@ export const BlogPostSchema = z.object({
     faqs: z.array(FaqSchema).optional(),
     category: z.string().optional(),
     popular: z.boolean().optional(),
+    // Support The Author fields
+    upiId: z.string().optional(),
+    paypalId: z.string().optional(),
+    supportQrUrl: z.string().optional(),
+    supportLabel: z.string().optional(),
+    layoutSettings: z
+      .object({
+        showBreadcrumbs: z.boolean().default(true).optional(),
+        leftSidebarEnabled: z.boolean().default(true).optional(),
+        rightSidebarEnabled: z.boolean().default(true).optional(),
+        leftSticky: z.boolean().default(false).optional(),
+        tocFontSize: z.string().optional(),
+        tocH3Indent: z.number().default(12).optional(),
+        tocHoverColor: z.string().optional(),
+      })
+      .optional(),
 });
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 

@@ -27,10 +27,21 @@ export interface BlogPost {
   // Categories & Tags
   categories: string[];
   tags: string[];
-  
+
   // Analytics
   views: number;
   readingTime: number;
+
+  // Layout Settings
+  layoutSettings?: {
+    showBreadcrumbs: boolean;
+    leftSidebarEnabled: boolean;
+    rightSidebarEnabled: boolean;
+    leftSticky?: boolean;
+    tocFontSize?: string; // e.g., 'text-sm' | 'text-base' | 'text-lg'
+    tocH3Indent?: number; // px value for indent
+    tocHoverColor?: string; // tailwind color class or hex
+  };
 }
 
 export interface Page {
@@ -167,21 +178,43 @@ export interface Tag {
 }
 
 // Form Types
+export interface SEOData {
+  metaTitle: string;
+  metaDescription: string;
+  focusKeyword: string;
+  canonicalUrl?: string;
+  // Analysis fields merged into SEO state when available
+  score?: number;
+  issues?: SEOIssue[];
+  suggestions?: string[];
+  keywordDensity?: Record<string, number>;
+  readabilityScore?: number;
+  wordCount?: number;
+  headingStructure?: HeadingAnalysis[];
+}
+
 export interface BlogPostForm {
   title: string;
   slug: string;
   content: string;
   excerpt: string;
+  author: string;
   status: 'draft' | 'published' | 'scheduled';
   scheduledAt?: Date;
-  metaTitle: string;
-  metaDescription: string;
-  canonicalUrl: string;
-  focusKeyword: string;
+  seo: SEOData;
   featuredImage?: string;
   featuredImageAlt: string;
   categories: string[];
   tags: string[];
+  layoutSettings?: {
+    showBreadcrumbs: boolean;
+    leftSidebarEnabled: boolean;
+    rightSidebarEnabled: boolean;
+    leftSticky?: boolean;
+    tocFontSize?: string;
+    tocH3Indent?: number;
+    tocHoverColor?: string;
+  };
 }
 
 export interface PageForm {

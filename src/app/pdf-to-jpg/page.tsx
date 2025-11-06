@@ -236,7 +236,7 @@ export default function PdfToJpgPage() {
   };
 
   return (
-    <ModernPageLayout title="PDF to JPG Converter" description="Convert PDF documents to high-quality JPG images with AI-powered precision.">
+    <ModernPageLayout title="PDF to JPG Converter" description="Convert PDF documents to high-quality JPG images with AI-powered precision." backgroundVariant="home">
       <ModernSection
         title="PDF to JPG Converter"
         subtitle="Transform your PDF documents into high-quality JPG images with AI-powered precision"

@@ -38,6 +38,10 @@ export function CreatePostForm() {
     const [published, setPublished] = useState('true');
     const [faqs, setFaqs] = useState<FaqItem[]>([]);
     const [activeFormats, setActiveFormats] = useState<string[]>([]);
+    // Support The Author fields
+    const [upiId, setUpiId] = useState('');
+    const [paypalId, setPaypalId] = useState('');
+    const [supportLabel, setSupportLabel] = useState('Support The Author');
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -112,6 +116,15 @@ export function CreatePostForm() {
             formData.set(`faq-answer-${index}`, faq.answer);
         });
 
+        // Support fields
+        if (upiId) formData.set('upiId', upiId);
+        if (paypalId) formData.set('paypalId', paypalId);
+        if (supportLabel) formData.set('supportLabel', supportLabel);
+        const supportQrInput = event.currentTarget.elements.namedItem('supportQr') as HTMLInputElement | null;
+        if (supportQrInput && supportQrInput.files && supportQrInput.files[0]) {
+            formData.set('supportQr', supportQrInput.files[0]);
+        }
+
 
         const result = await createPost(formData);
 
@@ -135,6 +148,9 @@ export function CreatePostForm() {
             setSeoTitle('');
             setMetaDescription('');
             setFaqs([]);
+            setUpiId('');
+            setPaypalId('');
+            setSupportLabel('Support The Author');
         }
 
         setIsLoading(false);
@@ -310,6 +326,30 @@ export function CreatePostForm() {
                                 </div>
                             ))}
                             <Button type="button" variant="outline" className="w-full" onClick={addFaq}><PlusCircle className="mr-2"/>Add FAQ</Button>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+                {/* Support The Author */}
+                <Accordion type="single" collapsible defaultValue="support">
+                    <AccordionItem value="support">
+                        <AccordionTrigger className="text-base font-semibold px-6">Support The Author</AccordionTrigger>
+                        <AccordionContent className="p-6 pt-2 space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="supportLabel">Label</Label>
+                                <Input id="supportLabel" name="supportLabel" value={supportLabel} onChange={e => setSupportLabel(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="upiId">UPI ID</Label>
+                                <Input id="upiId" name="upiId" placeholder="name@bank" value={upiId} onChange={e => setUpiId(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="paypalId">PayPal ID (email)</Label>
+                                <Input id="paypalId" name="paypalId" placeholder="your-email@example.com" value={paypalId} onChange={e => setPaypalId(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="supportQr">Support QR Code</Label>
+                                <Input id="supportQr" name="supportQr" type="file" accept="image/*" />
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

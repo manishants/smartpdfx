@@ -38,7 +38,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Split className="h-6 w-6" />}
     className="mt-12"
-    contentClassName="max-w-4xl mx-auto"
+    contentClassName="w-full"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -402,7 +402,7 @@ export default function SplitPdfPage() {
                     )}
 
                     <div className="mt-6 flex justify-end items-center">
-                       <Button size="lg" onClick={handleSplit} disabled={isLoading || computedRanges.length === 0}>
+                       <Button size="lg" onClick={handleSplit} disabled={isLoading || computedRanges.length === 0} className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white">
                             {isLoading ? <><Loader2 className="mr-2 animate-spin" />Splitting...</> : <><Scissors className="mr-2"/>Split PDF</>}
                         </Button>
                     </div>
@@ -444,6 +444,7 @@ export default function SplitPdfPage() {
             icon={<Split className="h-8 w-8" />}
             badge="AI Enhanced"
             gradient="from-orange-600 via-red-600 to-pink-500"
+            backgroundVariant="home"
         >
             {stage === 'upload' && (
                 <ModernSection

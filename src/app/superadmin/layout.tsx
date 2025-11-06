@@ -1,10 +1,12 @@
 "use client";
+import "./superadmin.css";
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from "next/navigation";
 import { checkRouteAccess } from '@/lib/auth/middleware';
 import { Loader2 } from 'lucide-react';
 import { SuperadminSidebar } from './dashboard/_components/sidebar';
+import { useTheme } from "next-themes";
 
 export default function SuperadminLayout({
   children,
@@ -15,6 +17,7 @@ export default function SuperadminLayout({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const { setTheme } = useTheme();
   
   // Show sidebar across superadmin routes except login
 
@@ -40,6 +43,14 @@ export default function SuperadminLayout({
     checkAccess();
   }, [pathname, router]);
 
+  // Force light theme across all superadmin routes for better readability
+  useEffect(() => {
+    try {
+      localStorage.setItem("smartpdfx-theme-override", "true");
+    } catch {}
+    setTheme("light");
+  }, [setTheme]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -56,7 +67,7 @@ export default function SuperadminLayout({
   const showSidebar = pathname !== '/superadmin/login';
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
+    <div className="superadmin-scope flex min-h-screen bg-gradient-to-b from-white to-slate-50">
       {showSidebar && <SuperadminSidebar />}
       <main className="flex-1 min-w-0 p-4 md:p-8">
         {children}

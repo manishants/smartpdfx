@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { WysiwygEditor } from '@/components/ui/wysiwyg-editor';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -30,10 +31,13 @@ import {
   Trash2,
   Image
 } from 'lucide-react';
-import { BlogPost, BlogPostForm, SEOData } from '@/types/cms';
+import { BlogPost, BlogPostForm, SEOData, SEOIssue } from '@/types/cms';
 import { cmsStore } from '@/lib/cms/store';
 import { SEOAnalyzer } from '@/lib/seo/analyzer';
 import { MediaLibraryModal } from '@/components/media-library';
+import { BlogTOC } from '@/components/blog/BlogTOC';
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import { NewsletterForm } from '@/components/newsletter-form';
 
 export default function EditBlogPost() {
   const router = useRouter();
@@ -56,6 +60,7 @@ export default function EditBlogPost() {
     categories: [],
     tags: [],
     featuredImage: '',
+    featuredImageAlt: '',
     seo: {
       metaTitle: '',
       metaDescription: '',
@@ -65,7 +70,16 @@ export default function EditBlogPost() {
       issues: [],
       suggestions: []
     },
-    scheduledAt: undefined
+    scheduledAt: undefined,
+    layoutSettings: {
+      showBreadcrumbs: true,
+      leftSidebarEnabled: true,
+      rightSidebarEnabled: true,
+      leftSticky: false,
+      tocFontSize: 'text-sm',
+      tocH3Indent: 12,
+      tocHoverColor: 'hover:text-primary'
+    }
   });
 
   const [seoAnalysis, setSeoAnalysis] = useState<SEOData | null>(null);
@@ -88,8 +102,26 @@ export default function EditBlogPost() {
             categories: post.categories,
             tags: post.tags,
             featuredImage: post.featuredImage || '',
-            seo: post.seo,
-            scheduledAt: post.scheduledAt
+            featuredImageAlt: post.featuredImageAlt || '',
+            seo: {
+              metaTitle: post.metaTitle || post.title,
+              metaDescription: post.metaDescription || '',
+              focusKeyword: post.focusKeyword || '',
+              canonicalUrl: post.canonicalUrl || '',
+              score: post.seoScore || 0,
+              issues: [],
+              suggestions: []
+            },
+            scheduledAt: post.scheduledAt,
+            layoutSettings: post.layoutSettings || {
+              showBreadcrumbs: true,
+              leftSidebarEnabled: true,
+              rightSidebarEnabled: true,
+              leftSticky: false,
+              tocFontSize: 'text-sm',
+              tocH3Indent: 12,
+              tocHoverColor: 'hover:text-primary'
+            }
           });
           setLastSaved(new Date(post.updatedAt));
         } else {
@@ -111,14 +143,13 @@ export default function EditBlogPost() {
   // SEO Analysis
   useEffect(() => {
     if (formData.title || formData.content || formData.seo.metaDescription) {
-      const analyzer = new SEOAnalyzer();
-      const analysis = analyzer.analyzePage({
-        title: formData.seo.metaTitle || formData.title,
-        metaDescription: formData.seo.metaDescription,
-        content: formData.content,
-        focusKeyword: formData.seo.focusKeyword,
-        url: formData.slug
-      });
+      const analyzer = new SEOAnalyzer(
+        formData.content || '',
+        formData.seo.metaTitle || formData.title || '',
+        formData.seo.metaDescription || '',
+        formData.seo.focusKeyword || ''
+      );
+      const analysis = analyzer.analyze();
       
       setSeoAnalysis(analysis);
       setFormData(prev => ({
@@ -161,15 +192,28 @@ export default function EditBlogPost() {
     }));
   };
 
+  const handleLayoutChange = (field: keyof NonNullable<BlogPostForm['layoutSettings']>, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      layoutSettings: { ...(prev.layoutSettings || {}), [field]: value }
+    }));
+  };
+
   const handleSave = async (status?: 'draft' | 'published' | 'scheduled') => {
     setSaving(true);
     try {
+      // Flatten nested SEO fields for update
+      const { seo, ...rest } = formData;
       const updateData: Partial<BlogPost> = {
-        ...formData,
+        ...rest,
         status: status || formData.status,
         publishedAt: status === 'published' && originalPost?.status !== 'published' 
           ? new Date() 
-          : originalPost?.publishedAt
+          : originalPost?.publishedAt,
+        metaTitle: seo.metaTitle,
+        metaDescription: seo.metaDescription,
+        canonicalUrl: seo.canonicalUrl,
+        focusKeyword: seo.focusKeyword
       };
 
       await cmsStore.updatePost(postId, updateData);
@@ -332,46 +376,54 @@ export default function EditBlogPost() {
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label htmlFor="content">Content *</Label>
-                      <div className="flex gap-2">
-                        <MediaLibraryModal
-                          onSelect={(file) => {
-                            const imageMarkdown = `![${file.alt || file.name}](${file.url})`;
-                            const newContent = formData.content + '\n\n' + imageMarkdown;
-                            handleInputChange('content', newContent);
-                          }}
-                          trigger={
-                            <Button variant="outline" size="sm" className="gap-2">
-                              <Image className="h-4 w-4" />
-                              Add Image
-                            </Button>
-                          }
-                          title="Insert Image"
-                        />
-                      </div>
-                    </div>
-                    <Textarea
-                      id="content"
+                    <Label htmlFor="content">Content *</Label>
+                    <WysiwygEditor
                       value={formData.content}
-                      onChange={(e) => handleInputChange('content', e.target.value)}
-                      placeholder="Write your blog post content here..."
-                      rows={15}
-                      className="font-mono"
+                      onChange={(html) => handleInputChange('content', html)}
+                      height={500}
+                      placeholder="Write or paste your content, add images, embeds, tables, etc."
+                      className="mt-2"
                     />
                     <p className="text-sm text-muted-foreground mt-1">
-                      {formData.content.length} characters, ~{Math.ceil(formData.content.split(' ').length / 200)} min read
+                      {formData.content.replace(/<[^>]*>/g, '').length} characters, ~{Math.ceil(formData.content.replace(/<[^>]*>/g, ' ').split(' ').filter(Boolean).length / 200)} min read
                     </p>
                   </div>
                 </>
               ) : (
-                <div className="prose max-w-none">
-                  <h1>{formData.title || 'Untitled Post'}</h1>
-                  {formData.excerpt && (
-                    <p className="lead text-muted-foreground">{formData.excerpt}</p>
-                  )}
-                  <div className="whitespace-pre-wrap">
-                    {formData.content || 'No content yet...'}
+                <div>
+                  {/* Layout Preview: grid with TOC & right sidebar */}
+                  <div className="grid lg:grid-cols-12 gap-6">
+                    {formData.layoutSettings?.leftSidebarEnabled && (
+                      <aside className="hidden lg:block lg:col-span-3">
+                        <BlogTOC
+                          headings={addIdsAndExtract(formData.content || '').headings}
+                          sticky={!!formData.layoutSettings?.leftSticky}
+                          fontSizeClass={formData.layoutSettings?.tocFontSize || 'text-sm'}
+                          h3Indent={formData.layoutSettings?.tocH3Indent || 12}
+                          hoverClass={formData.layoutSettings?.tocHoverColor || 'hover:text-primary'}
+                        />
+                      </aside>
+                    )}
+                    <div className="lg:col-span-6">
+                      <article className="prose max-w-none">
+                        <h1>{formData.title || 'Untitled Post'}</h1>
+                        {formData.excerpt && (
+                          <p className="lead text-muted-foreground">{formData.excerpt}</p>
+                        )}
+                        <div dangerouslySetInnerHTML={{ __html: addIdsAndExtract(formData.content || '').contentWithIds }} />
+                      </article>
+                    </div>
+                    {formData.layoutSettings?.rightSidebarEnabled && (
+                      <aside className="lg:col-span-3 space-y-6">
+                        {formData.layoutSettings?.showBreadcrumbs && (
+                          <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog' }, { label: (formData.categories?.[0] || 'General') as string }, { label: formData.title || 'Untitled Post' }]} />
+                        )}
+                        <div className="border rounded p-4">
+                          <h3 className="font-semibold mb-2">Subscribe</h3>
+                          <NewsletterForm category={(formData.categories?.[0] || 'General') as string} />
+                        </div>
+                      </aside>
+                    )}
                   </div>
                 </div>
               )}
@@ -485,10 +537,10 @@ export default function EditBlogPost() {
                             Issues to Fix
                           </h4>
                           <ul className="space-y-1">
-                            {seoAnalysis.issues.map((issue, index) => (
+                            {seoAnalysis.issues.map((issue: SEOIssue, index: number) => (
                               <li key={index} className="text-sm text-red-600 flex items-start gap-2">
                                 <span className="w-1 h-1 bg-red-600 rounded-full mt-2 flex-shrink-0"></span>
-                                {issue}
+                                {issue.message}
                               </li>
                             ))}
                           </ul>
@@ -502,7 +554,7 @@ export default function EditBlogPost() {
                             Suggestions
                           </h4>
                           <ul className="space-y-1">
-                            {seoAnalysis.suggestions.map((suggestion, index) => (
+                            {seoAnalysis.suggestions.map((suggestion: string, index: number) => (
                               <li key={index} className="text-sm text-green-600 flex items-start gap-2">
                                 <span className="w-1 h-1 bg-green-600 rounded-full mt-2 flex-shrink-0"></span>
                                 {suggestion}
@@ -530,6 +582,77 @@ export default function EditBlogPost() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Layout Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Show Breadcrumbs</Label>
+                  <Select value={String(formData.layoutSettings?.showBreadcrumbs)} onValueChange={(v) => handleLayoutChange('showBreadcrumbs', v === 'true')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Enabled</SelectItem>
+                      <SelectItem value="false">Disabled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Left Sidebar (TOC)</Label>
+                  <Select value={String(formData.layoutSettings?.leftSidebarEnabled)} onValueChange={(v) => handleLayoutChange('leftSidebarEnabled', v === 'true')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Enabled</SelectItem>
+                      <SelectItem value="false">Disabled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Right Sidebar</Label>
+                  <Select value={String(formData.layoutSettings?.rightSidebarEnabled)} onValueChange={(v) => handleLayoutChange('rightSidebarEnabled', v === 'true')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Enabled</SelectItem>
+                      <SelectItem value="false">Disabled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Left Sticky (Desktop)</Label>
+                  <Select value={String(formData.layoutSettings?.leftSticky)} onValueChange={(v) => handleLayoutChange('leftSticky', v === 'true')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Sticky</SelectItem>
+                      <SelectItem value="false">Normal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>TOC Font Size</Label>
+                  <Select value={formData.layoutSettings?.tocFontSize || 'text-sm'} onValueChange={(v) => handleLayoutChange('tocFontSize', v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text-xs">Small</SelectItem>
+                      <SelectItem value="text-sm">Default</SelectItem>
+                      <SelectItem value="text-base">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>H3 Indent (px)</Label>
+                  <Input type="number" value={formData.layoutSettings?.tocH3Indent || 12} onChange={(e) => handleLayoutChange('tocH3Indent', Number(e.target.value))} />
+                </div>
+              </div>
+              <div>
+                <Label>TOC Hover Class</Label>
+                <Input value={formData.layoutSettings?.tocHoverColor || 'hover:text-primary'} onChange={(e) => handleLayoutChange('tocHoverColor', e.target.value)} placeholder="Tailwind class e.g., hover:text-primary" />
+              </div>
+            </CardContent>
+          </Card>
           {/* Post Info */}
           <Card>
             <CardHeader>
@@ -618,21 +741,16 @@ export default function EditBlogPost() {
                   {['Technology', 'Business', 'Lifestyle', 'Health', 'Education'].map((category) => (
                     <Badge
                       key={category}
-                      variant={formData.categories.some(c => c.name === category) ? 'default' : 'outline'}
+                      variant={formData.categories.includes(category) ? 'default' : 'outline'}
                       className="cursor-pointer"
                       onClick={() => {
-                        const exists = formData.categories.some(c => c.name === category);
-                        if (exists) {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: prev.categories.filter(c => c.name !== category)
-                          }));
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            categories: [...prev.categories, { id: category.toLowerCase(), name: category }]
-                          }));
-                        }
+                        const exists = formData.categories.includes(category);
+                        setFormData(prev => ({
+                          ...prev,
+                          categories: exists
+                            ? prev.categories.filter(c => c !== category)
+                            : [...prev.categories, category]
+                        }));
                       }}
                     >
                       {category}
@@ -642,17 +760,43 @@ export default function EditBlogPost() {
               </div>
 
               <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Label htmlFor="tags">Tags (press Enter to add, max 20)</Label>
                 <Input
                   id="tags"
-                  value={formData.tags.map(t => t.name).join(', ')}
-                  onChange={(e) => {
-                    const tagNames = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
-                    const tags = tagNames.map(name => ({ id: name.toLowerCase(), name }));
-                    handleInputChange('tags', tags);
+                  value={''}
+                  onChange={() => {}}
+                  onKeyDown={(e) => {
+                    // Capture input via event target value since we don't keep local state here
+                    const input = (e.target as HTMLInputElement);
+                    const name = input.value.trim();
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (!name) return;
+                      if (formData.tags.includes(name)) { input.value = ''; return; }
+                      if (formData.tags.length >= 20) return;
+                      setFormData(prev => ({ ...prev, tags: [...prev.tags, name] }));
+                      input.value = '';
+                    }
                   }}
-                  placeholder="tag1, tag2, tag3"
+                  placeholder="Type a tag and press Enter"
                 />
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.tags.map((t) => (
+                      <Badge key={t} variant="secondary" className="gap-2">
+                        {t}
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, tags: prev.tags.filter(x => x !== t) }))}
+                          title="Remove"
+                          className="ml-1"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -709,4 +853,29 @@ export default function EditBlogPost() {
       </div>
     </div>
   );
+}
+
+// Helper to generate headings for preview (client-side safe)
+function addIdsAndExtract(html: string) {
+  let contentWithIds = html;
+  const headings: { id: string; text: string; level: 2 | 3 }[] = [];
+  const slugify = (str: string) => str
+    .toLowerCase()
+    .replace(/<[^>]*>/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+  const process = (tag: 'h2' | 'h3') => {
+    const regex = new RegExp(`<${tag}[^>]*>(.*?)<\/${tag}>`, 'gi');
+    contentWithIds = contentWithIds.replace(regex, (full, inner) => {
+      const text = String(inner).replace(/<[^>]*>/g, '').trim();
+      const id = slugify(text);
+      headings.push({ id, text, level: tag === 'h2' ? 2 : 3 });
+      if (full.includes(' id=')) return full;
+      return full.replace(`<${tag}`, `<${tag} id="${id}"`);
+    });
+  };
+  process('h2');
+  process('h3');
+  return { contentWithIds, headings };
 }

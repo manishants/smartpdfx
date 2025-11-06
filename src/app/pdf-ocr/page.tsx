@@ -217,6 +217,7 @@ export default function PdfOcrPage() {
       title="AI PDF OCR"
       description="Extract text from any PDF document using advanced AI technology"
       icon={<Eye className="w-8 h-8" />}
+      backgroundVariant="home"
     >
       <ModernSection>
         <div className="grid lg:grid-cols-2 gap-8">

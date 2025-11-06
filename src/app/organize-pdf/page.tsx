@@ -250,6 +250,7 @@ export default function OrganizePdfPage() {
             title="AI PDF Organizer"
             description="Intelligently reorder and organize PDF pages with advanced drag-and-drop functionality"
             icon={<ArrowUpDown className="w-8 h-8" />}
+            backgroundVariant="home"
         >
             <ModernSection>
                 <div className="max-w-6xl mx-auto space-y-8">
@@ -391,7 +392,7 @@ export default function OrganizePdfPage() {
                                             size="lg" 
                                             onClick={handleApplyChanges} 
                                             disabled={isLoading}
-                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                                            className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                                         >
                                             {isLoading ? (
                                                 <>
@@ -436,7 +437,7 @@ export default function OrganizePdfPage() {
                                             <Button 
                                                 size="lg" 
                                                 onClick={handleDownload}
-                                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                                                className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                                             >
                                                 <FileDown className="mr-2 h-5 w-5" />
                                                 Download

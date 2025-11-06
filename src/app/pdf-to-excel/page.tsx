@@ -78,13 +78,13 @@ export default function PdfToExcelPage() {
   };
 
   return (
-    <ModernPageLayout>
-      <ModernSection
-        title="PDF to Excel"
-        subtitle="Convert PDFs to Excel with two modes: No OCR (LibreOffice) or AI OCR for scanned documents."
-        icon={<FileSpreadsheet className="h-8 w-8" />}
-        className="text-center"
-      >
+    <ModernPageLayout
+      title="PDF to Excel"
+      description="Convert PDFs to Excel via No OCR (LibreOffice) or AI OCR for scanned documents."
+      icon={<FileSpreadsheet className="h-8 w-8" />}
+      backgroundVariant="home"
+    >
+      <ModernSection className="text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <ModernUploadArea
             onFileSelect={handleFileChange}
@@ -131,7 +131,7 @@ export default function PdfToExcelPage() {
                   </label>
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  <Button onClick={handleConvert} disabled={isConverting}>
+                  <Button onClick={handleConvert} disabled={isConverting} className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white">
                     {isConverting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -99,7 +99,7 @@ export default function RemoveWatermarkPage() {
                                         className="w-full h-48 object-cover rounded-lg"
                                     />
                                     <p className="text-sm text-muted-foreground">Selected: {file.name}</p>
-                                    <Button onClick={handleRemoveWatermark} disabled={isProcessing} className="w-full">
+                                    <Button onClick={handleRemoveWatermark} disabled={isProcessing} className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white">
                                         <Wand2 className="mr-2 h-4 w-4" />
                                         Remove Watermark
                                     </Button>
@@ -176,13 +176,12 @@ export default function RemoveWatermarkPage() {
     };
 
     return (
-        <ModernPageLayout>
-            <header className="text-center">
-                <h1 className="text-4xl font-bold font-headline">Remove Watermark</h1>
-                <p className="text-lg text-muted-foreground mt-2">
-                    Automatically remove watermarks from images using AI
-                </p>
-            </header>
+        <ModernPageLayout
+            title="Remove Watermark"
+            description="Automatically remove watermarks from images using AI"
+            icon={<Wand2 className="h-8 w-8" />}
+            backgroundVariant="home"
+        >
             
             <div className="mt-8">
                 <Card>

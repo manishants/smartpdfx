@@ -50,7 +50,7 @@ const FAQ = () => (
         subtitle="Frequently asked questions about our intelligent PDF rotation tool"
         icon={<RotateCw className="h-6 w-6" />}
         className="mt-12"
-        contentClassName="max-w-4xl mx-auto"
+        contentClassName="w-full"
     >
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">

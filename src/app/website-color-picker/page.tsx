@@ -177,10 +177,11 @@ export default function WebsiteColorPickerPage() {
       title="Website Color Picker"
       description="Extract beautiful color palettes from any website with AI-powered precision and real-time preview."
       icon={<Pipette className="w-8 h-8" />}
+      backgroundVariant="home"
     >
       <ModernSection>
         <div className="max-w-6xl mx-auto">
-          <Card className="border-2 border-blue-200/50 bg-gradient-to-br from-blue-50/30 to-purple-50/20">
+          <Card className="border-0 bg-transparent shadow-none">
             <CardContent className="p-8">
               {!screenshot ? (
                 <div className="max-w-lg mx-auto space-y-8">
@@ -211,7 +212,7 @@ export default function WebsiteColorPickerPage() {
                     <Button 
                       onClick={handleFetchScreenshot} 
                       disabled={isLoading || !url.trim()} 
-                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium text-lg rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100"
+                      className="w-full h-12 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium text-lg rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:scale-100"
                     >
                       {isLoading ? (
                         <>

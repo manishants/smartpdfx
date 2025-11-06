@@ -64,13 +64,13 @@ export default function SuperadminDashboard() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild className="bg-yellow-600 hover:bg-yellow-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+          <Button asChild className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 rounded-xl">
             <Link href="/superadmin/blog/create">
               <PenTool className="h-4 w-4 mr-2" />
               New Post
             </Link>
           </Button>
-          <Button variant="outline" asChild className="border-yellow-600 text-yellow-700 hover:bg-yellow-50 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
+          <Button variant="outline" asChild className="bg-gradient-to-r from-slate-100 to-slate-50 border-slate-300 text-slate-700 hover:shadow-md transition-all duration-200 hover:scale-105 rounded-xl">
             <Link href="/superadmin/seo">
               <Target className="h-4 w-4 mr-2" />
               SEO Tools
@@ -119,9 +119,9 @@ export default function SuperadminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-yellow-900 mb-1">{stats?.averageSeoScore || 0}/100</div>
+            <div className="text-3xl font-bold text-yellow-900 mb-1">{(stats?.averageSeoScore ?? 0)}/100</div>
             <p className="text-sm text-yellow-600">
-              {stats?.averageSeoScore >= 80 ? 'Excellent' : stats?.averageSeoScore >= 60 ? 'Good' : 'Needs improvement'}
+              {(stats?.averageSeoScore ?? 0) >= 80 ? 'Excellent' : (stats?.averageSeoScore ?? 0) >= 60 ? 'Good' : 'Needs improvement'}
             </p>
           </CardContent>
         </Card>
@@ -171,13 +171,13 @@ export default function SuperadminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all duration-200">
+            <Button asChild className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl">
               <Link href="/superadmin/blog/create">Create New Post</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-indigo-600 text-indigo-700 hover:bg-indigo-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-300 text-indigo-700 hover:from-indigo-100 hover:to-indigo-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/blog">Manage Posts</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-indigo-600 text-indigo-700 hover:bg-indigo-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-300 text-indigo-700 hover:from-indigo-100 hover:to-indigo-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/blog/categories">Categories & Tags</Link>
             </Button>
           </CardContent>
@@ -193,16 +193,16 @@ export default function SuperadminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-md hover:shadow-lg transition-all duration-200">
+            <Button asChild className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl">
               <Link href="/superadmin/pages">Edit Pages</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-300 text-emerald-700 hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/pages/create">Create New Page</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-300 text-emerald-700 hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/pages/seo">Page SEO Settings</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-300 text-emerald-700 hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/pages/tools">Edit Tool Pages</Link>
             </Button>
           </CardContent>
@@ -218,13 +218,13 @@ export default function SuperadminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button asChild className="w-full bg-rose-600 hover:bg-rose-700 shadow-md hover:shadow-lg transition-all duration-200">
+            <Button asChild className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl">
               <Link href="/superadmin/seo/analyzer">SEO Analyzer</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-rose-600 text-rose-700 hover:bg-rose-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-rose-50 to-rose-100 border-rose-300 text-rose-700 hover:from-rose-100 hover:to-rose-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/seo/keywords">Keyword Research</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full border-rose-600 text-rose-700 hover:bg-rose-50 transition-all duration-200">
+            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-rose-50 to-rose-100 border-rose-300 text-rose-700 hover:from-rose-100 hover:to-rose-200 transition-all duration-200 rounded-xl">
               <Link href="/superadmin/seo/links">Link Checker</Link>
             </Button>
           </CardContent>

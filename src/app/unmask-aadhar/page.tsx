@@ -98,7 +98,7 @@ export default function UnmaskAadharPage() {
                                         className="w-full h-48 object-cover rounded-lg"
                                     />
                                     <p className="text-sm text-muted-foreground">Selected: {file.name}</p>
-                                    <Button onClick={handleUnmaskAadhar} disabled={isProcessing} className="w-full">
+                                    <Button onClick={handleUnmaskAadhar} disabled={isProcessing} className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white">
                                         <Eye className="mr-2 h-4 w-4" />
                                         Unmask Aadhar
                                     </Button>
@@ -156,13 +156,12 @@ export default function UnmaskAadharPage() {
     };
 
     return (
-        <ModernPageLayout>
-            <header className="text-center">
-                <h1 className="text-4xl font-bold font-headline">Unmask Aadhar</h1>
-                <p className="text-lg text-muted-foreground mt-2">
-                    Reveal hidden information in masked Aadhar documents
-                </p>
-            </header>
+        <ModernPageLayout
+            title="Unmask Aadhar"
+            description="Reveal hidden information in masked Aadhar documents"
+            icon={<Shield className="h-8 w-8" />}
+            backgroundVariant="home"
+        >
             
             <div className="mt-8">
                 <Card>

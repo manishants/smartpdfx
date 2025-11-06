@@ -79,7 +79,7 @@ export default function BlogManager() {
       filtered = filtered.filter(post =>
         post.title.toLowerCase().includes(q) ||
         post.content.toLowerCase().includes(q) ||
-        (post.seo?.focusKeyword?.toLowerCase().includes(q) ?? false)
+        (post.focusKeyword?.toLowerCase().includes(q) ?? false)
       );
     }
 
@@ -90,9 +90,7 @@ export default function BlogManager() {
 
     // Category filter
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter(post => 
-        post.categories.some(cat => cat.id === categoryFilter)
-      );
+      filtered = filtered.filter(post => post.categories.includes(categoryFilter));
     }
 
     setFilteredPosts(filtered);
@@ -151,7 +149,7 @@ export default function BlogManager() {
     drafts: posts.filter(p => p.status === 'draft').length,
     scheduled: posts.filter(p => p.status === 'scheduled').length,
     avgSeoScore: posts.length > 0 
-      ? Math.round(posts.reduce((sum, p) => sum + (p.seo?.score || 0), 0) / posts.length)
+      ? Math.round(posts.reduce((sum, p) => sum + (p.seoScore || 0), 0) / posts.length)
       : 0
   };
 
@@ -168,7 +166,7 @@ export default function BlogManager() {
             Create, edit, and manage your blog posts with SEO optimization
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black shadow-md hover:shadow-lg transition-all duration-200 rounded-xl">
           <Link href="/superadmin/blog/create">
             <PenTool className="h-4 w-4 mr-2" />
             Create New Post
@@ -305,7 +303,7 @@ export default function BlogManager() {
                         <div>
                           <div className="font-medium">{post.title}</div>
                           <div className="text-sm text-muted-foreground truncate max-w-[200px]">
-                            {post.seo?.metaDescription || 'No description'}
+                            {post.metaDescription || 'No description'}
                           </div>
                         </div>
                       </TableCell>
@@ -318,8 +316,8 @@ export default function BlogManager() {
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
-                        <span className={`font-medium ${getSeoScoreColor(post.seo?.score || 0)}`}>
-                          {post.seo?.score || 0}/100
+                        <span className={`font-medium ${getSeoScoreColor(post.seoScore || 0)}`}>
+                          {post.seoScore || 0}/100
                         </span>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">

@@ -8,10 +8,10 @@ const teamMembers = [
   {
     id: 1,
     name: "Manish Singh",
-    title: "Founder And CEO of Smartpdfx",
-    description: "Manish Singh, the visionary CEO and Co-Founder of Smartpdfx, comes from a strong technical background and has always been passionate about building digital solutions that empower people. The idea of Smartpdfx was born when Manish noticed that most of the popular online PDF tools were developed by foreign companies and charged users for even basic features. Believing that technology should be accessible to everyone, he envisioned creating a 100% free, made-in-India alternative.\n\nWith his deep understanding of web technologies, Manish took the initiative to design, develop, and launch Smartpdfx from the ground up. He later shared this innovative idea with Nishant Singh, his like-minded partner, who also came from a technical background. Together, they refined the vision and laid the foundation for what is now one of India's most promising free PDF tool platforms.\n\nManish's leadership is driven by innovation, transparency, and a mission to make Smartpdfx a global name in digital productivity — proudly built in India, for the world.",
+    title: "Founder & CEO of Smartpdfx",
+    description: "Manish Singh, the visionary Founder of Smartpdfx, comes from a strong technical background and has always been passionate about building digital solutions that empower people. The idea of Smartpdfx was born when Manish noticed that most of the popular online PDF tools were developed by foreign companies and charged users for even basic features. Believing that technology should be accessible to everyone, he envisioned creating a 100% free, made-in-India alternative.\n\nWith his deep understanding of web technologies, Manish took the initiative to design, develop, and launch Smartpdfx from the ground up. He later shared this innovative idea with Nishant Singh, his like-minded partner, who also came from a technical background. Together, they refined the vision and laid the foundation for what is now one of India's most promising free PDF tool platforms.\n\nManish's leadership is driven by innovation, transparency, and a mission to make Smartpdfx a global name in digital productivity — proudly built in India, for the world.",
     seoKeywords: "Manish Singh Smartpdfx, CEO of Smartpdfx, Indian free PDF tools founder, made in India PDF website",
-    image: "/team/ceo_cofounder_manish_singh_smartpdfx.png",
+    image: "/team/ceo_founder_manish_singh_smartpdfx.png",
     role: "Visionary Leader",
     badges: ["CEO", "Founder", "Tech Visionary"]
   },

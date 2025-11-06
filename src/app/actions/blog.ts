@@ -6,46 +6,111 @@ import type { BlogPost, Faq } from '@/lib/types';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 
-export async function getBlogs(): Promise<BlogPost[]> {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const { data, error } = await supabase
-    .from('blogs')
-    .select('*')
-    .order('date', { ascending: false });
+// When Supabase is disabled or credentials are missing, serve local fallback data
+const isSupabaseDisabled = () =>
+  process.env.NEXT_PUBLIC_DISABLE_SUPABASE === 'true' ||
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (error) {
-    console.error('Error fetching blogs:', error);
-    // Return empty array but don't block the page from rendering
-    return [];
+const fallbackPosts: BlogPost[] = [
+  {
+    id: 'local-1',
+    slug: 'sample-post',
+    title: 'Sample Post (Offline)',
+    content: `
+      <p>This is an offline sample post used when Supabase is disabled.</p>
+      <h2>Getting Started</h2>
+      <p>Use the admin editor to add headings, lists, and links.</p>
+      <h3>Features</h3>
+      <ul><li>Breadcrumbs at top</li><li>Sticky right sidebar</li><li>Support popup</li></ul>
+    `,
+    imageUrl: '/hero_section_smartpdfx.webp',
+    author: 'Admin',
+    date: new Date().toISOString(),
+    published: true,
+    seoTitle: 'Sample Post (Offline)',
+    metaDescription: 'Offline sample post for development without Supabase.',
+    faqs: [],
+    category: 'general',
+    popular: false,
+    layoutSettings: {
+      showBreadcrumbs: true,
+      leftSidebarEnabled: true,
+      rightSidebarEnabled: true,
+      leftSticky: true,
+      tocFontSize: 'text-sm',
+      tocH3Indent: 12,
+      tocHoverColor: 'hover:text-primary',
+    },
+    upiId: 'manishants@ybl',
+    paypalId: 'manishants@gmail.com',
+    supportQrUrl: '/qr.jpg',
+    supportLabel: 'Support The Author',
+  }
+];
+
+export async function getBlogs(): Promise<BlogPost[]> {
+  if (isSupabaseDisabled()) {
+    // Offline fallback
+    return fallbackPosts;
   }
 
-  return data.map((post: any) => ({
-    ...post,
-    faqs: post.faqs || [],
-  }));
+  try {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+      .from('blogs')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching blogs:', error);
+      return fallbackPosts;
+    }
+
+    return (data || []).map((post: any) => ({
+      ...post,
+      faqs: post.faqs || [],
+    }));
+  } catch (e) {
+    console.error('Supabase unavailable, using fallback posts:', e);
+    return fallbackPosts;
+  }
 }
 
 export async function getPost(slug: string): Promise<BlogPost | null> {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const { data, error } = await supabase
-    .from('blogs')
-    .select('*')
-    .eq('slug', slug)
-    .single();
-
-  if (error) {
-    console.error(`Error fetching blog post with slug ${slug}:`, error);
-    return null;
+  if (isSupabaseDisabled()) {
+    return fallbackPosts.find(p => p.slug === slug) || fallbackPosts[0] || null;
   }
-  return data as BlogPost;
+
+  try {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+      .from('blogs')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching blog post with slug ${slug}:`, error);
+      return null;
+    }
+    return data as BlogPost;
+  } catch (e) {
+    console.error('Supabase unavailable, using fallback post:', e);
+    return fallbackPosts.find(p => p.slug === slug) || fallbackPosts[0] || null;
+  }
 }
 
 export async function createPost(formData: FormData) {
+  if (isSupabaseDisabled()) {
+    // Simulate success when offline
+    return { success: 'Supabase disabled: post not persisted (development mode).' };
+  }
+
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
-  
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -60,6 +125,10 @@ export async function createPost(formData: FormData) {
   const seoTitle = formData.get('seoTitle') as string;
   const metaDescription = formData.get('metaDescription') as string;
   const published = formData.get('published') === 'true';
+  const upiId = formData.get('upiId') as string | null;
+  const paypalId = formData.get('paypalId') as string | null;
+  const supportLabel = (formData.get('supportLabel') as string | null) || null;
+  const supportQr = formData.get('supportQr') as File | null;
 
   const faqs: Faq[] = [];
   formData.forEach((value, key) => {
@@ -94,6 +163,23 @@ export async function createPost(formData: FormData) {
     
   const imageUrl = imageUrlData.publicUrl;
 
+  // Optional support QR upload
+  let supportQrUrl: string | undefined = undefined;
+  if (supportQr && supportQr.size > 0) {
+    const qrName = `support-${finalSlug}-${Date.now()}`;
+    const { data: qrData, error: qrError } = await supabase.storage
+      .from('blogs')
+      .upload(qrName, supportQr);
+    if (!qrError && qrData) {
+      const { data: qrPublic } = supabase.storage
+        .from('blogs')
+        .getPublicUrl(qrData.path);
+      supportQrUrl = qrPublic.publicUrl;
+    } else {
+      console.error('Error uploading support QR:', qrError);
+    }
+  }
+
   const newPost: Omit<BlogPost, 'id' | 'created_at'> = {
     slug: finalSlug,
     title,
@@ -105,6 +191,10 @@ export async function createPost(formData: FormData) {
     seoTitle: seoTitle || title,
     metaDescription,
     faqs,
+    upiId: upiId || undefined,
+    paypalId: paypalId || undefined,
+    supportQrUrl,
+    supportLabel: supportLabel || undefined,
   };
   
   const { error: insertError } = await supabase

@@ -34,6 +34,7 @@ import {
   Zap
 } from 'lucide-react';
 import { SEOAnalyzer } from '@/lib/seo/analyzer';
+import { SEOIssue } from '@/types/cms';
 import { cmsStore } from '@/lib/cms/store';
 
 interface SEOAnalysisResult {
@@ -43,12 +44,13 @@ interface SEOAnalysisResult {
   content: string;
   focusKeyword: string;
   score: number;
-  issues: string[];
+  issues: SEOIssue[];
   suggestions: string[];
   keywordDensity: { [key: string]: number };
   wordCount: number;
   readingTime: number;
   headings: { level: number; text: string }[];
+  readabilityScore?: number;
 }
 
 interface LinkCheckResult {
@@ -100,16 +102,15 @@ export default function SEOTools() {
       const posts = await cmsStore.getPosts();
       
       const allContent = [...pages, ...posts];
-      const totalScore = allContent.reduce((sum, item) => sum + (item.seo?.score || 0), 0);
+      const totalScore = allContent.reduce((sum, item: any) => sum + (item.seoScore || 0), 0);
       const avgScore = allContent.length > 0 ? Math.round(totalScore / allContent.length) : 0;
-      
-      const allIssues = allContent.reduce((sum, item) => sum + (item.seo?.issues?.length || 0), 0);
+      const allIssues = 0;
       
       // Extract keywords from all content
       const keywordMap: { [key: string]: number } = {};
-      allContent.forEach(item => {
-        if (item.seo.focusKeyword) {
-          keywordMap[item.seo.focusKeyword] = (keywordMap[item.seo.focusKeyword] || 0) + 1;
+      allContent.forEach((item: any) => {
+        if (item.focusKeyword) {
+          keywordMap[item.focusKeyword] = (keywordMap[item.focusKeyword] || 0) + 1;
         }
       });
       
@@ -467,10 +468,10 @@ export default function SEOTools() {
                               Issues ({analysisResult.issues.length})
                             </h4>
                             <ul className="space-y-1">
-                              {analysisResult.issues.map((issue, index) => (
+                              {analysisResult.issues.map((issue: SEOIssue, index) => (
                                 <li key={index} className="text-sm text-red-600 flex items-start gap-2">
                                   <span className="w-1 h-1 bg-red-600 rounded-full mt-2 flex-shrink-0"></span>
-                                  {issue}
+                                  {issue.message}
                                 </li>
                               ))}
                             </ul>

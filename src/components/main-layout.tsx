@@ -34,7 +34,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
       <AppHeader />
       <GoogleHeaderAd />
       {/* Sidebars removed from all pages (tool and informational) */}
-      <div className="flex-1 container mx-auto">
+      <div className="flex-1 w-full px-2 sm:px-4">
         <main className="flex-1 w-full">
           {children}
         </main>

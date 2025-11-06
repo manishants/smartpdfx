@@ -31,7 +31,7 @@ const FAQ = () => (
     subtitle="Frequently Asked Questions"
     icon={<Shield className="h-6 w-6" />}
     className="mt-12"
-    contentClassName="max-w-4xl mx-auto"
+    contentClassName="w-full"
   >
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
@@ -178,11 +178,13 @@ export default function ProtectPdfPage() {
   };
 
   return (
-    <ModernPageLayout>
+    <ModernPageLayout
+      title="PDF Password Protector"
+      description="Secure your PDFs with AI-powered encryption and password protection"
+      icon={<Lock className="h-8 w-8" />}
+      backgroundVariant="home"
+    >
       <ModernSection
-        title="PDF Password Protector"
-        subtitle="Secure your PDFs with AI-powered encryption and password protection"
-        icon={<Lock className="h-8 w-8" />}
         className="text-center"
       >
         <div className="max-w-2xl mx-auto space-y-8">
@@ -274,7 +276,7 @@ export default function ProtectPdfPage() {
                   <Button 
                     onClick={handleProtect}
                     disabled={isProtecting || !password || !confirmPassword}
-                    className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full h-12 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     {isProtecting ? (
                       <>
@@ -325,7 +327,7 @@ export default function ProtectPdfPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     onClick={handleDownload}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     <FileDown className="mr-2 h-4 w-4" />
                     Download Protected PDF

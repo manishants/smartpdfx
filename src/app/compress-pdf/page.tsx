@@ -246,6 +246,7 @@ export default function CompressPdfPage() {
       title="AI PDF Compressor"
       description="Reduce PDF file sizes by up to 80% with intelligent AI-powered compression technology"
       icon={<Minimize2 className="w-8 h-8" />}
+      backgroundVariant="home"
     >
       <ModernSection>
         <div className="max-w-4xl mx-auto space-y-8">
@@ -335,7 +336,7 @@ export default function CompressPdfPage() {
                       size="lg" 
                       onClick={handleCompress}
                       disabled={isProcessing}
-                      className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8"
+                      className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8"
                     >
                       <Minimize2 className="mr-2 h-5 w-5" />
                       Compress with AI
@@ -418,7 +419,7 @@ export default function CompressPdfPage() {
                       <Button 
                         size="lg" 
                         onClick={handleDownload}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                        className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                       >
                         <FileDown className="mr-2 h-5 w-5" />
                         Download Compressed PDF

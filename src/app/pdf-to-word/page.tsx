@@ -400,7 +400,7 @@ export default function PdfToWordPage() {
                       {result?.success && (
                         <Button 
                           onClick={handleDownload}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-600/90 hover:to-emerald-600/90 text-white font-medium py-6 text-lg"
+                          className="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium py-6 text-lg"
                         >
                           <FileDown className="mr-2 h-5 w-5" />
                           Download Word File
