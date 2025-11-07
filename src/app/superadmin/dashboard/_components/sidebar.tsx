@@ -67,7 +67,7 @@ export function SuperadminSidebar() {
   const supabase = createClient();
   const isBlogActive = pathname.startsWith('/superadmin/blog');
   const isPageActive = pathname.startsWith('/superadmin/pages');
-  const isSEOActive = pathname.startsWith('/superadmin/seo');
+  const isSEOActive = pathname.startsWith('/superadmin/seo') || pathname.startsWith('/superadmin/pages/seo');
   const isAnalyticsActive = pathname.startsWith('/superadmin/analytics');
 
   const handleLogout = async () => {
@@ -202,6 +202,9 @@ export function SuperadminSidebar() {
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pl-8 mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
+                  <NavLink href="/superadmin/pages/seo" icon={Globe}>
+                    Page SEO Manager
+                  </NavLink>
                   <NavLink href="/superadmin/seo" icon={Target}>
                     SEO Analyzer
                   </NavLink>

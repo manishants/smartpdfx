@@ -4,6 +4,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+ 
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, ArrowRight, RefreshCw, FileText, CheckCircle, Minimize2, Sparkles, Zap, Gauge, FileArchive } from "lucide-react";
 import { compressImage } from '@/lib/actions/compress-image';

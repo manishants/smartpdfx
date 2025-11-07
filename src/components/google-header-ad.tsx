@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
 declare global {
@@ -13,21 +13,32 @@ export function GoogleHeaderAd() {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
   const slot = process.env.NEXT_PUBLIC_ADSENSE_PAGE_BELOW_HEADER_SLOT_ID;
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
-    if (!client || !slot) return;
+    if (!mounted || !client || !slot) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (err) {
       console.error("AdSense error:", err);
     }
-  }, []);
+  }, [mounted, client, slot]);
 
-  if (!client || !slot) {
-    return null;
+  if (!mounted || !client || !slot) {
+    return (
+      <div className="w-full max-w-full my-4" suppressHydrationWarning>
+        <Card className="overflow-hidden">
+          <CardContent className="p-2 sm:p-4 flex justify-center items-center min-h-[100px] sm:min-h-[120px] bg-muted/50">
+            <div style={{ display: 'block', minWidth: '280px', minHeight: '100px', maxWidth: '100%' }} />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full max-w-full my-4">
+    <div className="w-full max-w-full my-4" suppressHydrationWarning>
       <Card className="overflow-hidden">
         <CardContent className="p-2 sm:p-4 flex justify-center items-center min-h-[100px] sm:min-h-[120px] bg-muted/50">
           <ins

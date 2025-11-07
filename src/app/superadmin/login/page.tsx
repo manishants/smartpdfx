@@ -33,9 +33,14 @@ export default function SuperadminLoginPage() {
         try {
             // First attempt: server-side session via API
             try {
+                const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                const adminKey = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPERADMIN_API_KEY) || '';
+                if (adminKey) {
+                  headers['x-admin-key'] = adminKey;
+                }
                 const apiResp = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({ email, password }),
                 });
                 if (apiResp.ok) {

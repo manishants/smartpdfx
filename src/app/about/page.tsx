@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Shield, Zap, Goal, Sparkles, Star, Heart, Trophy, Linkedin, Twitter, Mail } from "lucide-react";
 import Image from "next/image";
+import type { Metadata } from "next";
+import { getPageSEO } from "@/lib/seoStore";
+export const dynamic = 'force-dynamic';
 
 const teamMembers = [
   {
@@ -265,4 +268,17 @@ export default function AboutUsPage() {
             </section>
         </main>
     );
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = getPageSEO("/about");
+  const title = seo?.title?.trim();
+  const description = seo?.description?.trim();
+  const keywords = seo?.keywords && seo.keywords.length > 0 ? seo.keywords : undefined;
+  return {
+    ...(title ? { title } : {}),
+    ...(description ? { description } : {}),
+    ...(keywords ? { keywords } : {}),
+    alternates: { canonical: "/about" },
+  };
 }

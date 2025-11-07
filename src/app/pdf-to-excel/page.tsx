@@ -11,6 +11,9 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 // Tool-specific sections removed
 import { pdfToExcel } from '@/lib/actions/pdf-to-excel';
 import { pdfToExcelAi } from '@/ai/flows/pdf-to-excel';
+ 
+
+ 
 
 export default function PdfToExcelPage() {
   // Tool-specific sections removed

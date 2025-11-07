@@ -25,7 +25,7 @@ function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'pag
   ]
 
   for (const c of candidates) {
-    if (fs.existsSync(c.dir)) return c
+    if (fs.existsSync(c.dir)) return { appDir: c.dir, pageFileName: c.pageFileName }
   }
   // Fallback: return src/app to avoid crashes; caller will guard exists
   return { appDir: path.join(process.cwd(), 'src', 'app'), pageFileName: 'page.tsx' }
@@ -33,15 +33,18 @@ function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'pag
 
 function getAppPages(): StoredPage[] {
   const { appDir, pageFileName } = resolveScanContext()
+  try { console.log('[api/pages] scan appDir:', appDir, 'pageFileName:', pageFileName) } catch {}
   const pages: StoredPage[] = []
 
   if (!fs.existsSync(appDir)) {
     // No app directory available at runtime (standalone builds). Return defaults from store only.
+    try { console.log('[api/pages] appDir does not exist') } catch {}
     return pages
   }
 
   // Include root page as '/'
   const rootPagePath = path.join(appDir, pageFileName)
+  try { console.log('[api/pages] rootPagePath:', rootPagePath, 'exists:', fs.existsSync(rootPagePath)) } catch {}
   if (fs.existsSync(rootPagePath)) {
     const stat = fs.statSync(rootPagePath)
     pages.push({
@@ -56,6 +59,7 @@ function getAppPages(): StoredPage[] {
 
   // Scan top-level directories for page files
   const entries = fs.readdirSync(appDir, { withFileTypes: true })
+  try { console.log('[api/pages] dir entries count:', entries.length) } catch {}
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
     const name = entry.name
@@ -64,7 +68,9 @@ function getAppPages(): StoredPage[] {
     if (name.startsWith('(') || name.startsWith('[')) continue
 
     const pageFile = path.join(appDir, name, pageFileName)
-    if (fs.existsSync(pageFile)) {
+    const exists = fs.existsSync(pageFile)
+    try { console.log('[api/pages] checking page file:', pageFile, 'exists:', exists) } catch {}
+    if (exists) {
       const stat = fs.statSync(pageFile)
       const slug = `${name}`
       pages.push({
