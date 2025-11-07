@@ -17,6 +17,8 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 // Tool-specific sections removed
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
 
 export const dynamic = 'force-dynamic';
 
@@ -175,6 +177,8 @@ export default function MergePdfPage() {
           subtitle="Upload multiple PDFs and let our AI create the perfect merged document"
           icon={<Sparkles className="h-6 w-6" />}
         >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
           <ModernUploadArea
             onFileSelect={handleFileChange}
             accept="application/pdf"
@@ -267,6 +271,19 @@ export default function MergePdfPage() {
               </div>
             </div>
           )}
+            </div>
+            <div className="lg:col-span-1 space-y-6">
+              <AIPoweredFeatures 
+                features={[
+                  'Smart document analysis',
+                  'Preserves formatting and metadata',
+                  'Optimized file size',
+                  'Fast, stable merging',
+                ]}
+              />
+              <ProTip tip="Upload PDFs in your desired order and use drag-and-drop to adjust sequence before merging." />
+            </div>
+          </div>
         </ModernSection>
       ) : (
         <ModernSection

@@ -505,7 +505,7 @@ export default function SplitPdfPage() {
                         </div>
                         
                         {/* AI Features Component - Right Side */}
-                        <div className="lg:col-span-1">
+                        <div className="lg:col-span-1 space-y-6">
                             <AIPoweredFeatures 
                                 features={[
                                     "Smart page analysis",
@@ -513,6 +513,9 @@ export default function SplitPdfPage() {
                                     "Batch processing",
                                     "Quality preservation"
                                 ]}
+                            />
+                            <ProTip 
+                                tip="Our AI analyzes your PDF structure to suggest optimal page groupings. For best results, upload PDFs with clear page breaks and consistent formatting."
                             />
                         </div>
                     </div>
@@ -537,12 +540,7 @@ export default function SplitPdfPage() {
                         </div>
                     )}
                     
-                    {/* Pro Tip Component - Below Upload */}
-                    <div className="mt-8">
-                        <ProTip 
-                            tip="Our AI analyzes your PDF structure to suggest optimal page groupings. For best results, upload PDFs with clear page breaks and consistent formatting."
-                        />
-                    </div>
+                    {/* Pro Tip moved to right sidebar below AI features */}
                 </ModernSection>
             )}
 

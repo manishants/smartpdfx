@@ -8,19 +8,43 @@ export function createClient() {
 
   // If envs are missing (e.g., during static build), return a tolerant mock
   if (!url || !key) {
-    const mockQuery = async () => ({ data: [], error: null })
+    const mockSelectResult = { data: [], error: null } as const
+    const mockMutationError = { data: null as any, error: new Error('Supabase not configured') }
+
+    // Minimal chainable Postgrest builder that is Thenable
+    const makeBuilder = () => {
+      const builder: any = {
+        select: (_fields?: string) => builder,
+        eq: (_column: string, _value: any) => builder,
+        order: (_column: string, _opts?: any) => builder,
+        single: () => builder,
+        then: (resolve: (value: any) => any) => resolve(mockSelectResult),
+        catch: (_reject: (reason?: any) => any) => ({ data: [], error: null }),
+        finally: (_onFinally: () => void) => undefined,
+      }
+      return builder
+    }
+
     const mockStorage = {
-      upload: async () => ({ data: null as any, error: new Error('Supabase not configured') }),
-      getPublicUrl: (path: string) => ({ data: { publicUrl: '' } } as any),
+      upload: async () => mockMutationError,
+      getPublicUrl: (_path: string) => ({ data: { publicUrl: '' } } as any),
     }
 
     return {
       auth: {
         getUser: async () => ({ data: { user: null } }),
       },
-      from: (_table: string) => ({ select: mockQuery, eq: (_: string, __: any) => ({ select: mockQuery, single: mockQuery }) } as any),
-      storage: { from: (_bucket: string) => mockStorage } as any,
-    } as any
+      from: (_table: string) => ({
+        select: (_fields?: string) => makeBuilder(),
+        eq: (_column: string, _value: any) => makeBuilder(),
+        order: (_column: string, _opts?: any) => makeBuilder(),
+        single: () => makeBuilder(),
+        insert: (_rows: any[]) => ({ then: (resolve: (value: any) => any) => resolve(mockMutationError) }),
+        update: (_values: any) => ({ then: (resolve: (value: any) => any) => resolve(mockMutationError) }),
+        delete: () => ({ eq: (_column: string, _value: any) => ({ then: (resolve: (value: any) => any) => resolve(mockMutationError) }) }),
+      }),
+      storage: { from: (_bucket: string) => mockStorage },
+    }
   }
 
   const cookieStore = cookies()

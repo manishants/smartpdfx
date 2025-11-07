@@ -316,6 +316,7 @@ export default function JpgToPdfPage() {
 
       <FAQ />
       <ToolCustomSectionRenderer slug="jpg-to-pdf" />
+      <AllTools />
     </ModernPageLayout>
   );
 }

@@ -21,6 +21,8 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 // Tool-specific sections removed
 import { pdfToPng } from '@/lib/actions/pdf-to-png';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
 
 
 type PdfToJpgOutput = {
@@ -244,144 +246,157 @@ export default function PdfToJpgPage() {
         icon={<ImageIcon className="h-8 w-8" />}
         className="text-center"
       >
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Upload Area */}
-          <ModernUploadArea
-            onFileSelect={handleFileChange}
-            accept="application/pdf"
-            title="Upload PDF File"
-            subtitle="Select a PDF file to convert to JPG images"
-            icon={<FileText className="h-12 w-12 text-primary/60" />}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="lg:col-span-2 space-y-8">
+            {/* Upload Area */}
+            <ModernUploadArea
+              onFileSelect={handleFileChange}
+              accept="application/pdf"
+              title="Upload PDF File"
+              subtitle="Select a PDF file to convert to JPG images"
+              icon={<FileText className="h-12 w-12 text-primary/60" />}
+            />
 
-          {/* File Info */}
-          {file && (
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-800/50">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                   <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">{file.name}</h3>
-                  <p className="text-sm text-blue-600 dark:text-blue-300">
-                    Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-                <Button
-                  onClick={handleConvert}
-                  disabled={isConverting}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Converting...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="mr-2 h-4 w-4" />
-                      Convert to JPG
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={handleServerConvert}
-                  disabled={isConverting}
-                  variant="secondary"
-                  className="ml-2"
-                >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Exporting...
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="mr-2 h-4 w-4" />
-                      Convert via LibreOffice (Server)
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Results */}
-          {result && result.imageUris && result.imageUris.length > 0 && (
-            <ModernSection
-              title="Conversion Complete"
-              subtitle={`Successfully converted ${result.imageUris.length} page${result.imageUris.length > 1 ? 's' : ''} to JPG`}
-              icon={<Sparkles className="h-6 w-6" />}
-              className="mt-8"
-            >
-              <div className="space-y-6">
-                {/* Download All Button */}
-                <div className="flex justify-center">
+            {/* File Info */}
+            {file && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-800/50">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                     <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                   </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">{file.name}</h3>
+                    <p className="text-sm text-blue-600 dark:text-blue-300">
+                      Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
                   <Button
-                    onClick={handleDownloadAll}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    onClick={handleConvert}
+                    disabled={isConverting}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Download All as ZIP
+                    {isConverting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Converting...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="mr-2 h-4 w-4" />
+                        Convert to JPG
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleServerConvert}
+                    disabled={isConverting}
+                    variant="secondary"
+                    className="ml-2"
+                  >
+                    {isConverting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="mr-2 h-4 w-4" />
+                        Convert via LibreOffice (Server)
+                      </>
+                    )}
                   </Button>
                 </div>
+              </div>
+            )}
 
-                {/* Image Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {result.imageUris.map((imageData, index) => (
-                    <div
-                      key={index}
-                      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700"
+            {/* Results */}
+            {result && result.imageUris && result.imageUris.length > 0 && (
+              <ModernSection
+                title="Conversion Complete"
+                subtitle={`Successfully converted ${result.imageUris.length} page${result.imageUris.length > 1 ? 's' : ''} to JPG`}
+                icon={<Sparkles className="h-6 w-6" />}
+                className="mt-8"
+              >
+                <div className="space-y-6">
+                  {/* Download All Button */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={handleDownloadAll}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                     >
-                      <div className="aspect-[3/4] relative bg-gray-50 dark:bg-gray-900">
-                        <img
-                          src={imageData}
-                          alt={`Page ${index + 1}`}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Page {index + 1}
-                          </span>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              const link = document.createElement('a');
-                              link.href = imageData;
-                              link.download = `page-${index + 1}.jpg`;
-                              link.click();
-                            }}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                          >
-                            <FileDown className="h-3 w-3 mr-1" />
-                            Download
-                          </Button>
+                      <FileDown className="mr-2 h-4 w-4" />
+                      Download All as ZIP
+                    </Button>
+                  </div>
+
+                  {/* Image Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {result.imageUris.map((imageData, index) => (
+                      <div
+                        key={index}
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700"
+                      >
+                        <div className="aspect-[3/4] relative bg-gray-50 dark:bg-gray-900">
+                          <img
+                            src={imageData}
+                            alt={`Page ${index + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Page {index + 1}
+                            </span>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = imageData;
+                                link.download = `page-${index + 1}.jpg`;
+                                link.click();
+                              }}
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                            >
+                              <FileDown className="h-3 w-3 mr-1" />
+                              Download
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
 
-                {/* Convert Another Button */}
-                <div className="flex justify-center pt-6">
-                  <Button
-                    onClick={() => {
-                      setFile(null);
-                      setResult(null);
-                      setIsConverting(false);
-                    }}
-                    variant="outline"
-                    className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Convert Another PDF
-                  </Button>
+                  {/* Convert Another Button */}
+                  <div className="flex justify-center pt-6">
+                    <Button
+                      onClick={() => {
+                        setFile(null);
+                        setResult(null);
+                        setIsConverting(false);
+                      }}
+                      variant="outline"
+                      className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Convert Another PDF
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </ModernSection>
-          )}
+              </ModernSection>
+            )}
+          </div>
+          <div className="lg:col-span-1 space-y-6">
+            <AIPoweredFeatures
+              features={[
+                'Optimized page rendering',
+                'Preserves clarity and detail',
+                'Page-by-page export',
+                'ZIP download support',
+              ]}
+            />
+            <ProTip tip="Use server export for large PDFs; browser export runs entirely locally and is great for privacy." />
+          </div>
         </div>
       </ModernSection>
 

@@ -16,6 +16,8 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
 
 export const dynamic = 'force-dynamic';
 
@@ -174,10 +176,10 @@ export default function UnlockPdfPage() {
       icon={<Lock className="h-8 w-8" />}
       backgroundVariant="home"
     >
-      <ModernSection
-        className="text-center"
-      >
-        <div className="max-w-2xl mx-auto space-y-8">
+      <ModernSection>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="max-w-2xl mx-auto space-y-8">
           {/* Upload Area */}
           {!file && (
             <ModernUploadArea
@@ -318,6 +320,19 @@ export default function UnlockPdfPage() {
               </div>
             </ModernSection>
           )}
+            </div>
+          </div>
+          <div className="lg:col-span-1 space-y-6">
+            <AIPoweredFeatures
+              features={[
+                'Secure unlocking with privacy protection',
+                'Requires correct open password',
+                'Preserves formatting and metadata',
+                'Fast processing and clear status',
+              ]}
+            />
+            <ProTip tip="Enter the exact viewing password. Owner-only restrictions without an open password aren’t removed; this tool is for authorized access, not password cracking." />
+          </div>
         </div>
       </ModernSection>
 

@@ -286,7 +286,7 @@ export default function ImageConverterPage() {
                 </div>
               )}
             </div>
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <AIPoweredFeatures 
                 features={[
                   "Smart format optimization",
@@ -295,13 +295,12 @@ export default function ImageConverterPage() {
                   "Ideal for web and print"
                 ]}
               />
+              <ProTip tip="For web use, WEBP offers excellent compression; PNG/TIFF for highest quality." />
             </div>
           </div>
         </ModernSection>
-
-        <div className="mt-8">
-          <ProTip tip="For web use, WEBP offers excellent compression; PNG/TIFF for highest quality." />
-        </div>
+        
+        {/* Pro Tip moved to right sidebar below AI features */}
 
         {/* Tool-specific sections removed (home-only CMS sections) */}
 

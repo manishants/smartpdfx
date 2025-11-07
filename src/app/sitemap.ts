@@ -83,8 +83,8 @@ function getAppPages(): StoredPage[] {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const URL = getSiteUrl()
-  // Temporarily exclude blog from sitemap until blog structure is finalized
-  const includeBlogInSitemap = false
+  // Include blog posts in sitemap
+  const includeBlogInSitemap = true
 
   // Static pages
   const staticPages = [
@@ -98,7 +98,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((route) => ({
     url: `${URL}${route}`,
     lastModified: new Date().toISOString(),
-    changeFrequency: 'monthly',
+    changeFrequency: 'daily',
     priority: route === '' ? 1 : 0.8,
   }))
 
@@ -106,7 +106,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const toolPages = tools.map((tool) => ({
     url: `${URL}${tool.href}`,
     lastModified: new Date().toISOString(),
-    changeFrequency: 'weekly',
+    changeFrequency: 'daily',
     priority: 0.9,
   }))
 
@@ -117,7 +117,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .map((p) => ({
       url: `${URL}/${p.slug}`.replace(/\/+$/, ''),
       lastModified: p.lastModified || new Date().toISOString(),
-      changeFrequency: 'weekly',
+      changeFrequency: 'daily',
       priority: 0.85,
     }))
 
@@ -135,7 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         blogPages = data.map((post: any) => ({
           url: `${URL}/blog/${post.slug}`,
           lastModified: new Date(post.date || Date.now()).toISOString(),
-          changeFrequency: 'weekly',
+          changeFrequency: 'daily',
           priority: 0.8,
         }))
       }

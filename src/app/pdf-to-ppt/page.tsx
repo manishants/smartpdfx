@@ -13,12 +13,16 @@ import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import * as pdfjsLib from 'pdfjs-dist';
 import PptxGenJS from 'pptxgenjs';
 import { saveAs } from 'file-saver';
-import { pdfToPptx } from '@/lib/actions/pdf-to-pptx';
+import { ModernPageLayout } from "@/components/modern-page-layout";
+import { ModernSection } from "@/components/modern-section";
+import { ModernUploadArea } from "@/components/modern-upload-area";
+import { AIPoweredFeatures } from "@/components/ai-powered-features";
+import { ProTip } from "@/components/pro-tip";
  
-
- 
-
-// pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+// Ensure pdf.js runs without a web worker in Next.js/Turbopack
+pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+// Also provide a stable worker source to prevent chunk misresolution in dev
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const FAQ = () => (
     <div className="max-w-4xl mx-auto mt-12">
@@ -51,6 +55,14 @@ export default function PdfToPptPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const { toast } = useToast();
+  
+  const handleFileSelected = (selectedFile: File) => {
+    if (selectedFile.type !== 'application/pdf') {
+      toast({ title: "Invalid file type", description: "Please select a PDF file.", variant: "destructive" });
+      return;
+    }
+    setFile(selectedFile);
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -89,7 +101,9 @@ export default function PdfToPptPage() {
             const slideWidth = pageWidth / 72;
             const slideHeight = pageHeight / 72;
             pptx.defineLayout({ name: `PDF_Page_${i}`, width: slideWidth, height: slideHeight });
-            const slide = pptx.addSlide({ masterName: `PDF_Page_${i}` });
+            let slide = pptx.addSlide({ masterName: `PDF_Page_${i}` });
+            let overflowSlide: any = null;
+            let overflowCursorY = 0.5; // inches
             
             // --- Process Text ---
             const textContent = await page.getTextContent();
@@ -99,26 +113,53 @@ export default function PdfToPptPage() {
                 const tx = item.transform;
                 const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
                 
-                const textX = tx[4] / 72; // Convert to inches
-                const textY = (pageHeight - tx[5] - fontHeight) / 72; // Convert to inches
-                const textW = item.width / 72;
+                let textX = tx[4] / 72; // Convert to inches
+                let textY = (pageHeight - tx[5] - fontHeight) / 72; // Convert to inches
+                const textWBase = item.width / 72;
+                const textHIn = fontHeight / 72;
+                const margin = 0.25;
+                // Clamp X within page bounds
+                if (textX < margin) textX = margin;
+                if (textX > slideWidth - margin) textX = Math.max(margin, slideWidth - margin);
+                // Compute effective width within page bounds
+                const textW = Math.max(margin, Math.min(textWBase, slideWidth - textX - margin));
                 
                 const style = textContent.styles[item.fontName];
                 const isBold = style.fontFamily.toLowerCase().includes('bold');
                 const isItalic = style.fontFamily.toLowerCase().includes('italic');
-                
-                slide.addText(item.str, {
-                    x: textX,
-                    y: textY,
-                    w: textW,
-                    h: fontHeight / 72,
+                // If the text would go beyond the bottom, continue on a new slide
+                if (textY + textHIn > slideHeight - margin) {
+                  if (!overflowSlide) {
+                    overflowSlide = pptx.addSlide({ masterName: `PDF_Page_${i}` });
+                    overflowCursorY = margin;
+                  }
+                  overflowSlide.addText(item.str, {
+                    x: margin,
+                    y: overflowCursorY,
+                    w: slideWidth - 2 * margin,
+                    h: textHIn,
                     fontFace: style.fontFamily.split(',')[0],
-                    fontSize: fontHeight * 0.75, // Approximate conversion from points to PowerPoint points
+                    fontSize: fontHeight * 0.75,
                     color: '000000',
                     bold: isBold,
                     italic: isItalic,
                     valign: 'top'
-                });
+                  });
+                  overflowCursorY += textHIn * 1.2;
+                } else {
+                  slide.addText(item.str, {
+                    x: textX,
+                    y: textY,
+                    w: textW,
+                    h: textHIn,
+                    fontFace: style.fontFamily.split(',')[0],
+                    fontSize: fontHeight * 0.75, // Approximate conversion
+                    color: '000000',
+                    bold: isBold,
+                    italic: isItalic,
+                    valign: 'top'
+                  });
+                }
             }
 
             // --- Process Images ---
@@ -191,42 +232,7 @@ export default function PdfToPptPage() {
     }
   };
 
-  const handleConvertWithLibreOffice = async () => {
-    if (!file) {
-      toast({ title: "No file selected", description: "Please select a PDF to convert.", variant: "destructive" });
-      return;
-    }
-    setIsConverting(true);
-    try {
-      // Use FileReader to avoid Node Buffer in the browser
-      const pdfUri = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const res = await pdfToPptx({ pdfUri });
-      if (res.error) throw new Error(res.error);
-      if (!res.pptxUri) throw new Error('No PPTX produced');
-      const link = document.createElement('a');
-      link.href = res.pptxUri;
-      const originalFilename = file.name.substring(0, file.name.lastIndexOf('.')) || 'converted';
-      link.download = `${originalFilename}.pptx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast({ title: 'Conversion Successful!', description: 'LibreOffice export completed and downloaded.' });
-    } catch (error: any) {
-      console.error('LibreOffice export failed:', error);
-      toast({
-        title: 'LibreOffice Export Failed',
-        description: error.message || 'Unable to export via LibreOffice.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsConverting(false);
-    }
-  };
+  // Removed LibreOffice server export; in-browser conversion is the default No OCR path.
   
   const handleReset = () => {
     setFile(null);
@@ -235,80 +241,112 @@ export default function PdfToPptPage() {
 
   return (
     <>
-    <main className="flex-1 p-6 md:p-8 space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">PDF to PowerPoint</h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Convert your PDF to an editable PPTX file.
-        </p>
-      </header>
-      
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="p-6">
-            {!file && (
-              <div 
-                className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                <UploadCloud className="mx-auto h-12 w-12 text-primary" />
-                <p className="mt-4 font-semibold text-primary">Drag & drop a PDF here</p>
-                <p className="text-sm text-muted-foreground mt-1">or click to select a file</p>
-                <Input 
-                  id="file-upload"
-                  type="file" 
-                  className="hidden" 
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                />
-              </div>
-            )}
+      <ModernPageLayout
+        title="PDF to PowerPoint Converter"
+        description="Convert your PDFs into editable PowerPoint slides while preserving text and images."
+        icon={<FileType className="h-8 w-8" />}
+        badge="Client-Side"
+        backgroundVariant="home"
+      >
+        <div className="space-y-8">
+          <ModernSection>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Upload Area */}
+              <div className="lg:col-span-2">
+                {!file ? (
+                  <ModernUploadArea
+                    onFileSelect={handleFileSelected}
+                    accept="application/pdf"
+                    maxSize={50 * 1024 * 1024}
+                    isLoading={isConverting}
+                  >
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-full blur-xl animate-pulse" />
+                        <div className="relative bg-gradient-to-r from-primary/10 to-blue-600/10 p-6 rounded-full border border-primary/20">
+                          <UploadCloud className="h-12 w-12 text-primary" />
+                        </div>
+                      </div>
+                      <div className="text-center space-y-2">
+                        <h3 className="text-xl font-semibold text-foreground">Drop your PDF here or click to browse</h3>
+                        <p className="text-muted-foreground">Supports PDF files up to 50MB</p>
+                      </div>
+                    </div>
+                  </ModernUploadArea>
+                ) : (
+                  <div className="space-y-6">
+                    {/* File Info */}
+                    <Card className="bg-gradient-to-r from-primary/5 to-blue-600/5 border border-primary/20">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="p-3 bg-gradient-to-r from-primary/10 to-blue-600/10 rounded-lg">
+                              <FileType className="h-8 w-8 text-primary" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-foreground">{file.name}</h3>
+                              <p className="text-sm text-muted-foreground">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-            {file && (
-              <div className="flex flex-col items-center gap-6">
-                <div className="flex flex-col items-center justify-center bg-muted/50 border rounded-lg p-8 w-full">
-                    <FileType className="w-16 h-16 text-primary" />
-                    <p className="mt-2 text-sm font-semibold text-muted-foreground">{file.name}</p>
-                </div>
-                <div className="flex gap-4 flex-wrap">
-                    <Button 
-                    size="lg" 
-                    onClick={handleConvert}
-                    disabled={isConverting}
-                    >
-                    {isConverting ? (
-                        <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Converting...
-                        </>
-                    ) : <><FileUp className="mr-2"/>Convert to PPT & Download</>}
-                    </Button>
-                    <Button size="lg" variant="secondary" onClick={handleConvertWithLibreOffice} disabled={isConverting}>
-                      {isConverting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Exporting...
-                        </>
-                      ) : (
-                        <>
-                          <FileUp className="mr-2" />
-                          Convert with LibreOffice (Fast)
-                        </>
-                      )}
-                    </Button>
-                    <Button size="lg" variant="outline" onClick={handleReset}>
-                        <RefreshCw className="mr-2" /> Start Over
-                    </Button>
-                </div>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <Button
+                        onClick={handleConvert}
+                        disabled={isConverting}
+                        className="flex-1 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                      >
+                        {isConverting ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Converting...
+                          </>
+                        ) : (
+                          <>
+                            <FileUp className="mr-2 h-5 w-5" />
+                            Convert to PPT & Download
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        onClick={handleReset}
+                        variant="outline"
+                        className="flex-1 border-2 border-gray-300 hover:border-gray-400 font-medium py-3 px-6 rounded-lg transition-all duration-200"
+                      >
+                        <RefreshCw className="mr-2 h-5 w-5" />
+                        Start Over
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-      <FAQ />
-      <ToolCustomSectionRenderer slug="pdf-to-ppt" />
-    </main>
-    <AllTools />
+
+              {/* Right Side: AI Features + Pro Tip below */}
+              <div className="lg:col-span-1 space-y-4">
+                <AIPoweredFeatures 
+                  features={[
+                    "Editable text boxes",
+                    "Preserves layout",
+                    "Maintains image quality",
+                    "Slide-ready output"
+                  ]}
+                />
+                <ProTip tip="For best results, use PDFs with selectable text. Scanned PDFs may require OCR before conversion." />
+              </div>
+            </div>
+          </ModernSection>
+
+          <ModernSection>
+            <FAQ />
+          </ModernSection>
+          <ToolCustomSectionRenderer slug="pdf-to-ppt" />
+        </div>
+      </ModernPageLayout>
+      <AllTools />
     </>
   );
 }

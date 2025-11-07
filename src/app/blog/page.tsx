@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import type { Metadata } from 'next';
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { getBlogs } from "@/app/actions/blog";
+import { getBlogs, getBlogsPaginated } from "@/app/actions/blog";
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -32,10 +32,15 @@ const PopularPostItem = ({ post }: { post: BlogPost }) => (
 );
 
 
-export default async function BlogListPage() {
-    const posts = await getBlogs();
+export default async function BlogListPage({ searchParams }: { searchParams?: { page?: string; perPage?: string } }) {
+    const currentPage = searchParams?.page ? Math.max(1, parseInt(searchParams.page)) : 1;
+    const perPage = searchParams?.perPage ? Math.max(1, parseInt(searchParams.perPage)) : 6;
+
+    const { posts, total, page } = await getBlogsPaginated(currentPage, perPage, true);
     const publishedPosts = posts.filter(p => p.published);
+    // For sidebar, derive popular from current page's posts
     const popularPosts = publishedPosts.filter(p => p.popular);
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
 
     return (
         <div className="px-4 py-8 md:py-12">
@@ -72,6 +77,34 @@ export default async function BlogListPage() {
                                     </p>
                                 </article>
                             ))}
+
+                            {/* Pagination Controls */}
+                            {totalPages > 1 && (
+                              <div className="mt-8 flex items-center justify-center gap-2">
+                                {/* Prev */}
+                                {page > 1 ? (
+                                  <Link href={`/blog?page=${page - 1}&perPage=${perPage}`} className="px-3 py-1 rounded-md border hover:bg-muted">Prev</Link>
+                                ) : (
+                                  <span className="px-3 py-1 rounded-md border opacity-50">Prev</span>
+                                )}
+                                {/* Page numbers */}
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                                  <Link
+                                    key={n}
+                                    href={`/blog?page=${n}&perPage=${perPage}`}
+                                    className={`px-3 py-1 rounded-md border ${n === page ? 'bg-primary text-white border-primary' : 'hover:bg-muted'}`}
+                                  >
+                                    {n}
+                                  </Link>
+                                ))}
+                                {/* Next */}
+                                {page < totalPages ? (
+                                  <Link href={`/blog?page=${page + 1}&perPage=${perPage}`} className="px-3 py-1 rounded-md border hover:bg-muted">Next</Link>
+                                ) : (
+                                  <span className="px-3 py-1 rounded-md border opacity-50">Next</span>
+                                )}
+                              </div>
+                            )}
                         </div>
 
                         {/* Sidebar */}

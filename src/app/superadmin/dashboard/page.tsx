@@ -71,16 +71,16 @@ export default function SuperadminDashboard() {
             </Link>
           </Button>
           <Button variant="outline" asChild className="bg-gradient-to-r from-slate-100 to-slate-50 border-slate-300 text-slate-700 hover:shadow-md transition-all duration-200 hover:scale-105 rounded-xl">
-            <Link href="/superadmin/seo">
+            <Link href="/superadmin/pages/seo">
               <Target className="h-4 w-4 mr-2" />
-              SEO Tools
+              Page SEO Manager
             </Link>
           </Button>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         <Card className="group hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-semibold text-blue-700">Total Posts</CardTitle>
@@ -160,7 +160,7 @@ export default function SuperadminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-6 lg:grid-cols-4">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card className="group hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-0 shadow-lg bg-gradient-to-br from-indigo-50 to-indigo-100">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3 text-indigo-800 group-hover:text-indigo-900 transition-colors">
@@ -214,18 +214,12 @@ export default function SuperadminDashboard() {
               <div className="p-2 bg-rose-600 rounded-lg group-hover:bg-rose-700 transition-colors duration-200">
                 <Search className="h-5 w-5 text-white" />
               </div>
-              SEO Tools
+              Page SEO Manager
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button asChild className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl">
-              <Link href="/superadmin/seo/analyzer">SEO Analyzer</Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-rose-50 to-rose-100 border-rose-300 text-rose-700 hover:from-rose-100 hover:to-rose-200 transition-all duration-200 rounded-xl">
-              <Link href="/superadmin/seo/keywords">Keyword Research</Link>
-            </Button>
-            <Button variant="outline" asChild className="w-full bg-gradient-to-r from-rose-50 to-rose-100 border-rose-300 text-rose-700 hover:from-rose-100 hover:to-rose-200 transition-all duration-200 rounded-xl">
-              <Link href="/superadmin/seo/links">Link Checker</Link>
+              <Link href="/superadmin/pages/seo">Open Page SEO Manager</Link>
             </Button>
           </CardContent>
         </Card>

@@ -21,6 +21,7 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
+import { AllTools } from '@/components/all-tools';
 interface ConversionResult {
   success: boolean;
   pdfUri?: string;
@@ -315,23 +316,20 @@ export default function WordToPdfPage() {
             </div>
 
             {/* AI Features Component - Right Side */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <AIPoweredFeatures features={[
                 'LibreOffice-powered conversion',
                 'Perfect formatting preservation',
                 'Maintains document structure',
                 'Professional PDF output',
               ]} />
+              <ProTip tip="For optimal results, use standard fonts and avoid complex formatting. Our LibreOffice engine handles most Word features perfectly, including tables, images, and headers." />
             </div>
           </div>
         </ModernSection>
 
-        {/* Pro Tip Component - Below Upload */}
-        <div className="mt-8">
-          <ProTip tip="For optimal results, use standard fonts and avoid complex formatting. Our LibreOffice engine handles most Word features perfectly, including tables, images, and headers." />
-        </div>
-
         <ToolDescription />
+        <AllTools />
         {/* Tool-specific sections removed: page now uses home-only CMS sections */}
       </div>
     </ModernPageLayout>

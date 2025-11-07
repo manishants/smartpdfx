@@ -80,7 +80,7 @@ export async function getBlogs(): Promise<BlogPost[]> {
 
 export async function getPost(slug: string): Promise<BlogPost | null> {
   if (isSupabaseDisabled()) {
-    return fallbackPosts.find(p => p.slug === slug) || fallbackPosts[0] || null;
+    return fallbackPosts.find(p => p.slug === slug) || null;
   }
 
   try {
@@ -98,8 +98,9 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
     }
     return data as BlogPost;
   } catch (e) {
-    console.error('Supabase unavailable, using fallback post:', e);
-    return fallbackPosts.find(p => p.slug === slug) || fallbackPosts[0] || null;
+    console.error('Supabase error when fetching post:', e);
+    // Do not default to a sample post; only return a matching fallback when available
+    return fallbackPosts.find(p => p.slug === slug) || null;
   }
 }
 
@@ -211,7 +212,78 @@ export async function createPost(formData: FormData) {
 
   revalidatePath('/admin/dashboard');
   revalidatePath('/blog');
-  revalidatePath(`/blog/${slug}`);
+  revalidatePath(`/blog/${finalSlug}`);
 
   return { success: 'Blog post created successfully!' };
+}
+
+// Paginated blogs fetch
+export async function getBlogsPaginated(page = 1, perPage = 6, onlyPublished = true): Promise<{
+  posts: BlogPost[];
+  total: number;
+  page: number;
+  perPage: number;
+}> {
+  const currentPage = Math.max(1, Number(page) || 1);
+  const pageSize = Math.max(1, Number(perPage) || 6);
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  if (isSupabaseDisabled()) {
+    const source = onlyPublished ? fallbackPosts.filter(p => p.published) : fallbackPosts;
+    return {
+      posts: source.slice(from, to + 1),
+      total: source.length,
+      page: currentPage,
+      perPage: pageSize,
+    };
+  }
+
+  try {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+
+    let query = supabase
+      .from('blogs')
+      .select('*', { count: 'exact' })
+      .order('date', { ascending: false });
+
+    if (onlyPublished) {
+      query = query.eq('published', true);
+    }
+
+    const { data, error, count } = await query.range(from, to);
+
+    if (error) {
+      console.error('Error fetching paginated blogs:', error);
+      const source = onlyPublished ? fallbackPosts.filter(p => p.published) : fallbackPosts;
+      return {
+        posts: source.slice(from, to + 1),
+        total: source.length,
+        page: currentPage,
+        perPage: pageSize,
+      };
+    }
+
+    const posts: BlogPost[] = (data || []).map((post: any) => ({
+      ...post,
+      faqs: post.faqs || [],
+    }));
+
+    return {
+      posts,
+      total: typeof count === 'number' ? count : posts.length,
+      page: currentPage,
+      perPage: pageSize,
+    };
+  } catch (e) {
+    console.error('Supabase unavailable, using fallback posts (paginated):', e);
+    const source = onlyPublished ? fallbackPosts.filter(p => p.published) : fallbackPosts;
+    return {
+      posts: source.slice(from, to + 1),
+      total: source.length,
+      page: currentPage,
+      perPage: pageSize,
+    };
+  }
 }

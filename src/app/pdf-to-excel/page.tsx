@@ -8,19 +8,107 @@ import { FileSpreadsheet, FileText, Upload, Download, Loader2, RefreshCw, FileUp
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
+import { AIPoweredFeatures } from '@/components/ai-powered-features';
+import { ProTip } from '@/components/pro-tip';
 // Tool-specific sections removed
-import { pdfToExcel } from '@/lib/actions/pdf-to-excel';
 import { pdfToExcelAi } from '@/ai/flows/pdf-to-excel';
+import { AllTools } from '@/components/all-tools';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import * as pdfjsLib from 'pdfjs-dist';
+import * as XLSX from 'xlsx';
+
+// Ensure pdf.js worker does not fail to load under Next.js dev
+pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+async function convertPdfToExcelClient(pdfFile: File): Promise<string> {
+  const buf = await pdfFile.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+
+  const wb = XLSX.utils.book_new();
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1.0 });
+    const pageHeight = viewport.height;
+    const textContent = await page.getTextContent();
+    const items = (textContent.items || []) as any[];
+
+    const rows: { y: number; items: { x: number; y: number; w: number; h: number; str: string }[] }[] = [];
+    const rowEpsBase = 2; // points
+
+    for (const item of items) {
+      const tx = item.transform || [1, 0, 0, 1, 0, 0];
+      const fontHeight = Math.sqrt((tx[2] || 0) ** 2 + (tx[3] || 0) ** 2) || 12;
+      const yTop = pageHeight - (tx[5] || 0) - fontHeight; // convert baseline to top
+      const x = tx[4] || 0;
+      const w = item.width || 0;
+      const str = (item.str || '').trim();
+      if (!str) continue;
+
+      const rowEps = Math.max(rowEpsBase, fontHeight * 0.15);
+      let row = rows.find((r) => Math.abs(r.y - yTop) < rowEps);
+      if (!row) {
+        row = { y: yTop, items: [] };
+        rows.push(row);
+      }
+      row.items.push({ x, y: yTop, w, h: fontHeight, str });
+    }
+
+    // Sort rows by their top Y (top-to-bottom)
+    rows.sort((a, b) => a.y - b.y);
+
+    const aoa: string[][] = [];
+    const gapBase = 12; // points
+
+    for (const row of rows) {
+      row.items.sort((a, b) => a.x - b.x);
+      const cells: string[] = [];
+      let current = '';
+      let prev: { x: number; y: number; w: number; h: number; str: string } | null = null;
+
+      for (const it of row.items) {
+        if (!prev) {
+          current = it.str;
+        } else {
+          const gap = it.x - (prev.x + prev.w);
+          const thresh = Math.max(gapBase, (it.h + prev.h) * 0.25);
+          if (gap > thresh) {
+            cells.push(current.trim());
+            current = it.str;
+          } else {
+            const needsSpace = /[A-Za-z0-9]$/.test(prev.str) && /^[A-Za-z0-9]/.test(it.str);
+            current += (needsSpace ? ' ' : '') + it.str;
+          }
+        }
+        prev = it;
+      }
+      if (current.length > 0) cells.push(current.trim());
+      if (cells.length > 0) aoa.push(cells);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa.length > 0 ? aoa : [['No text content detected']]);
+    XLSX.utils.book_append_sheet(wb, ws, `Page ${i}`);
+  }
+
+  const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([out], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  return url;
+}
  
 
- 
 
 export default function PdfToExcelPage() {
   // Tool-specific sections removed
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [xlsxUri, setXlsxUri] = useState<string | null>(null);
-  const [mode, setMode] = useState<'no_ocr' | 'ai_ocr'>('ai_ocr');
+  const [mode, setMode] = useState<'no_ocr' | 'ai_ocr'>('no_ocr');
   const { toast } = useToast();
 
   const handleFileChange = (f: File) => {
@@ -37,26 +125,24 @@ export default function PdfToExcelPage() {
     setIsConverting(true);
     setXlsxUri(null);
     try {
-      // Use FileReader to avoid Node Buffer in the browser
-      const pdfUri = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
       if (mode === 'no_ocr') {
-        const res = await pdfToExcel({ pdfUri });
-        if (res.error) throw new Error(res.error);
-        if (!res.xlsxUri) throw new Error('No XLSX output');
-        setXlsxUri(res.xlsxUri);
+        const url = await convertPdfToExcelClient(file);
+        setXlsxUri(url);
         toast({ title: 'Conversion complete', description: 'Your Excel file is ready to download.' });
       } else {
+        // Use FileReader to avoid Node Buffer in the browser
+        const pdfUri = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
         const res = await pdfToExcelAi({ pdfUri, conversionMode: 'ai_ocr' });
         setXlsxUri(res.xlsxUri);
         toast({ title: 'Conversion complete', description: 'Tables and text extracted into Excel.' });
       }
     } catch (e: any) {
-      toast({ title: 'Conversion Failed', description: e.message || 'LibreOffice export error.', variant: 'destructive' });
+      toast({ title: 'Conversion Failed', description: e.message || 'Conversion error.', variant: 'destructive' });
     } finally {
       setIsConverting(false);
     }
@@ -83,12 +169,14 @@ export default function PdfToExcelPage() {
   return (
     <ModernPageLayout
       title="PDF to Excel"
-      description="Convert PDFs to Excel via No OCR (LibreOffice) or AI OCR for scanned documents."
+      description="Extract tables from PDFs into Excel. No OCR runs entirely in your browser using pdf.js; AI OCR handles scanned documents."
       icon={<FileSpreadsheet className="h-8 w-8" />}
       backgroundVariant="home"
     >
-      <ModernSection className="text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <ModernSection>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="max-w-4xl mx-auto space-y-8">
           <ModernUploadArea
             onFileSelect={handleFileChange}
             accept="application/pdf"
@@ -119,7 +207,7 @@ export default function PdfToExcelPage() {
                     <input type="radio" name="mode" className="mt-1" checked={mode === 'no_ocr'} readOnly />
                     <div>
                       <div className="font-medium">No OCR</div>
-                      <div className="text-xs text-muted-foreground">Convert PDFs with selectable text using local LibreOffice. No API key required.</div>
+                      <div className="text-xs text-muted-foreground">Client-side table extraction in your browser. Best for text-based PDFs. No API key required.</div>
                     </div>
                   </label>
                   <label
@@ -161,10 +249,53 @@ export default function PdfToExcelPage() {
               </CardContent>
             </Card>
           )}
+            </div>
+          </div>
+          <div className="lg:col-span-1 space-y-6">
+            <AIPoweredFeatures 
+              features={[
+                'Client-side table extraction',
+                'AI OCR for scanned PDFs',
+                'Multi-sheet Excel output',
+                'Fast and private processing',
+              ]}
+            />
+            <ProTip tip="Use No OCR for text-based PDFs to keep everything in-browser. Switch to AI OCR for scanned or image-based documents to extract tables accurately." />
+          </div>
         </div>
       </ModernSection>
+      {/* FAQ */}
+      <ModernSection
+        title="PDF to Excel FAQs"
+        subtitle="Answers to common questions about table extraction"
+        icon={<Upload className="h-6 w-6" />}
+        className="mt-12"
+        contentClassName="w-full"
+      >
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>How does No OCR extraction work?</AccordionTrigger>
+            <AccordionContent>
+              No OCR analyzes PDF text positions in your browser using pdf.js and groups them into rows and columns heuristically, then builds an Excel workbook with those tables. No server upload.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2">
+            <AccordionTrigger>When should I use AI OCR?</AccordionTrigger>
+            <AccordionContent>
+              Use AI OCR for scanned PDFs or documents without selectable text. AI reads the page images and rebuilds tables into Excel.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger>Why do I see an error on No OCR?</AccordionTrigger>
+            <AccordionContent>
+              No OCR is browser-only and works on PDFs with selectable text. If your PDF is scanned (no selectable text) or very complex, switch to AI OCR. If you still see errors, try reloading the page or using a simpler PDF.
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </ModernSection>
 
-  {/* Tool-specific sections removed */}
+      <ToolCustomSectionRenderer slug="pdf-to-excel" />
+      <AllTools />
     </ModernPageLayout>
   );
 }

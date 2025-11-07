@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Eraser, LayoutDashboard, Megaphone, FileText, PlusCircle, ChevronDown, User } from "lucide-react";
+import { Eraser, LayoutDashboard, Megaphone, FileText, PlusCircle, ChevronDown, User, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -60,6 +60,9 @@ export function Sidebar() {
                                 </NavLink>
                                 <NavLink href="/admin/blog/new" icon={PlusCircle}>
                                     New Post
+                                </NavLink>
+                                <NavLink href="/admin/blog/comments" icon={MessageSquare}>
+                                    Comments
                                 </NavLink>
                             </CollapsibleContent>
                         </Collapsible>

@@ -14,7 +14,10 @@ export async function POST(req: Request) {
 
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .insert([{ email, category: category || 'general', created_at: new Date().toISOString() }]);
+      .upsert(
+        { email, category: category || 'general', unsubscribed: false },
+        { onConflict: 'email,category', returning: 'minimal' }
+      );
 
     if (error) {
       console.error('Newsletter subscribe error:', error);

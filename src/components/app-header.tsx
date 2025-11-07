@@ -179,7 +179,7 @@ const ToolsMegaMenu = () => {
     const nonAiCategories = toolCategories.filter(cat => cat.id !== 'ai');
 
     return (
-        <PopoverContent className="w-screen max-w-none mx-0 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border border-white/10 shadow-2xl" align="center" side="bottom" sideOffset={8}>
+        <PopoverContent className="w-[95vw] md:w-[90vw] lg:w-[85vw] xl:w-[1200px] max-w-[95vw] mx-0 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border border-white/10 shadow-2xl overflow-x-hidden" align="center" side="bottom" sideOffset={8}>
             <ScrollArea className="max-h-[80vh] h-auto sm:h-[550px]">
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 lg:gap-x-8 gap-y-4 sm:gap-y-6 pr-2 sm:pr-4 lg:pr-6">

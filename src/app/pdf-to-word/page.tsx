@@ -422,7 +422,7 @@ export default function PdfToWordPage() {
               </div>
               
               {/* AI Features Component - Right Side */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 space-y-6">
                 <AIPoweredFeatures 
                   features={[
                     "Advanced text recognition",
@@ -431,15 +431,13 @@ export default function PdfToWordPage() {
                     "Maintains image quality"
                   ]}
                 />
+                <ProTip 
+                  tip="For best results, ensure your PDF has clear, readable text. Our AI works exceptionally well with documents that have good contrast and standard fonts."
+                />
               </div>
             </div>
             
-            {/* Pro Tip Component - Below Upload */}
-            <div className="mt-8">
-              <ProTip 
-                tip="For best results, ensure your PDF has clear, readable text. Our AI works exceptionally well with documents that have good contrast and standard fonts."
-              />
-            </div>
+            {/* Pro Tip moved to right sidebar below AI features */}
           </ModernSection>
 
           {/* AI Information Section */}

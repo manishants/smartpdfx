@@ -337,7 +337,7 @@ export default function ImageResizerPage() {
             </div>
           )}
             </div>
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <AIPoweredFeatures 
                 features={[
                   "Maintains aspect ratio automatically",
@@ -346,13 +346,12 @@ export default function ImageResizerPage() {
                   "Fast, AI-assisted resizing"
                 ]}
               />
+              <ProTip tip="Use pixel mode for precise dimensions; percentage for quick scaling." />
             </div>
           </div>
         </ModernSection>
-
-        <div className="mt-8">
-          <ProTip tip="Use pixel mode for precise dimensions; percentage for quick scaling." />
-        </div>
+        
+        {/* Pro Tip moved to right sidebar below AI features */}
 
       {/* Tool-specific sections removed (home-only CMS sections) */}
 

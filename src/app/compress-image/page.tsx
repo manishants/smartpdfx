@@ -286,7 +286,7 @@ export default function CompressImagePage() {
             </div>
           )}
             </div>
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <AIPoweredFeatures 
                 features={[
                   "Smart lossy compression",
@@ -295,15 +295,14 @@ export default function CompressImagePage() {
                   "Optimized for web performance"
                 ]}
               />
+              <ProTip 
+                tip="For best results, use high-quality source images. Our AI balances size reduction and clarity automatically."
+              />
             </div>
           </div>
         </ModernSection>
-
-        <div className="mt-8">
-          <ProTip 
-            tip="For best results, use high-quality source images. Our AI balances size reduction and clarity automatically."
-          />
-        </div>
+        
+        {/* Pro Tip moved to right sidebar below AI features */}
         
       {/* Tool-specific sections removed (home-only CMS sections) */}
         

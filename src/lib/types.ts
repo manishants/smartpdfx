@@ -403,6 +403,20 @@ export const BlogPostSchema = z.object({
 });
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 
+// Blog Comments
+export const BlogCommentSchema = z.object({
+  id: z.number().optional(),
+  blog_slug: z.string(),
+  name: z.string(),
+  email: z.string(),
+  content: z.string(),
+  link_url: z.string().nullable().optional(),
+  status: z.enum(['pending','spam','approved']).default('pending'),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+export type BlogComment = z.infer<typeof BlogCommentSchema>;
+
 const PointSchema = z.object({ x: z.number(), y: z.number() });
 
 // PDF Editor

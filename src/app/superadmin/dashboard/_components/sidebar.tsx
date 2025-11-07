@@ -24,7 +24,8 @@ import {
   Calendar,
   TrendingUp,
   Key as KeyIcon,
-  LogOut
+  LogOut,
+  Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -205,18 +206,6 @@ export function SuperadminSidebar() {
                   <NavLink href="/superadmin/pages/seo" icon={Globe}>
                     Page SEO Manager
                   </NavLink>
-                  <NavLink href="/superadmin/seo" icon={Target}>
-                    SEO Analyzer
-                  </NavLink>
-                  <NavLink href="/superadmin/seo/keywords" icon={Tags}>
-                    Keyword Research
-                  </NavLink>
-                  <NavLink href="/superadmin/seo/performance" icon={TrendingUp}>
-                    SEO Performance
-                  </NavLink>
-                  <NavLink href="/superadmin/seo/sitemap" icon={Code}>
-                    Sitemap Manager
-                  </NavLink>
                 </CollapsibleContent>
               </Collapsible>
             </div>
@@ -239,6 +228,10 @@ export function SuperadminSidebar() {
               
               <NavLink href="/superadmin/notifications" icon={Bell}>
                 Notifications
+              </NavLink>
+
+              <NavLink href="/superadmin/newsletter" icon={Mail}>
+                Newsletter Subscribers
               </NavLink>
               
               <NavLink href="/superadmin/database" icon={Database}>
