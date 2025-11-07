@@ -1,6 +1,7 @@
 "use client";
 
-import { LOCAL_SUPERADMIN_KEY, LOCAL_ADMIN_KEY } from './roles';
+import { createClient } from '@/lib/supabase/client';
+import { UserRole } from './roles';
 
 type AccessResult = {
   hasAccess: boolean;
@@ -9,40 +10,43 @@ type AccessResult = {
 
 export async function checkRouteAccess(pathname: string): Promise<AccessResult> {
   try {
-    const openSuperadmin =
-      typeof process !== 'undefined' &&
-      process.env
-        ? process.env.NEXT_PUBLIC_SUPERADMIN_OPEN !== 'false'
-        : true
-
-    // Allow all public routes
+    // Public routes
     if (!pathname.startsWith('/superadmin') && !pathname.startsWith('/admin')) {
       return { hasAccess: true };
     }
 
-    // Always allow the respective login pages
+    // Always allow login pages
     if (pathname === '/superadmin/login' || pathname === '/admin/login') {
       return { hasAccess: true };
     }
 
-    // Local session flags in browser storage
-    const isSuperadmin = typeof window !== 'undefined' && window.localStorage.getItem(LOCAL_SUPERADMIN_KEY) === 'true';
-    const isAdmin = typeof window !== 'undefined' && window.localStorage.getItem(LOCAL_ADMIN_KEY) === 'true';
+    const supabase = createClient();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      return { hasAccess: false, redirectTo: pathname.startsWith('/superadmin') ? '/superadmin/login' : '/admin/login' };
+    }
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const role = profile?.role as UserRole | undefined;
     if (pathname.startsWith('/superadmin')) {
-      if (openSuperadmin) return { hasAccess: true };
-      if (isSuperadmin) return { hasAccess: true };
+      if (role === UserRole.SUPERADMIN) return { hasAccess: true };
       return { hasAccess: false, redirectTo: '/superadmin/login' };
     }
 
     if (pathname.startsWith('/admin')) {
-      if (isAdmin || isSuperadmin) return { hasAccess: true };
+      if (role === UserRole.ADMIN || role === UserRole.SUPERADMIN) return { hasAccess: true };
       return { hasAccess: false, redirectTo: '/admin/login' };
     }
 
     return { hasAccess: true };
   } catch {
-    // On any error, be defensive and require login
+    // Defensive default: require login
     if (pathname.startsWith('/superadmin')) {
       return { hasAccess: false, redirectTo: '/superadmin/login' };
     }
@@ -51,14 +55,4 @@ export async function checkRouteAccess(pathname: string): Promise<AccessResult> 
     }
     return { hasAccess: true };
   }
-}
-
-export function setLocalSuperadminSession(enabled: boolean) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(LOCAL_SUPERADMIN_KEY, enabled ? 'true' : 'false');
-}
-
-export function setLocalAdminSession(enabled: boolean) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(LOCAL_ADMIN_KEY, enabled ? 'true' : 'false');
 }

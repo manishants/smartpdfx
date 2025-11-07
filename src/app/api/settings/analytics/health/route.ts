@@ -2,14 +2,14 @@ import { getGA4Overview } from "@/lib/google/ga4";
 import { getGSCOverview } from "@/lib/google/gsc";
 import { readAnalyticsConfig } from "@/lib/analyticsConfigStore";
 import { checkRateLimit } from "@/lib/api/rateLimit";
-import { getClientIp, requireAdminApiKey } from "@/lib/api/auth";
+import { getClientIp, requireSuperadmin } from "@/lib/api/auth";
 
 export async function GET(req: Request) {
   const ip = getClientIp(req);
   const rl = checkRateLimit(`analytics-health:${ip}`, 30);
   if (rl) return rl;
 
-  const unauthorized = requireAdminApiKey(req);
+  const unauthorized = await requireSuperadmin();
   if (unauthorized) return unauthorized;
 
   const cfg = readAnalyticsConfig();

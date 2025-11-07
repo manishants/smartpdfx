@@ -1,3 +1,5 @@
+import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
+
 export function unauthorized(message = "Unauthorized") {
   return new Response(JSON.stringify({ error: message }), {
     status: 401,
@@ -5,14 +7,27 @@ export function unauthorized(message = "Unauthorized") {
   });
 }
 
-export function requireAdminApiKey(req: Request) {
-  const requiredKey = process.env.SUPERADMIN_API_KEY;
-  if (!requiredKey) return undefined; // allow if no key configured
-  const headerKey = req.headers.get("x-admin-key") || req.headers.get("X-Admin-Key");
-  if (!headerKey || headerKey !== requiredKey) {
+// Supabase-only guard: require an authenticated SUPERADMIN user
+export async function requireSuperadmin(): Promise<Response | undefined> {
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) return unauthorized();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || profile.role !== "superadmin") {
+      return unauthorized();
+    }
+    return undefined;
+  } catch {
     return unauthorized();
   }
-  return undefined;
 }
 
 export function getClientIp(req: Request) {

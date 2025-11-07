@@ -10,8 +10,6 @@ export default function SuperadminAnalyticsConfig() {
   const { toast } = useToast();
   const [ga4PropertyId, setGa4PropertyId] = useState("");
   const [gscSiteUrl, setGscSiteUrl] = useState("");
-  const [requiresAdminKey, setRequiresAdminKey] = useState(false);
-  const [adminKey, setAdminKey] = useState("");
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [health, setHealth] = useState<any>(null);
@@ -26,11 +24,6 @@ export default function SuperadminAnalyticsConfig() {
         const json = await res.json();
         setGa4PropertyId(json?.config?.ga4PropertyId || "");
         setGscSiteUrl(json?.config?.gscSiteUrl || "");
-        setRequiresAdminKey(!!json?.requiresAdminKey);
-      } catch {}
-      try {
-        const localAdmin = window.localStorage.getItem("superadmin.adminKey") || "";
-        setAdminKey(localAdmin);
       } catch {}
     })();
   }, []);
@@ -39,8 +32,6 @@ export default function SuperadminAnalyticsConfig() {
     setSaving(true);
     try {
       const headers: Record<string, string> = { "content-type": "application/json" };
-      const key = adminKey || process.env.NEXT_PUBLIC_SUPERADMIN_API_KEY || "";
-      if (key) headers["x-admin-key"] = key;
       const res = await fetch("/api/settings/analytics", {
         method: "POST",
         headers,
@@ -55,20 +46,10 @@ export default function SuperadminAnalyticsConfig() {
     }
   };
 
-  const handleSaveAdminKey = () => {
-    try {
-      window.localStorage.setItem("superadmin.adminKey", adminKey);
-      toast({ title: "Saved", description: "Admin API key stored locally" });
-    } catch {}
-  };
-
   const handleTestCredentials = async () => {
     setTesting(true);
     try {
-      const headers: Record<string, string> = {};
-      const key = adminKey || process.env.NEXT_PUBLIC_SUPERADMIN_API_KEY || "";
-      if (key) headers["x-admin-key"] = key;
-      const res = await fetch("/api/settings/analytics/health", { headers });
+      const res = await fetch("/api/settings/analytics/health");
       const json = await res.json();
       setHealth(json);
       const ok = (json?.ga4?.ok && json?.gsc?.ok);
@@ -144,9 +125,6 @@ export default function SuperadminAnalyticsConfig() {
             <Button className="ui-button" data-variant="default" onClick={handleTestCredentials} disabled={testing}>
               {testing ? "Testing…" : "Test Credentials"}
             </Button>
-            {requiresAdminKey && (
-              <div className="text-xs text-slate-500">Requires Admin API key in header</div>
-            )}
           </div>
           {health && (
             <div className="grid md:grid-cols-2 gap-4">
@@ -177,30 +155,6 @@ export default function SuperadminAnalyticsConfig() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Admin API Key</CardTitle>
-          <CardDescription>Used to authenticate calls to protected superadmin routes.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="grid gap-1">
-              <Label htmlFor="admin-key">Paste Admin API Key</Label>
-              <Input id="admin-key" placeholder="Your X-Admin-Key" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} />
-              <p className="text-xs text-slate-500">Set server `SUPERADMIN_API_KEY` and paste the same value here. This will be sent as the `x-admin-key` header from your browser.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button className="ui-button" data-variant="default" onClick={handleSaveAdminKey}>Save Locally</Button>
-            {requiresAdminKey ? (
-              <span className="text-xs text-slate-600">Server requires admin key.</span>
-            ) : (
-              <span className="text-xs text-slate-600">Server has no admin key configured; requests will be allowed.</span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>What do I paste here?</CardTitle>
           <CardDescription>Quick guidance for IDs and keys</CardDescription>
         </CardHeader>
@@ -224,9 +178,7 @@ export default function SuperadminAnalyticsConfig() {
           <div>
             <p className="font-medium">Admin API Key</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Server secret in env <span className="font-mono">SUPERADMIN_API_KEY</span>.</li>
-              <li>Paste the same value here so client requests include <span className="font-mono">x-admin-key</span>.</li>
-              <li>For local dev, you can also set <span className="font-mono">NEXT_PUBLIC_SUPERADMIN_API_KEY</span>.</li>
+              <li>Deprecated. SuperAdmin routes now require Supabase sign-in with SUPERADMIN role.</li>
             </ul>
           </div>
         </CardContent>

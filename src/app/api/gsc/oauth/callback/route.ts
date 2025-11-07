@@ -1,6 +1,9 @@
 import { google } from "googleapis";
+import { requireSuperadmin } from "@/lib/api/auth";
 
 export async function GET(req: Request) {
+  const unauthorized = await requireSuperadmin();
+  if (unauthorized) return unauthorized;
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
 

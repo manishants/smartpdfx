@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +51,7 @@ export default function BlogManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const uniqueCategories = Array.from(new Set(posts.flatMap(p => p.categories || []))).filter(Boolean);
 
   useEffect(() => {
     loadPosts();
@@ -261,9 +263,13 @@ export default function BlogManager() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="tech">Technology</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                {uniqueCategories.length === 0 ? (
+                  <SelectItem value="general">General</SelectItem>
+                ) : (
+                  uniqueCategories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -280,6 +286,7 @@ export default function BlogManager() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[90px]">Image</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead className="hidden md:table-cell">Author</TableHead>
                   <TableHead>Status</TableHead>
@@ -292,13 +299,34 @@ export default function BlogManager() {
               <TableBody>
                 {filteredPosts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No posts found. Create your first blog post to get started!
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredPosts.map((post) => (
                     <TableRow key={post.id}>
+                      <TableCell>
+                        <div className="h-14 w-20 overflow-hidden rounded-md border bg-muted">
+                          {post.featuredImage ? (
+                            <Image
+                              src={post.featuredImage}
+                              alt={post.title}
+                              width={80}
+                              height={56}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <Image
+                              src="/hero_section_smartpdfx.webp"
+                              alt="placeholder"
+                              width={80}
+                              height={56}
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">{post.title}</div>

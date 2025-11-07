@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Crown, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { UserRole } from '@/lib/auth/roles';
-import { setLocalSuperadminSession } from '@/lib/auth/middleware';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export default function SuperadminLoginPage() {
@@ -31,30 +30,6 @@ export default function SuperadminLoginPage() {
         setIsLoading(true);
 
         try {
-            // First attempt: server-side session via API
-            try {
-                const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-                const adminKey = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_SUPERADMIN_API_KEY) || '';
-                if (adminKey) {
-                  headers['x-admin-key'] = adminKey;
-                }
-                const apiResp = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({ email, password }),
-                });
-                if (apiResp.ok) {
-                    // Set local flag so client-side route guard passes too
-                    setLocalSuperadminSession(true);
-                    toast({
-                        title: 'Login Successful',
-                        description: 'Welcome to SuperAdmin Dashboard!',
-                    });
-                    router.push('/superadmin/dashboard');
-                    return;
-                }
-            } catch {}
-
             const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
 
             if (canUseSupabase) {
@@ -102,33 +77,11 @@ export default function SuperadminLoginPage() {
                     return;
                 }
 
-                toast({
-                    title: "Login Successful",
-                    description: "Welcome to SuperAdmin Dashboard!",
-                });
-                
+                toast({ title: "Login Successful", description: "Welcome to SuperAdmin Dashboard!" });
                 router.push('/superadmin/dashboard');
                 return;
             }
-
-            // Local dev fallback: simple superadmin check
-            const localEmail = 'superadmin@smartpdfx.com';
-            const localPassword = 'smartpdfx123';
-            if (email === localEmail && password === localPassword) {
-                setLocalSuperadminSession(true);
-                toast({
-                    title: 'Local Login Successful',
-                    description: 'Signed in as local superadmin.',
-                });
-                router.push('/superadmin/dashboard');
-                return;
-            }
-
-            toast({
-                title: 'Login Failed',
-                description: 'Invalid credentials for local superadmin.',
-                variant: 'destructive',
-            });
+            toast({ title: 'Login Failed', description: 'Supabase auth is not available.', variant: 'destructive' });
             setIsLoading(false);
             return;
         } catch (error) {

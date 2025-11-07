@@ -37,7 +37,8 @@ export default async function BlogListPage({ searchParams }: { searchParams?: { 
     const perPage = searchParams?.perPage ? Math.max(1, parseInt(searchParams.perPage)) : 6;
 
     const { posts, total, page } = await getBlogsPaginated(currentPage, perPage, true);
-    const publishedPosts = posts.filter(p => p.published);
+    // Filter by boolean `published` for compatibility with actions/blog mapping
+    const publishedPosts = posts.filter(p => !!p.published);
     // For sidebar, derive popular from current page's posts
     const popularPosts = publishedPosts.filter(p => p.popular);
     const totalPages = Math.max(1, Math.ceil(total / perPage));

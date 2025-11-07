@@ -26,25 +26,19 @@ export async function GET() {
     return bd - ad
   })
 
-  const posts = sorted.map((p) => ({
-    id: (p as any).id?.toString?.() || p.slug,
+  // Shape tailored for CMS consumption: featuredImage, author string, category string
+  const posts = sorted.map((p: any) => ({
+    id: p?.id?.toString?.() || p.slug,
     title: p.title,
     slug: p.slug,
     excerpt: toExcerpt(p.content || ''),
     content: p.content,
-    featuredImage: p.imageUrl,
-    author: {
-      id: 'author',
-      name: p.author || 'Unknown',
-      email: '',
-      avatar: undefined,
-    },
-    category: {
-      id: p.category || 'general',
-      name: p.category || 'General',
-      slug: (p.category || 'general').toLowerCase().replace(/\s+/g, '-')
-    },
-    tags: [],
+    featuredImage: p.imageUrl ?? p.imageurl,
+    author: p.author || 'Unknown',
+    metaTitle: p.seoTitle ?? p.seotitle ?? p.title,
+    metaDescription: p.metaDescription ?? p.metadescription ?? '',
+    category: p.category || 'general',
+    tags: [] as string[],
     status: p.published ? 'published' : 'draft',
     views: 0,
     likes: 0,

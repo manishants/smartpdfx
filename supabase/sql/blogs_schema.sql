@@ -1,5 +1,17 @@
--- Blog status enum for review workflow
-create type if not exists public.blog_status as enum ('draft','review','published');
+do $$
+begin
+  -- Create enum only if it doesn't already exist (CREATE TYPE lacks IF NOT EXISTS)
+  if not exists (
+    select 1
+    from pg_type t
+    join pg_namespace n on n.oid = t.typnamespace
+    where t.typname = 'blog_status'
+      and n.nspname = 'public'
+  ) then
+    execute 'create type public.blog_status as enum (''draft'',''review'',''published'')';
+  end if;
+end
+$$;
 
 -- 1) Blogs table
 create table if not exists public.blogs (
@@ -29,6 +41,14 @@ create table if not exists public.blogs (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Ensure 'status' column exists even if table pre-existed without it
+alter table if exists public.blogs
+  add column if not exists status public.blog_status not null default 'draft';
+
+-- SQL editor runs without an auth context; allow NULL created_by for seed inserts
+alter table if exists public.blogs
+  alter column created_by drop not null;
 
 -- 2) Helpful indexes
 create index if not exists blogs_published_idx on public.blogs (published);

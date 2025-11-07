@@ -31,7 +31,6 @@ import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { setLocalSuperadminSession } from "@/lib/auth/middleware";
 
 const NavLink = ({ 
   href, 
@@ -81,9 +80,6 @@ export function SuperadminSidebar() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch {}
-
-    // Clear local superadmin session (client-side flag)
-    setLocalSuperadminSession(false);
 
     // Redirect to login
     router.push('/superadmin/login');

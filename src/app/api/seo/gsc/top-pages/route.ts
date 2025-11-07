@@ -1,13 +1,13 @@
 import { getGSCTopPages } from "@/lib/google/gsc";
 import { checkRateLimit } from "@/lib/api/rateLimit";
-import { getClientIp, requireAdminApiKey } from "@/lib/api/auth";
+import { getClientIp, requireSuperadmin } from "@/lib/api/auth";
 
 export async function GET(req: Request) {
   const ip = getClientIp(req);
   const rl = checkRateLimit(`gsc-top-pages:${ip}`, 60);
   if (rl) return rl;
 
-  const unauthorized = requireAdminApiKey(req);
+  const unauthorized = await requireSuperadmin();
   if (unauthorized) return unauthorized;
 
   const url = new URL(req.url);

@@ -12,7 +12,6 @@ export default function AnalyticsOverviewPage() {
   const [keywords, setKeywords] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const envAdminKey = process.env.NEXT_PUBLIC_SUPERADMIN_API_KEY || "";
   const [propertyId, setPropertyId] = useState<string>("");
   const [siteUrl, setSiteUrl] = useState<string>("");
 
@@ -28,19 +27,16 @@ export default function AnalyticsOverviewPage() {
         // Update state for UI, but also use local variables to avoid stale state in this tick
         setPropertyId(prop);
         setSiteUrl(site);
-        
-        const localAdminKey = typeof window !== "undefined" ? (window.localStorage.getItem("superadmin.adminKey") || "") : "";
-        const headers = (localAdminKey || envAdminKey) ? { "x-admin-key": localAdminKey || envAdminKey } : {};
 
         const qsProp = prop ? `?propertyId=${encodeURIComponent(prop)}` : "";
         const qsSite = site ? `?siteUrl=${encodeURIComponent(site)}` : "";
 
         const [gaRes, gscRes, pagesRes, keywordsRes, suggRes] = await Promise.all([
-          fetch(`/api/analytics/ga4/overview${qsProp}`, { headers }),
-          fetch(`/api/seo/gsc/overview${qsSite}`, { headers }),
-          fetch(`/api/seo/gsc/top-pages${site ? `?siteUrl=${encodeURIComponent(site)}&limit=10` : `?limit=10`}`, { headers }),
-          fetch(`/api/seo/gsc/keywords${site ? `?siteUrl=${encodeURIComponent(site)}&limit=10` : `?limit=10`}`, { headers }),
-          fetch(`/api/seo/suggestions${qsSite}`, { headers }),
+          fetch(`/api/analytics/ga4/overview${qsProp}`),
+          fetch(`/api/seo/gsc/overview${qsSite}`),
+          fetch(`/api/seo/gsc/top-pages${site ? `?siteUrl=${encodeURIComponent(site)}&limit=10` : `?limit=10`}`),
+          fetch(`/api/seo/gsc/keywords${site ? `?siteUrl=${encodeURIComponent(site)}&limit=10` : `?limit=10`}`),
+          fetch(`/api/seo/suggestions${qsSite}`),
         ]);
         const gaJson = await gaRes.json();
         const gscJson = await gscRes.json();
@@ -56,16 +52,14 @@ export default function AnalyticsOverviewPage() {
         return; // early return since we finished inside try
       } catch {}
       // Fallback path using existing state (should rarely execute)
-      const localAdminKey = typeof window !== "undefined" ? (window.localStorage.getItem("superadmin.adminKey") || "") : "";
-      const headers = (localAdminKey || envAdminKey) ? { "x-admin-key": localAdminKey || envAdminKey } : {};
       const qsProp = propertyId ? `?propertyId=${encodeURIComponent(propertyId)}` : "";
       const qsSite = siteUrl ? `?siteUrl=${encodeURIComponent(siteUrl)}` : "";
       const [gaRes, gscRes, pagesRes, keywordsRes, suggRes] = await Promise.all([
-        fetch(`/api/analytics/ga4/overview${qsProp}`, { headers }),
-        fetch(`/api/seo/gsc/overview${qsSite}`, { headers }),
-        fetch(`/api/seo/gsc/top-pages${siteUrl ? `?siteUrl=${encodeURIComponent(siteUrl)}&limit=10` : `?limit=10`}`, { headers }),
-        fetch(`/api/seo/gsc/keywords${siteUrl ? `?siteUrl=${encodeURIComponent(siteUrl)}&limit=10` : `?limit=10`}`, { headers }),
-        fetch(`/api/seo/suggestions${qsSite}`, { headers }),
+        fetch(`/api/analytics/ga4/overview${qsProp}`),
+        fetch(`/api/seo/gsc/overview${qsSite}`),
+        fetch(`/api/seo/gsc/top-pages${siteUrl ? `?siteUrl=${encodeURIComponent(siteUrl)}&limit=10` : `?limit=10`}`),
+        fetch(`/api/seo/gsc/keywords${siteUrl ? `?siteUrl=${encodeURIComponent(siteUrl)}&limit=10` : `?limit=10`}`),
+        fetch(`/api/seo/suggestions${qsSite}`),
       ]);
       const gaJson = await gaRes.json();
       const gscJson = await gscRes.json();

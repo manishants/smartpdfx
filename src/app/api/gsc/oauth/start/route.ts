@@ -1,8 +1,11 @@
 import { google } from "googleapis";
+import { requireSuperadmin } from "@/lib/api/auth";
 
 const SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"];
 
 export async function GET() {
+  const unauthorized = await requireSuperadmin();
+  if (unauthorized) return unauthorized;
   const clientId = process.env.GSC_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GSC_OAUTH_CLIENT_SECRET;
   const redirectUri = process.env.GSC_OAUTH_REDIRECT_URI || "http://localhost:3002/api/gsc/oauth/callback";

@@ -1,5 +1,5 @@
 import { readAnalyticsConfig, writeAnalyticsConfig } from "@/lib/analyticsConfigStore";
-import { getClientIp, requireAdminApiKey } from "@/lib/api/auth";
+import { getClientIp, requireSuperadmin } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rateLimit";
 
 export async function GET(req: Request) {
@@ -7,8 +7,9 @@ export async function GET(req: Request) {
   const rl = checkRateLimit(`settings-analytics-get:${ip}`, 120);
   if (rl) return rl;
   const cfg = readAnalyticsConfig();
-  const requiresAdminKey = !!process.env.SUPERADMIN_API_KEY;
-  return Response.json({ config: cfg, requiresAdminKey });
+  const unauthorized = await requireSuperadmin();
+  if (unauthorized) return unauthorized;
+  return Response.json({ config: cfg });
 }
 
 export async function POST(req: Request) {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
   const rl = checkRateLimit(`settings-analytics-post:${ip}`, 30);
   if (rl) return rl;
 
-  const unauthorized = requireAdminApiKey(req);
+  const unauthorized = await requireSuperadmin();
   if (unauthorized) return unauthorized;
 
   try {

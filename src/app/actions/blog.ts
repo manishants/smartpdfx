@@ -68,9 +68,34 @@ export async function getBlogs(): Promise<BlogPost[]> {
       return fallbackPosts;
     }
 
+    // Normalize DB keys (lowercase) to camelCase expected by the app
     return (data || []).map((post: any) => ({
-      ...post,
-      faqs: post.faqs || [],
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      content: post.content,
+      imageUrl: post.imageUrl ?? post.imageurl,
+      author: post.author,
+      date: post.date,
+      published: !!post.published,
+      seoTitle: post.seoTitle ?? post.seotitle ?? post.title,
+      metaDescription: post.metaDescription ?? post.metadescription ?? '',
+      faqs: Array.isArray(post.faqs) ? post.faqs : [],
+      category: post.category ?? 'general',
+      popular: !!post.popular,
+      layoutSettings: post.layoutSettings ?? post.layoutsettings ?? {
+        showBreadcrumbs: true,
+        leftSidebarEnabled: true,
+        rightSidebarEnabled: true,
+        leftSticky: false,
+        tocFontSize: 'text-sm',
+        tocH3Indent: 12,
+        tocHoverColor: 'hover:text-primary',
+      },
+      upiId: post.upiId ?? post.upiid,
+      paypalId: post.paypalId ?? post.paypalid,
+      supportQrUrl: post.supportQrUrl ?? post.supportqrurl,
+      supportLabel: post.supportLabel ?? post.supportlabel,
     }));
   } catch (e) {
     console.error('Supabase unavailable, using fallback posts:', e);
@@ -96,7 +121,38 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
       console.error(`Error fetching blog post with slug ${slug}:`, error);
       return null;
     }
-    return data as BlogPost;
+    // Normalize Supabase row keys (which may be lowercase) to our BlogPost shape
+    const post = data as any;
+    const normalized: BlogPost = {
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      content: post.content,
+      imageUrl: post.imageUrl ?? post.imageurl,
+      author: post.author,
+      date: post.date,
+      published: !!post.published,
+      seoTitle: post.seoTitle ?? post.seotitle ?? post.title,
+      metaDescription: post.metaDescription ?? post.metadescription ?? '',
+      faqs: Array.isArray(post.faqs) ? post.faqs : [],
+      category: post.category ?? 'general',
+      popular: !!post.popular,
+      layoutSettings: post.layoutSettings ?? post.layoutsettings ?? {
+        showBreadcrumbs: true,
+        leftSidebarEnabled: true,
+        rightSidebarEnabled: true,
+        leftSticky: false,
+        tocFontSize: 'text-sm',
+        tocH3Indent: 12,
+        tocHoverColor: 'hover:text-primary',
+      },
+      upiId: post.upiId ?? post.upiid,
+      paypalId: post.paypalId ?? post.paypalid,
+      supportQrUrl: post.supportQrUrl ?? post.supportqrurl,
+      supportLabel: post.supportLabel ?? post.supportlabel,
+    };
+
+    return normalized;
   } catch (e) {
     console.error('Supabase error when fetching post:', e);
     // Do not default to a sample post; only return a matching fallback when available
@@ -266,8 +322,32 @@ export async function getBlogsPaginated(page = 1, perPage = 6, onlyPublished = t
     }
 
     const posts: BlogPost[] = (data || []).map((post: any) => ({
-      ...post,
-      faqs: post.faqs || [],
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      content: post.content,
+      imageUrl: post.imageUrl ?? post.imageurl,
+      author: post.author,
+      date: post.date,
+      published: !!post.published,
+      seoTitle: post.seoTitle ?? post.seotitle ?? post.title,
+      metaDescription: post.metaDescription ?? post.metadescription ?? '',
+      faqs: Array.isArray(post.faqs) ? post.faqs : [],
+      category: post.category ?? 'general',
+      popular: !!post.popular,
+      layoutSettings: post.layoutSettings ?? post.layoutsettings ?? {
+        showBreadcrumbs: true,
+        leftSidebarEnabled: true,
+        rightSidebarEnabled: true,
+        leftSticky: false,
+        tocFontSize: 'text-sm',
+        tocH3Indent: 12,
+        tocHoverColor: 'hover:text-primary',
+      },
+      upiId: post.upiId ?? post.upiid,
+      paypalId: post.paypalId ?? post.paypalid,
+      supportQrUrl: post.supportQrUrl ?? post.supportqrurl,
+      supportLabel: post.supportLabel ?? post.supportlabel,
     }));
 
     return {

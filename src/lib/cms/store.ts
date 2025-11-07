@@ -15,6 +15,78 @@ class CMSStore {
   // Blog Posts
   async getAllPosts(): Promise<BlogPost[]> {
     if (typeof window === 'undefined') return [];
+    // Try to load from Supabase via API first
+    try {
+      const resp = await fetch('/api/blog/posts');
+      if (resp.ok) {
+        const json = await resp.json();
+        const apiPosts = Array.isArray(json.posts) ? json.posts : json;
+        if (Array.isArray(apiPosts) && apiPosts.length > 0) {
+          return apiPosts.map((p: any) => ({
+            id: String(p.id),
+            title: p.title,
+            slug: p.slug,
+            content: p.content || '',
+            excerpt: p.excerpt || '',
+            author: p.author || 'Admin',
+            status: p.status || (p.published ? 'published' : 'draft'),
+            publishedAt: p.publishedAt ? new Date(p.publishedAt) : undefined,
+            createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
+            updatedAt: p.updatedAt ? new Date(p.updatedAt) : new Date(),
+            metaTitle: p.metaTitle || p.title,
+            metaDescription: p.metaDescription || '',
+            canonicalUrl: p.canonicalUrl || '',
+            focusKeyword: p.focusKeyword || '',
+            seoScore: this.calculateSEOScore({
+              id: String(p.id),
+              title: p.title,
+              slug: p.slug,
+              content: p.content || '',
+              author: p.author || 'Admin',
+              status: p.status || 'draft',
+              createdAt: new Date(p.createdAt || Date.now()),
+              updatedAt: new Date(p.updatedAt || Date.now()),
+              metaTitle: p.metaTitle || p.title,
+              metaDescription: p.metaDescription || '',
+              seoScore: 0,
+              categories: [],
+              tags: [],
+              views: 0,
+              readingTime: 0,
+              featuredImage: p.featuredImage,
+              featuredImageAlt: '',
+              layoutSettings: p.layoutSettings || {
+                showBreadcrumbs: true,
+                leftSidebarEnabled: true,
+                rightSidebarEnabled: true,
+                leftSticky: false,
+                tocFontSize: 'text-sm',
+                tocH3Indent: 12,
+                tocHoverColor: 'hover:text-primary'
+              }
+            } as BlogPost),
+            featuredImage: p.featuredImage,
+            featuredImageAlt: p.featuredImageAlt || '',
+            categories: p.category ? [p.category] : [],
+            tags: Array.isArray(p.tags) ? p.tags : [],
+            views: Number(p.views || 0),
+            readingTime: calculateReadingTime(p.content || ''),
+            layoutSettings: p.layoutSettings || {
+              showBreadcrumbs: true,
+              leftSidebarEnabled: true,
+              rightSidebarEnabled: true,
+              leftSticky: false,
+              tocFontSize: 'text-sm',
+              tocH3Indent: 12,
+              tocHoverColor: 'hover:text-primary'
+            }
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load posts from API, falling back to localStorage:', e);
+    }
+    // Fallback to localStorage
     const posts = localStorage.getItem(this.STORAGE_KEYS.POSTS);
     return posts ? JSON.parse(posts) : this.getDefaultPosts();
   }
@@ -25,6 +97,95 @@ class CMSStore {
   }
 
   async createPost(postData: Partial<BlogPost>): Promise<BlogPost> {
+    try {
+      // Try to save to Supabase first
+      const response = await fetch('/api/cms/blog/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...postData,
+          // Convert to Supabase-compatible format
+          title: postData.title || 'Untitled Post',
+          slug: postData.slug || generateSlug(postData.title || 'untitled-post'),
+          content: postData.content || '',
+          author: postData.author || 'Admin',
+          status: postData.status || 'draft',
+          metaTitle: postData.metaTitle || postData.title || '',
+          metaDescription: postData.metaDescription || '',
+          canonicalUrl: postData.canonicalUrl || '',
+          focusKeyword: postData.focusKeyword || '',
+          excerpt: postData.excerpt || '',
+          featuredImage: postData.featuredImage,
+          featuredImageAlt: postData.featuredImageAlt || '',
+          categories: postData.categories || [],
+          tags: postData.tags || [],
+          layoutSettings: postData.layoutSettings || {
+            showBreadcrumbs: true,
+            leftSidebarEnabled: true,
+            rightSidebarEnabled: true,
+            leftSticky: false,
+            tocFontSize: 'text-sm',
+            tocH3Indent: 12,
+            tocHoverColor: 'hover:text-primary'
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const supabasePost = await response.json();
+        
+        // Log activity
+        await this.logActivity({
+          type: 'post_created',
+          message: `Created new post: ${supabasePost.title}`,
+          entityId: String(supabasePost.id)
+        });
+
+        // Normalize Supabase payload back to CMS shape
+        const cmsPost: BlogPost = {
+          id: String(supabasePost.id),
+          title: supabasePost.title,
+          slug: supabasePost.slug,
+          content: supabasePost.content || '',
+          excerpt: postData.excerpt || '',
+          author: supabasePost.author || 'Admin',
+          status: supabasePost.published ? 'published' : 'draft',
+          publishedAt: supabasePost.published ? new Date(supabasePost.date) : undefined,
+          createdAt: new Date(supabasePost.date || Date.now()),
+          updatedAt: new Date(supabasePost.date || Date.now()),
+          metaTitle: supabasePost.seoTitle ?? supabasePost.seotitle ?? (postData.metaTitle || postData.title || ''),
+          metaDescription: supabasePost.metaDescription ?? supabasePost.metadescription ?? (postData.metaDescription || ''),
+          canonicalUrl: postData.canonicalUrl || '',
+          focusKeyword: postData.focusKeyword || '',
+          seoScore: 0,
+          featuredImage: supabasePost.imageUrl ?? supabasePost.imageurl ?? postData.featuredImage,
+          featuredImageAlt: postData.featuredImageAlt || '',
+          categories: (postData.categories && postData.categories.length > 0)
+            ? postData.categories
+            : (supabasePost.category ? [supabasePost.category] : []),
+          tags: postData.tags || [],
+          views: 0,
+          readingTime: calculateReadingTime(supabasePost.content || ''),
+          layoutSettings: postData.layoutSettings || {
+            showBreadcrumbs: true,
+            leftSidebarEnabled: true,
+            rightSidebarEnabled: true,
+            leftSticky: false,
+            tocFontSize: 'text-sm',
+            tocH3Indent: 12,
+            tocHoverColor: 'hover:text-primary'
+          }
+        };
+        cmsPost.seoScore = this.calculateSEOScore(cmsPost);
+        return cmsPost;
+      }
+    } catch (error) {
+      console.error('Failed to save to Supabase, falling back to localStorage:', error);
+    }
+
+    // Fallback to localStorage if Supabase fails
     const posts = await this.getAllPosts();
     
     const newPost: BlogPost = {
@@ -78,6 +239,95 @@ class CMSStore {
   }
 
   async updatePost(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
+    try {
+      // Try to update in Supabase first
+      const response = await fetch(`/api/cms/blog/update/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...updates,
+          // Convert to Supabase-compatible format
+          title: updates.title || '',
+          content: updates.content || '',
+          author: updates.author || '',
+          slug: updates.slug,
+          status: updates.status || 'draft',
+          metaTitle: updates.metaTitle || updates.title || '',
+          metaDescription: updates.metaDescription || '',
+          canonicalUrl: updates.canonicalUrl || '',
+          focusKeyword: updates.focusKeyword || '',
+          excerpt: updates.excerpt || '',
+          featuredImage: updates.featuredImage,
+          featuredImageAlt: updates.featuredImageAlt || '',
+          categories: updates.categories || [],
+          tags: updates.tags || [],
+          layoutSettings: updates.layoutSettings || {
+            showBreadcrumbs: true,
+            leftSidebarEnabled: true,
+            rightSidebarEnabled: true,
+            leftSticky: false,
+            tocFontSize: 'text-sm',
+            tocH3Indent: 12,
+            tocHoverColor: 'hover:text-primary'
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const supabasePost = await response.json();
+        
+        // Log activity
+        await this.logActivity({
+          type: updates.status === 'published' ? 'post_published' : 'post_updated',
+          message: `Updated post: ${supabasePost.title}`,
+          entityId: String(supabasePost.id)
+        });
+
+        // Normalize Supabase payload to CMS shape
+        const cmsPost: BlogPost = {
+          id: String(supabasePost.id),
+          title: supabasePost.title,
+          slug: supabasePost.slug,
+          content: supabasePost.content || '',
+          excerpt: updates.excerpt || '',
+          author: supabasePost.author || updates.author || 'Admin',
+          status: supabasePost.published ? 'published' : (updates.status || 'draft'),
+          publishedAt: supabasePost.published ? new Date(supabasePost.date) : undefined,
+          createdAt: new Date(supabasePost.date || Date.now()),
+          updatedAt: new Date(supabasePost.date || Date.now()),
+          metaTitle: supabasePost.seoTitle ?? supabasePost.seotitle ?? updates.metaTitle,
+          metaDescription: supabasePost.metaDescription ?? supabasePost.metadescription ?? updates.metaDescription,
+          canonicalUrl: updates.canonicalUrl || '',
+          focusKeyword: updates.focusKeyword || '',
+          seoScore: 0,
+          featuredImage: supabasePost.imageUrl ?? supabasePost.imageurl ?? updates.featuredImage,
+          featuredImageAlt: updates.featuredImageAlt || '',
+          categories: (updates.categories && updates.categories.length > 0)
+            ? updates.categories
+            : (supabasePost.category ? [supabasePost.category] : []),
+          tags: updates.tags || [],
+          views: 0,
+          readingTime: calculateReadingTime(supabasePost.content || updates.content || ''),
+          layoutSettings: updates.layoutSettings || {
+            showBreadcrumbs: true,
+            leftSidebarEnabled: true,
+            rightSidebarEnabled: true,
+            leftSticky: false,
+            tocFontSize: 'text-sm',
+            tocH3Indent: 12,
+            tocHoverColor: 'hover:text-primary'
+          }
+        };
+        cmsPost.seoScore = this.calculateSEOScore(cmsPost);
+        return cmsPost;
+      }
+    } catch (error) {
+      console.error('Failed to update in Supabase, falling back to localStorage:', error);
+    }
+
+    // Fallback to localStorage if Supabase fails
     const posts = await this.getAllPosts();
     const index = posts.findIndex(post => post.id === id);
     
@@ -103,7 +353,7 @@ class CMSStore {
     
     // Log activity
     await this.logActivity({
-      type: updates.status === 'published' ? 'post_published' : 'post_created',
+      type: updates.status === 'published' ? 'post_published' : 'post_updated',
       message: `Updated post: ${updatedPost.title}`,
       entityId: updatedPost.id
     });
@@ -112,12 +362,41 @@ class CMSStore {
   }
 
   async deletePost(id: string): Promise<boolean> {
+    try {
+      // Try to delete from Supabase first
+      const response = await fetch(`/api/cms/blog/delete/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Log activity
+        await this.logActivity({
+          type: 'post_deleted',
+          message: `Deleted post with ID: ${id}`,
+          entityId: id
+        });
+
+        return true;
+      }
+    } catch (error) {
+      console.error('Failed to delete from Supabase, falling back to localStorage:', error);
+    }
+
+    // Fallback to localStorage if Supabase fails
     const posts = await this.getAllPosts();
     const filteredPosts = posts.filter(post => post.id !== id);
     
     if (filteredPosts.length === posts.length) return false;
     
     this.savePosts(filteredPosts);
+    
+    // Log activity
+    await this.logActivity({
+      type: 'post_deleted',
+      message: `Deleted post with ID: ${id}`,
+      entityId: id
+    });
+    
     return true;
   }
 
