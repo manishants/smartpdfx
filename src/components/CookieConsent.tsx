@@ -140,7 +140,7 @@ export default function CookieConsent({
       >
         <Button
           aria-label="Dismiss cookie banner"
-          variant="ghost"
+          variant="default"
           size="icon"
           className="absolute right-3 top-3"
           onClick={dismissTemporary}
@@ -154,7 +154,7 @@ export default function CookieConsent({
           </CardDescription>
         </CardHeader>
         <CardFooter className="pt-0 px-4 pb-4 gap-2 flex flex-wrap items-center">
-          <Button aria-label="Accept all cookies" onClick={acceptAll}>
+          <Button aria-label="Accept all cookies" variant="default" onClick={acceptAll}>
             Accept All
           </Button>
           <Button
@@ -165,7 +165,7 @@ export default function CookieConsent({
           >
             Manage
           </Button>
-          <Button asChild variant="link" aria-label="Open privacy policy">
+          <Button asChild variant="default" aria-label="Open privacy policy">
             <Link href="/privacy-policy">Privacy Policy</Link>
           </Button>
         </CardFooter>
