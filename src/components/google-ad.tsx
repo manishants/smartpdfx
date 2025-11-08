@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
 declare global {
@@ -18,11 +18,37 @@ export function GoogleAd() {
 
   useEffect(() => {
     if (!mounted || !client || !slot) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error(err);
-    }
+    const el = insRef.current as HTMLElement | null;
+    if (!el) return;
+
+    const push = () => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (err) {
+        console.error('AdSense error:', err);
+      }
+    };
+
+    const tryPush = () => {
+      const w = el.offsetWidth;
+      if (w && w > 0) {
+        push();
+        return true;
+      }
+      return false;
+    };
+
+    if (tryPush()) return;
+
+    const ro = new ResizeObserver(() => {
+      if (tryPush()) ro.disconnect();
+    });
+    ro.observe(el);
+    const id = setTimeout(() => tryPush(), 1500);
+    return () => {
+      ro.disconnect();
+      clearTimeout(id);
+    };
   }, [mounted, client, slot]);
 
   if (!mounted || !client || !slot) {
@@ -54,6 +80,7 @@ export function GoogleAd() {
             data-ad-slot={slot}
             data-ad-format="auto"
             data-full-width-responsive="true"
+            ref={insRef}
           ></ins>
         </CardContent>
       </Card>

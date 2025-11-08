@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Zap, TrendingUp } from 'lucide-react';
@@ -12,17 +12,54 @@ declare global {
 }
 
 export const BottomAdsSection = () => {
+    const sectionRef = useRef<HTMLDivElement | null>(null);
+
     useEffect(() => {
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (err) {
-            console.error('AdSense error:', err);
+        const root = sectionRef.current;
+        if (!root) return;
+        const slots = Array.from(root.querySelectorAll('ins.adsbygoogle')) as HTMLElement[];
+        if (!slots.length) return;
+
+        const push = () => {
+            try {
+                (window.adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (err) {
+                console.error('AdSense error:', err);
+            }
+        };
+
+        const observers: ResizeObserver[] = [];
+        const timeouts: number[] = [];
+
+        const tryInit = (el: HTMLElement) => {
+            const w = el.offsetWidth;
+            if (w && w > 0) {
+                push();
+                return true;
+            }
+            return false;
+        };
+
+        for (const el of slots) {
+            if (tryInit(el)) continue;
+            const ro = new ResizeObserver(() => {
+                if (tryInit(el)) ro.disconnect();
+            });
+            ro.observe(el);
+            observers.push(ro);
+            const id = window.setTimeout(() => tryInit(el), 1500);
+            timeouts.push(id);
         }
+
+        return () => {
+            observers.forEach((ro) => ro.disconnect());
+            timeouts.forEach((id) => clearTimeout(id));
+        };
     }, []);
 
     return (
         <section className="w-full py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-background via-accent/5 to-primary/5 border-t border-border/50">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div ref={sectionRef} className="container mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Section Header */}
                 <div className="text-center mb-6 sm:mb-8 lg:mb-12">
                     <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
