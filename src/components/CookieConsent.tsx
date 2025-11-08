@@ -159,7 +159,7 @@ export default function CookieConsent({
           </Button>
           <Button
             aria-label="Manage cookie preferences"
-            variant="outline"
+            variant="default"
             onClick={openModal}
             ref={manageBtnRef}
           >
@@ -202,13 +202,13 @@ export default function CookieConsent({
             </div>
           </div>
           <DialogFooter className="mt-4 gap-2">
-            <Button aria-label="Save cookie preferences" onClick={saveCustom}>
+            <Button aria-label="Save cookie preferences" variant="default" onClick={saveCustom}>
               Save Preferences
             </Button>
-            <Button aria-label="Reject all cookies" variant="outline" onClick={rejectAll}>
+            <Button aria-label="Reject all cookies" variant="default" onClick={rejectAll}>
               Reject All
             </Button>
-            <Button aria-label="Cancel and close" variant="ghost" onClick={() => setShowModal(false)}>
+            <Button aria-label="Cancel and close" variant="default" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
           </DialogFooter>
