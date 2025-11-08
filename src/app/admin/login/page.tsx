@@ -28,35 +28,50 @@ export default function AdminLoginPage() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!supabase) {
-             toast({
-                title: "Client not ready",
-                description: "Supabase client is not initialized. Please wait a moment and try again.",
-                variant: "destructive",
-            });
-            return;
-        }
-
         setIsLoading(true);
+        try {
+            const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+            if (canUseSupabase) {
+                const { error } = await (supabase as any).auth.signInWithPassword({
+                    email,
+                    password,
+                });
 
-        if (error) {
-            toast({
-                title: "Login Failed",
-                description: error.message,
-                variant: "destructive",
+                if (!error) {
+                    toast({ title: "Login Successful", description: "Redirecting to the admin dashboard..." });
+                    window.location.href = '/admin/dashboard';
+                    return;
+                }
+
+                // If Supabase is not configured, fall through to cookie-based login
+                if (String(error?.message || '').includes('Supabase not configured')) {
+                    // continue to fallback
+                } else {
+                    toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            // Fallback cookie-based login when Supabase is disabled
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
             });
+            const json = await res.json().catch(() => ({}));
+            if (res.ok && json?.ok) {
+                toast({ title: "Login Successful", description: "Redirecting to the admin dashboard..." });
+                window.location.href = '/admin/dashboard';
+                return;
+            }
+            const message = json?.error || 'Login failed';
+            toast({ title: 'Login Failed', description: message, variant: 'destructive' });
             setIsLoading(false);
-        } else {
-            toast({
-                title: "Login Successful",
-                description: "Redirecting to the admin dashboard...",
-            });
-            window.location.href = '/admin/dashboard';
+        } catch (err: any) {
+            toast({ title: 'Login Failed', description: err?.message || 'Unexpected error', variant: 'destructive' });
+            setIsLoading(false);
         }
     };
 

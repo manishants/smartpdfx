@@ -10,6 +10,11 @@ type AccessResult = {
 
 export async function checkRouteAccess(pathname: string): Promise<AccessResult> {
   try {
+    const isSupabaseDisabled = () =>
+      process.env.NEXT_PUBLIC_DISABLE_SUPABASE === 'true' ||
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
     // Public routes
     if (!pathname.startsWith('/superadmin') && !pathname.startsWith('/admin')) {
       return { hasAccess: true };
@@ -18,6 +23,25 @@ export async function checkRouteAccess(pathname: string): Promise<AccessResult> 
     // Always allow login pages
     if (pathname === '/superadmin/login' || pathname === '/admin/login') {
       return { hasAccess: true };
+    }
+
+    // Fallback cookie-based access when Supabase is disabled
+    if (isSupabaseDisabled()) {
+      let role: string | undefined;
+      try {
+        const match = typeof document !== 'undefined' && document.cookie.match(/(?:^|; )spx_admin=([^;]+)/);
+        role = match?.[1];
+      } catch {}
+
+      if (pathname.startsWith('/superadmin')) {
+        if (role === 'superadmin') return { hasAccess: true };
+        return { hasAccess: false, redirectTo: '/superadmin/login' };
+      }
+
+      if (pathname.startsWith('/admin')) {
+        if (role === 'admin' || role === 'superadmin') return { hasAccess: true };
+        return { hasAccess: false, redirectTo: '/admin/login' };
+      }
     }
 
     const supabase = createClient();

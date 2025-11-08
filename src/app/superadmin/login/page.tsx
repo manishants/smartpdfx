@@ -39,49 +39,54 @@ export default function SuperadminLoginPage() {
                 });
 
                 if (authError) {
-                    toast({
-                        title: "Login Failed",
-                        description: authError.message,
-                        variant: "destructive",
-                    });
-                    setIsLoading(false);
+                    // If Supabase is not configured, fall through to cookie-based login
+                    if (!String(authError?.message || '').includes('Supabase not configured')) {
+                        toast({ title: "Login Failed", description: authError.message, variant: "destructive" });
+                        setIsLoading(false);
+                        return;
+                    }
+                } else {
+                    // Check if user has superadmin role
+                    const { data: profile, error: profileError } = await (supabase as any)
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', authData.user.id)
+                        .single();
+
+                    if (profileError || !profile) {
+                        await (supabase as any).auth.signOut();
+                        toast({ title: "Access Denied", description: "Unable to verify your permissions.", variant: "destructive" });
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    if (profile.role !== UserRole.SUPERADMIN) {
+                        await (supabase as any).auth.signOut();
+                        toast({ title: "Access Denied", description: "You don't have superadmin privileges.", variant: "destructive" });
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    toast({ title: "Login Successful", description: "Welcome to SuperAdmin Dashboard!" });
+                    router.push('/superadmin/dashboard');
                     return;
                 }
+            }
 
-                // Check if user has superadmin role
-                const { data: profile, error: profileError } = await (supabase as any)
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', authData.user.id)
-                    .single();
-
-                if (profileError || !profile) {
-                    await (supabase as any).auth.signOut();
-                    toast({
-                        title: "Access Denied",
-                        description: "Unable to verify your permissions.",
-                        variant: "destructive",
-                    });
-                    setIsLoading(false);
-                    return;
-                }
-
-                if (profile.role !== UserRole.SUPERADMIN) {
-                    await (supabase as any).auth.signOut();
-                    toast({
-                        title: "Access Denied",
-                        description: "You don't have superadmin privileges.",
-                        variant: "destructive",
-                    });
-                    setIsLoading(false);
-                    return;
-                }
-
+            // Fallback cookie-based login when Supabase is disabled
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const json = await res.json().catch(() => ({}));
+            if (res.ok && json?.ok && json?.role === 'superadmin') {
                 toast({ title: "Login Successful", description: "Welcome to SuperAdmin Dashboard!" });
                 router.push('/superadmin/dashboard');
                 return;
             }
-            toast({ title: 'Login Failed', description: 'Supabase auth is not available.', variant: 'destructive' });
+            const message = json?.error || 'Login failed';
+            toast({ title: 'Login Failed', description: message, variant: 'destructive' });
             setIsLoading(false);
             return;
         } catch (error) {
