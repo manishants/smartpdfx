@@ -1,10 +1,9 @@
 import { MetadataRoute } from 'next'
 
-export const dynamic = 'force-dynamic'
-
 function getSiteUrl() {
   const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL
-  return envUrl?.replace(/\/$/, '') || 'https://smartpdfx.com'
+  // Prefer the www host if no env is set to match public domain
+  return envUrl?.replace(/\/$/, '') || 'https://www.smartpdfx.com'
 }
 
 export default function robots(): MetadataRoute.Robots {
@@ -14,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: ['/', '/**'],
         disallow: ['/superadmin', '/superadmin/', '/admin', '/admin/'],
       },
     ],

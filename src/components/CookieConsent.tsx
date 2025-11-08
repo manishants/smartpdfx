@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
+import './cookie-consent.css'
 import {
   Dialog,
   DialogContent,
@@ -133,7 +134,7 @@ export default function CookieConsent({
       {/* Sticky bottom banner styled with shadcn Card */}
       <Card
         data-ready={ready}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1rem)] sm:w-auto max-w-2xl transition-all duration-300 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100 opacity-0 data-[ready=true]:translate-y-0 translate-y-2"
+        className="cookie-consent-scope fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1rem)] sm:w-auto max-w-2xl transition-all duration-300 ease-out motion-reduce:transition-none data-[ready=true]:opacity-100 opacity-0 data-[ready=true]:translate-y-0 translate-y-2"
         role="region"
         aria-label="Cookie consent banner"
       >
