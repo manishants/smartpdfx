@@ -173,7 +173,7 @@ export default function CookieConsent({
 
       {/* Modal for managing preferences using shadcn Dialog */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent>
+        <DialogContent className="cookie-consent-scope">
           <DialogHeader>
             <DialogTitle>Manage Preferences</DialogTitle>
           </DialogHeader>
