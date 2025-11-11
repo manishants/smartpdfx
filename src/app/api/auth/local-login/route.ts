@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { LOCAL_AUTH_DEFAULTS } from '@/config/local-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,9 +9,14 @@ export async function POST(req: Request) {
     const email = String(body?.email ?? '').trim().toLowerCase();
     const password = String(body?.password ?? '').trim();
 
+    const envEmail1 = process.env.SUPERADMIN_EMAIL ?? LOCAL_AUTH_DEFAULTS.SUPERADMIN_EMAIL;
+    const envPass1 = process.env.SUPERADMIN_PASSWORD ?? LOCAL_AUTH_DEFAULTS.SUPERADMIN_PASSWORD;
+    const envEmail2 = process.env.SUPERADMIN_EMAIL_2 ?? LOCAL_AUTH_DEFAULTS.SUPERADMIN_EMAIL_2;
+    const envPass2 = process.env.SUPERADMIN_PASSWORD_2 ?? LOCAL_AUTH_DEFAULTS.SUPERADMIN_PASSWORD_2;
+
     const pairs: Array<[string | undefined, string | undefined]> = [
-      [process.env.SUPERADMIN_EMAIL, process.env.SUPERADMIN_PASSWORD],
-      [process.env.SUPERADMIN_EMAIL_2, process.env.SUPERADMIN_PASSWORD_2],
+      [envEmail1 || undefined, envPass1 || undefined],
+      [envEmail2 || undefined, envPass2 || undefined],
     ];
 
     const valid = pairs.some(([e, p]) => {

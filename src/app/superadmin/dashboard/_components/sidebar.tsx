@@ -30,7 +30,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
 
 const NavLink = ({ 
   href, 
@@ -64,17 +63,11 @@ const NavLink = ({
 export function SuperadminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
   const isBlogActive = pathname.startsWith('/superadmin/blog');
   const isPageActive = pathname.startsWith('/superadmin/pages');
   const isSEOActive = pathname.startsWith('/superadmin/seo') || pathname.startsWith('/superadmin/pages/seo');
 
   const handleLogout = async () => {
-    try {
-      // Attempt to sign out Supabase user if present
-      await supabase.auth.signOut();
-    } catch {}
-
     // Clear server-side superadmin cookie
     try { await fetch('/api/auth/superadmin-cookie', { method: 'DELETE' }); } catch {}
 

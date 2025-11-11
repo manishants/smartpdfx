@@ -1,28 +1,20 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
-    const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
-
-    useEffect(() => {
-        // This is the standard and correct way to initialize the client-side Supabase client.
-        setSupabase(createClient());
-    }, []);
+    
 
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -30,60 +22,19 @@ export default function AdminLoginPage() {
         
         setIsLoading(true);
         try {
-            const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
-
-            if (!canUseSupabase) {
-                // Fallback to local login (env-based)
-                const resp = await fetch('/api/auth/local-login', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                if (!resp.ok) {
-                    const data = await resp.json().catch(() => ({}));
-                    toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
-                    setIsLoading(false);
-                    return;
-                }
-                // Issue cookie for server-side guard compatibility
-                try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
-                toast({ title: 'Login Successful', description: 'Redirecting to the admin dashboard...' });
-                window.location.href = '/admin/dashboard';
-                return;
-            }
-
-            const { error } = await (supabase as any).auth.signInWithPassword({
-                email,
-                password,
+            const resp = await fetch('/api/auth/local-login', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ email, password })
             });
-
-            if (!error) {
-                try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
-                toast({ title: "Login Successful", description: "Redirecting to the admin dashboard..." });
-                window.location.href = '/admin/dashboard';
+            if (!resp.ok) {
+                const data = await resp.json().catch(() => ({}));
+                toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
+                setIsLoading(false);
                 return;
             }
-
-            // If Supabase not configured, fallback
-            if ((error?.message || '').toLowerCase().includes('supabase not configured')) {
-                const resp = await fetch('/api/auth/local-login', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                if (!resp.ok) {
-                    const data = await resp.json().catch(() => ({}));
-                    toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
-                    setIsLoading(false);
-                    return;
-                }
-                try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
-                toast({ title: 'Login Successful', description: 'Redirecting to the admin dashboard...' });
-                window.location.href = '/admin/dashboard';
-                return;
-            }
-
-            toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+            toast({ title: 'Login Successful', description: 'Redirecting to the admin dashboard...' });
+            window.location.href = '/admin/dashboard';
             setIsLoading(false);
         } catch (err: any) {
             toast({ title: 'Login Failed', description: err?.message || 'Unexpected error', variant: 'destructive' });
@@ -108,7 +59,7 @@ export default function AdminLoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                disabled={isLoading || !supabase}
+                                disabled={isLoading}
                             />
                         </div>
                         <div className="space-y-2">
@@ -119,12 +70,12 @@ export default function AdminLoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                disabled={isLoading || !supabase}
+                                disabled={isLoading}
                             />
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button type="submit" className="w-full" disabled={isLoading || !supabase}>
+                        <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Logging in...</> : <><LogIn className="mr-2 h-4 w-4" /> Login</>}
                         </Button>
                     </CardFooter>
