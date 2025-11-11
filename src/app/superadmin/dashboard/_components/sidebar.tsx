@@ -75,6 +75,9 @@ export function SuperadminSidebar() {
       await supabase.auth.signOut();
     } catch {}
 
+    // Clear server-side superadmin cookie
+    try { await fetch('/api/auth/superadmin-cookie', { method: 'DELETE' }); } catch {}
+
     // Redirect to login
     router.push('/superadmin/login');
   };

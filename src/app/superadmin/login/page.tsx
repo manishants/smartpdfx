@@ -33,8 +33,20 @@ export default function SuperadminLoginPage() {
             const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
 
             if (!canUseSupabase) {
-                toast({ title: "Login Failed", description: "Supabase is not configured.", variant: "destructive" });
-                setIsLoading(false);
+                // Fallback: local superadmin login via env credentials
+                const resp = await fetch('/api/auth/local-login', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!resp.ok) {
+                    const data = await resp.json().catch(() => ({}));
+                    toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
+                    setIsLoading(false);
+                    return;
+                }
+                toast({ title: 'Login Successful', description: 'Welcome to SuperAdmin Dashboard!' });
+                router.push('/superadmin/dashboard');
                 return;
             }
 
@@ -69,6 +81,8 @@ export default function SuperadminLoginPage() {
                 return;
             }
 
+            // Issue cookie for server-side guard
+            try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
             toast({ title: "Login Successful", description: "Welcome to SuperAdmin Dashboard!" });
             router.push('/superadmin/dashboard');
             return;
