@@ -56,6 +56,24 @@ export default function SuperadminLoginPage() {
             });
 
             if (authError) {
+                // If Supabase is not configured, fallback to local superadmin login
+                if ((authError?.message || '').toLowerCase().includes('supabase not configured')) {
+                    const resp = await fetch('/api/auth/local-login', {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    if (!resp.ok) {
+                        const data = await resp.json().catch(() => ({}));
+                        toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
+                        setIsLoading(false);
+                        return;
+                    }
+                    try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
+                    toast({ title: 'Login Successful', description: 'Welcome to SuperAdmin Dashboard!' });
+                    router.push('/superadmin/dashboard');
+                    return;
+                }
                 toast({ title: "Login Failed", description: authError.message, variant: "destructive" });
                 setIsLoading(false);
                 return;

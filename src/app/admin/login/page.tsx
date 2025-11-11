@@ -33,8 +33,22 @@ export default function AdminLoginPage() {
             const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
 
             if (!canUseSupabase) {
-                toast({ title: 'Login Failed', description: 'Supabase is not configured.', variant: 'destructive' });
-                setIsLoading(false);
+                // Fallback to local login (env-based)
+                const resp = await fetch('/api/auth/local-login', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!resp.ok) {
+                    const data = await resp.json().catch(() => ({}));
+                    toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
+                    setIsLoading(false);
+                    return;
+                }
+                // Issue cookie for server-side guard compatibility
+                try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
+                toast({ title: 'Login Successful', description: 'Redirecting to the admin dashboard...' });
+                window.location.href = '/admin/dashboard';
                 return;
             }
 
@@ -44,7 +58,27 @@ export default function AdminLoginPage() {
             });
 
             if (!error) {
+                try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
                 toast({ title: "Login Successful", description: "Redirecting to the admin dashboard..." });
+                window.location.href = '/admin/dashboard';
+                return;
+            }
+
+            // If Supabase not configured, fallback
+            if ((error?.message || '').toLowerCase().includes('supabase not configured')) {
+                const resp = await fetch('/api/auth/local-login', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!resp.ok) {
+                    const data = await resp.json().catch(() => ({}));
+                    toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
+                    setIsLoading(false);
+                    return;
+                }
+                try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
+                toast({ title: 'Login Successful', description: 'Redirecting to the admin dashboard...' });
                 window.location.href = '/admin/dashboard';
                 return;
             }
