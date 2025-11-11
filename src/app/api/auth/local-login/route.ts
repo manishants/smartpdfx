@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const email = String(body?.email ?? '').trim();
+    const email = String(body?.email ?? '').trim().toLowerCase();
     const password = String(body?.password ?? '').trim();
 
     const pairs: Array<[string | undefined, string | undefined]> = [
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const valid = pairs.some(([e, p]) => {
       if (!p) return false;
       // Email optional: if provided, must match
-      if (e && email && e !== email) return false;
+      if (e && email && e.toLowerCase() !== email) return false;
       return password === p;
     });
 
