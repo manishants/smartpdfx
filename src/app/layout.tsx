@@ -5,7 +5,7 @@ import { MainLayout } from '@/components/main-layout';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SwRegister } from '@/components/sw-register';
 import { Inter } from 'next/font/google';
-import CookieConsent from '@/components/CookieConsent';
+import Script from 'next/script';
 export const metadata: Metadata = {
   title: {
     default: 'SmartPDFx - Free PDF & Image Tools',
@@ -50,9 +50,14 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon-192x192.png" />
         {/* Google AdSense */}
         <meta name="google-adsense-account" content={ADSENSE_CLIENT_ID} />
-        <script
-          async
+        {/* Preconnect to AdSense domain without blocking rendering */}
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        {/* Defer AdSense script loading to after page becomes interactive */}
+        <Script
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          strategy="lazyOnload"
+          async
           crossOrigin="anonymous"
         />
       </head>
@@ -64,17 +69,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <MainLayout>{children}</MainLayout>
-          {/* Global cookie consent banner */}
-          {/* Mounts once globally; persists choices in localStorage */}
-          {/* Gate analytics or ads via CookieConsent callbacks as needed */}
-          {/**
-           * Example gating:
-           * <CookieConsent onAccept={() => initAnalytics()} onSavePreferences={(prefs) => { if (prefs.analytics) initAnalytics(); }} />
-           */}
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore JS-first component with inline types */}
-          {/* Render without callbacks by default; configure in future if needed */}
-          <CookieConsent />
+          {/* Cookie consent removed per request */}
           <Toaster />
           {/* Register Service Worker for PWA functionality */}
           <SwRegister />

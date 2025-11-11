@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
+import { addSubscriber } from '@/lib/newsletterFs';
 
 export async function POST(req: Request) {
   try {
@@ -9,21 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email is required.' }, { status: 400 });
     }
 
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .upsert(
-        { email, category: category || 'general', unsubscribed: false },
-        { onConflict: 'email,category', returning: 'minimal' }
-      );
-
-    if (error) {
-      console.error('Newsletter subscribe error:', error);
-      return NextResponse.json({ error: 'Failed to subscribe.' }, { status: 500 });
-    }
-
+    addSubscriber(email, category || 'general');
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 });

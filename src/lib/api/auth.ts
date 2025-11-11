@@ -1,5 +1,4 @@
-import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
+// Supabase has been removed. Auth guard becomes a no-op to allow access.
 
 export function unauthorized(message = "Unauthorized") {
   return new Response(JSON.stringify({ error: message }), {
@@ -8,39 +7,9 @@ export function unauthorized(message = "Unauthorized") {
   });
 }
 
-// Supabase-only guard: require an authenticated SUPERADMIN user
+// No-op guard: allow all requests during local-only phase
 export async function requireSuperadmin(): Promise<Response | undefined> {
-  try {
-    const isSupabaseDisabled =
-      process.env.NEXT_PUBLIC_DISABLE_SUPABASE === "true" ||
-      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (isSupabaseDisabled) {
-      const cookieStore = cookies();
-      const role = cookieStore.get("spx_admin")?.value;
-      if (role === "superadmin") return undefined;
-      return unauthorized();
-    }
-
-    const supabase = createSupabaseServerClient();
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
-    if (!user) return unauthorized();
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile || profile.role !== "superadmin") {
-      return unauthorized();
-    }
-    return undefined;
-  } catch {
-    return unauthorized();
-  }
+  return undefined;
 }
 
 export function getClientIp(req: Request) {

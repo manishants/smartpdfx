@@ -16,13 +16,28 @@ export async function getBlogs(): Promise<BlogPost[]> {
 
   if (error) {
     console.error('Error fetching blogs:', error);
-    // Return empty array but don't block the page from rendering
     return [];
   }
 
-  return data.map((post: any) => ({
-    ...post,
+  return (data || []).map((post: any) => ({
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    content: post.content,
+    imageUrl: post.imageurl ?? post.imageUrl,
+    author: post.author,
+    date: post.date,
+    published: !!post.published,
+    seoTitle: post.seotitle ?? post.seoTitle,
+    metaDescription: post.metadescription ?? post.metaDescription,
     faqs: post.faqs || [],
+    category: post.category,
+    popular: !!post.popular,
+    layoutSettings: post.layoutsettings ?? post.layoutSettings,
+    upiId: post.upiid ?? post.upiId,
+    paypalId: post.paypalid ?? post.paypalId,
+    supportQrUrl: post.supportqrurl ?? post.supportQrUrl,
+    supportLabel: post.supportlabel ?? post.supportLabel,
   }));
 }
 
@@ -39,7 +54,27 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
     console.error(`Error fetching blog post with slug ${slug}:`, error);
     return null;
   }
-  return data as BlogPost;
+  const p: any = data;
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    content: p.content,
+    imageUrl: p.imageurl ?? p.imageUrl,
+    author: p.author,
+    date: p.date,
+    published: !!p.published,
+    seoTitle: p.seotitle ?? p.seoTitle,
+    metaDescription: p.metadescription ?? p.metaDescription,
+    faqs: p.faqs || [],
+    category: p.category,
+    popular: !!p.popular,
+    layoutSettings: p.layoutsettings ?? p.layoutSettings,
+    upiId: p.upiid ?? p.upiId,
+    paypalId: p.paypalid ?? p.paypalId,
+    supportQrUrl: p.supportqrurl ?? p.supportQrUrl,
+    supportLabel: p.supportlabel ?? p.supportLabel,
+  } as BlogPost;
 }
 
 export async function createPost(formData: FormData) {
@@ -60,6 +95,10 @@ export async function createPost(formData: FormData) {
   const seoTitle = formData.get('seoTitle') as string;
   const metaDescription = formData.get('metaDescription') as string;
   const published = formData.get('published') === 'true';
+  const upiId = formData.get('upiId') as string | null;
+  const paypalId = formData.get('paypalId') as string | null;
+  const supportLabel = (formData.get('supportLabel') as string | null) || null;
+  const supportQr = formData.get('supportQr') as File | null;
 
   const faqs: Faq[] = [];
   formData.forEach((value, key) => {
@@ -94,34 +133,56 @@ export async function createPost(formData: FormData) {
     
   const imageUrl = imageUrlData.publicUrl;
 
-  const newPost: Omit<BlogPost, 'id' | 'created_at'> = {
+  // Optional support QR upload
+  let supportQrUrl: string | undefined = undefined;
+  if (supportQr && (supportQr as any).size > 0) {
+    const supportName = `support-${finalSlug}-${Date.now()}`;
+    const { data: supportData, error: supportErr } = await supabase.storage
+      .from('blogs')
+      .upload(supportName, supportQr);
+    if (!supportErr && supportData) {
+      const { data: supportUrlData } = supabase.storage
+        .from('blogs')
+        .getPublicUrl(supportData.path);
+      supportQrUrl = supportUrlData.publicUrl;
+    } else {
+      console.error('Error uploading support QR:', supportErr);
+    }
+  }
+
+  const payload: any = {
     slug: finalSlug,
     title,
     content,
     author,
     date: new Date().toISOString(),
-    imageUrl: imageUrl,
+    imageurl: imageUrl,
     published,
-    seoTitle: seoTitle || title,
-    metaDescription,
+    seotitle: seoTitle || title,
+    metadescription: metaDescription,
     faqs,
+    upiid: upiId || undefined,
+    paypalid: paypalId || undefined,
+    supportqrurl: supportQrUrl,
+    supportlabel: supportLabel || undefined,
   };
   
   const { error: insertError } = await supabase
     .from('blogs')
-    .insert([newPost]);
+    .insert([payload]);
 
   if (insertError) {
     console.error('Error creating post:', insertError);
-    if (insertError.code === '42P01') { // '42P01' is the code for 'undefined_table'
+    if ((insertError as any).code === '42P01') { // '42P01' undefined_table
         return { error: 'The "blogs" table does not exist. Please create it in your Supabase project.' };
     }
     return { error: 'Failed to create blog post in the database.' };
   }
 
-  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/blog');
+  revalidatePath('/superadmin/blog');
   revalidatePath('/blog');
-  revalidatePath(`/blog/${slug}`);
+  revalidatePath(`/blog/${finalSlug}`);
 
   return { success: 'Blog post created successfully!' };
 }

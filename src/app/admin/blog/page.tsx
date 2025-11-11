@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { getBlogs } from "@/app/actions/blog";
+import { getBlogs } from "@/lib/actions/blog";
 
 export default async function AllPostsPage() {
     const posts = await getBlogs();

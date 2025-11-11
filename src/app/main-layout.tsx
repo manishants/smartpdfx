@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/app-header";
 import { AppFooter } from "./app-footer";
 import { GoogleAd } from "@/components/google-ad";
 import { GoogleSidebarAd } from "@/components/google-sidebar-ad";
+import { PageViewsWidget } from "@/components/page-views-widget";
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -45,6 +46,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <AppFooter />
+      <PageViewsWidget />
     </div>
   );
 }

@@ -317,13 +317,9 @@ export default function BlogManager() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <Image
-                              src="/hero_section_smartpdfx.webp"
-                              alt="placeholder"
-                              width={80}
-                              height={56}
-                              className="h-full w-full object-cover"
-                            />
+                            <div className="h-full w-full flex items-center justify-center text-xs text-muted-foreground">
+                              No Image
+                            </div>
                           )}
                         </div>
                       </TableCell>

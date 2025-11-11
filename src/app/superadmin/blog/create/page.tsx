@@ -51,6 +51,7 @@ export default function CreateBlogPost() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [slugAuto, setSlugAuto] = useState(true);
   
   const [formData, setFormData] = useState<BlogPostForm>({
     title: '',
@@ -122,16 +123,19 @@ export default function CreateBlogPost() {
     enabled: !!(formData.title || formData.content)
   });
 
-  // Auto-generate slug from title
+  // Utility to slugify strings consistently
+  const slugify = (str: string) => str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
+  // Auto-generate slug from title while user hasn't manually edited slug
   useEffect(() => {
-    if (formData.title && !formData.slug) {
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setFormData(prev => ({ ...prev, slug }));
+    if (slugAuto) {
+      const next = slugify(formData.title || '');
+      setFormData(prev => ({ ...prev, slug: next }));
     }
-  }, [formData.title]);
+  }, [formData.title, slugAuto]);
 
   // Load available categories for selection
   useEffect(() => {
@@ -150,6 +154,26 @@ export default function CreateBlogPost() {
       }));
     }
   }, [formData.title]);
+
+  // Auto-generate meta description from excerpt if empty
+  useEffect(() => {
+    if (formData.excerpt && !formData.seo.metaDescription) {
+      setFormData(prev => ({
+        ...prev,
+        seo: { ...prev.seo, metaDescription: formData.excerpt }
+      }));
+    }
+  }, [formData.excerpt]);
+
+  // Derive featuredImageAlt from URL when missing
+  useEffect(() => {
+    if (formData.featuredImage && !formData.featuredImageAlt) {
+      const url = String(formData.featuredImage || '');
+      const base = (url.split('/').pop() || '').replace(/\.[^.]+$/, '');
+      const altDefault = base.replace(/[-_]+/g, ' ').toLowerCase();
+      setFormData(prev => ({ ...prev, featuredImageAlt: altDefault }));
+    }
+  }, [formData.featuredImage]);
 
   // SEO Analysis
   useEffect(() => {
@@ -177,6 +201,18 @@ export default function CreateBlogPost() {
     // Save version for significant changes
     if (field === 'title' || field === 'content' || field === 'excerpt') {
       saveVersion(newData, `Updated ${field}`);
+    }
+
+    // If user edits the slug manually, stop auto-updating until cleared
+    if (field === 'slug') {
+      const val = typeof value === 'string' ? value : '';
+      if (val.trim().length === 0) {
+        setSlugAuto(true);
+      } else {
+        setSlugAuto(false);
+        // normalize slug input
+        setFormData(prev => ({ ...prev, slug: slugify(val) }));
+      }
     }
   };
 
@@ -746,6 +782,17 @@ export default function CreateBlogPost() {
                   title="Select Featured Image"
                   onSelect={(file: any) => {
                     handleInputChange('featuredImage', file.url);
+                    const providedAlt = (file.alt || '').trim();
+                    if (!formData.featuredImageAlt) {
+                      if (providedAlt) {
+                        setFormData(prev => ({ ...prev, featuredImageAlt: providedAlt }));
+                      } else {
+                        const url = String(file.url || '');
+                        const base = (url.split('/').pop() || '').replace(/\.[^.]+$/, '');
+                        const altDefault = base.replace(/[-_]+/g, ' ').toLowerCase();
+                        setFormData(prev => ({ ...prev, featuredImageAlt: altDefault }));
+                      }
+                    }
                   }}
                   trigger={<Button variant="outline" size="sm">Browse</Button>}
                 />

@@ -13,11 +13,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/**'],
+        allow: ['/', '/**', '/blog', '/blog/**', '/blog/category', '/blog/category/**'],
         disallow: ['/superadmin', '/superadmin/', '/admin', '/admin/'],
       },
     ],
-    sitemap: `${URL}/sitemap.xml`,
+    sitemap: [`${URL}/sitemap.xml`, `${URL}/blog/sitemap.xml`],
     host: URL,
   }
 }

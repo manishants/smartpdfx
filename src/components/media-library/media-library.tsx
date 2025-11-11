@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, X, Search, Grid, List, Trash2, Download, Eye, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,23 @@ export function MediaLibrary({
   const [previewFile, setPreviewFile] = useState<MediaFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load existing project images from API
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch('/api/cms/media/list');
+        if (resp.ok) {
+          const json = await resp.json();
+          const libraryFiles = Array.isArray(json.files) ? json.files.map((f: any) => ({
+            ...f,
+            uploadedAt: new Date(f.uploadedAt)
+          })) : [];
+          setFiles(prev => [...libraryFiles, ...prev]);
+        }
+      } catch {}
+    })();
+  }, []);
+
   const handleFileUpload = useCallback(async (uploadedFiles: FileList) => {
     setIsUploading(true);
     
@@ -61,18 +78,42 @@ export function MediaLibrary({
           });
           continue;
         }
-
-        // Create object URL for preview
-        const url = URL.createObjectURL(file);
+        // Try to persist to local filesystem via API
+        let url = '';
+        let serverAlt: string | undefined;
+        let savedName: string | undefined;
+        try {
+          const fd = new FormData();
+          fd.append('file', file);
+          const base = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+          fd.append('slug', base);
+          const resp = await fetch('/api/cms/blog/upload', { method: 'POST', body: fd });
+          if (resp.ok) {
+            const json = await resp.json();
+            url = json.url || '';
+            serverAlt = json.alt || undefined;
+            savedName = json.name || undefined;
+          }
+        } catch {}
+        // Fallback to object URL for preview if upload fails
+        if (!url) {
+          url = URL.createObjectURL(file);
+        }
         
+        const toAlt = (nameOrUrl: string) => {
+          const base = (nameOrUrl.split('/').pop() || nameOrUrl).replace(/\.[^.]+$/, '');
+          return base.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+        };
+
+        const finalName = savedName || file.name;
         const mediaFile: MediaFile = {
           id: `file-${Date.now()}-${i}`,
-          name: file.name,
+          name: finalName,
           url,
           size: file.size,
           type: file.type,
           uploadedAt: new Date(),
-          alt: file.name.split('.')[0]
+          alt: serverAlt || toAlt(finalName)
         };
         
         newFiles.push(mediaFile);

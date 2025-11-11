@@ -120,7 +120,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     const breadcrumbItems = [
       { label: 'Home', href: '/' },
       { label: 'Blog', href: '/blog' },
-      ...(post.category ? [{ label: post.category, href: `/blog?category=${encodeURIComponent(post.category)}` }] : []),
+      ...(post.category ? [{ label: post.category, href: `/blog/category/${slugify(post.category)}` }] : []),
       { label: post.title },
     ];
 

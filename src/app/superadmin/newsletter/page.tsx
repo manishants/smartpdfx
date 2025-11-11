@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ type Subscriber = {
 };
 
 export default function SuperadminNewsletterPage() {
-  const supabase = createClient();
   const [allSubscribers, setAllSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +28,11 @@ export default function SuperadminNewsletterPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error } = await supabase
-        .from("newsletter_subscribers")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      setAllSubscribers((data || []) as Subscriber[]);
+      const res = await fetch(`/api/newsletter/subscribers`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`Failed to load subscribers: ${res.status}`);
+      const json = await res.json();
+      const rows = (json?.subscribers || []) as Subscriber[];
+      setAllSubscribers(rows);
     } catch (e: any) {
       console.error("Load subscribers error:", e);
       setError(e?.message || "Failed to load subscribers");
@@ -72,11 +69,12 @@ export default function SuperadminNewsletterPage() {
 
   async function toggleSubscribe(id: number, nextUnsub: boolean) {
     try {
-      const { error } = await supabase
-        .from("newsletter_subscribers")
-        .update({ unsubscribed: nextUnsub })
-        .eq("id", id);
-      if (error) throw error;
+      const res = await fetch(`/api/newsletter/subscribers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unsubscribed: nextUnsub }),
+      });
+      if (!res.ok) throw new Error(`Failed to update subscriber: ${res.status}`);
       setAllSubscribers((prev) => prev.map((s) => (s.id === id ? { ...s, unsubscribed: nextUnsub } : s)));
     } catch (e: any) {
       console.error("Update subscriber error:", e);

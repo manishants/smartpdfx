@@ -1,116 +1,122 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Users, FileText, TrendingUp, Eye, Clock } from "lucide-react";
+import { useEffect, useState } from 'react'
 
-export default function AnalyticsPage() {
+type DayStat = { day: string; views: number; unique: number }
+type MonthStat = { month: string; views: number; unique: number }
+type YearStat = { year: string; views: number; unique: number }
+type PageStat = { page: string; views: number; unique: number }
+
+type Stats = {
+  totals: { views: number }
+  uniqueVisitors: number
+  byDay: DayStat[]
+  byMonth: MonthStat[]
+  byYear: YearStat[]
+  pages: PageStat[]
+  liveVisitors: number
+}
+
+export default function AnalyticsDashboardPage() {
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const resp = await fetch('/api/analytics/stats', { cache: 'no-store' })
+        if (!resp.ok) throw new Error('Failed to load stats')
+        const json = await resp.json()
+        setStats(json as Stats)
+      } catch (e: any) {
+        setError(e?.message || 'Error')
+      }
+    }
+    fetchStats()
+    const id = setInterval(fetchStats, 15000)
+    return () => clearInterval(id)
+  }, [])
+
+  if (error) {
+    return <div style={{ padding: 20 }}><h2>Analytics</h2><p style={{ color: 'red' }}>{error}</p></div>
+  }
+
+  if (!stats) {
+    return <div style={{ padding: 20 }}><h2>Analytics</h2><p>Loading…</p></div>
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-        <p className="text-muted-foreground">
-          Monitor your website performance and user engagement
-        </p>
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 24, fontWeight: 600 }}>Site Analytics (Superadmin)</h2>
+      <p style={{ opacity: 0.7, marginTop: 4 }}>Privacy-first: no IP collection or storage.</p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginTop: 16 }}>
+        <MetricCard label="Total views" value={String(stats.totals.views || 0)} />
+        <MetricCard label="Unique visitors" value={String(stats.uniqueVisitors || 0)} />
+        <MetricCard label="Live visitors" value={String(stats.liveVisitors || 0)} />
+        <MetricCard label="Tracked pages" value={String(stats.pages.length || 0)} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2,350</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Page Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">45,231</div>
-            <p className="text-xs text-muted-foreground">
-              +180.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Session</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3m 42s</div>
-            <p className="text-xs text-muted-foreground">
-              +19% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12.5%</div>
-            <p className="text-xs text-muted-foreground">
-              +2.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Section title="By Day">
+        <SimpleTable headers={["Day", "Views", "Unique"]} rows={stats.byDay.map(d => [d.day, d.views, d.unique])} />
+      </Section>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Traffic Overview</CardTitle>
-            <CardDescription>
-              Website traffic for the last 30 days
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-              Chart placeholder - Traffic data visualization
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Pages</CardTitle>
-            <CardDescription>
-              Most visited pages this month
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">/pdf-tools</span>
-                <span className="text-sm font-medium">12,543 views</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">/merge-pdf</span>
-                <span className="text-sm font-medium">8,921 views</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">/split-pdf</span>
-                <span className="text-sm font-medium">6,432 views</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">/compress-pdf</span>
-                <span className="text-sm font-medium">5,123 views</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Section title="By Month">
+        <SimpleTable headers={["Month", "Views", "Unique"]} rows={stats.byMonth.map(m => [m.month, m.views, m.unique])} />
+      </Section>
+
+      <Section title="By Year">
+        <SimpleTable headers={["Year", "Views", "Unique"]} rows={stats.byYear.map(y => [y.year, y.views, y.unique])} />
+      </Section>
+
+      <Section title="Pages">
+        <SimpleTable headers={["Page", "Views", "Unique"]} rows={stats.pages.map(p => [p.page, p.views, p.unique])} />
+      </Section>
+
+      {/* IP repeats removed per privacy setting */}
     </div>
-  );
+  )
+}
+
+function MetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ background: '#0f172a', color: '#fff', borderRadius: 10, padding: 16 }}>
+      <div style={{ opacity: 0.8, fontSize: 12 }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 700 }}>{value}</div>
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginTop: 24 }}>
+      <h3 style={{ fontSize: 18, fontWeight: 600 }}>{title}</h3>
+      <div style={{ marginTop: 8 }}>{children}</div>
+    </div>
+  )
+}
+
+function SimpleTable({ headers, rows }: { headers: (string)[]; rows: (any[])[] }) {
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            {headers.map((h, idx) => (
+              <th key={idx} style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #333' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i}>
+              {r.map((cell, j) => (
+                <td key={j} style={{ padding: 8, borderBottom: '1px solid #222' }}>{String(cell)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 }

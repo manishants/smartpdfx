@@ -4,8 +4,8 @@ import { tools } from '@/lib/data'
 import fs from 'fs'
 import path from 'path'
 import { mergeFilesystemPages, type StoredPage } from '@/lib/pageStore'
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { getAllBlogs } from '@/lib/blogFs'
+import { getAllCategories } from '@/lib/cms/categoriesFs'
 
 export const dynamic = 'force-dynamic'
 
@@ -121,28 +121,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     }))
 
-  // Blog posts from Supabase (published only)
+  // Blog posts from local store (published only)
   let blogPages: MetadataRoute.Sitemap = []
   if (includeBlogInSitemap) {
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('blogs')
-        .select('slug, date, published')
-        .eq('published', true)
-
-      if (!error && Array.isArray(data)) {
-        blogPages = data.map((post: any) => ({
-          url: `${URL}/blog/${post.slug}`,
-          lastModified: new Date(post.date || Date.now()).toISOString(),
-          changeFrequency: 'daily',
-          priority: 0.8,
-        }))
-      }
+      const posts = getAllBlogs().filter(p => p.published)
+      blogPages = posts.map(post => ({
+        url: `${URL}/blog/${post.slug}`,
+        lastModified: new Date(post.date || Date.now()).toISOString(),
+        changeFrequency: 'daily',
+        priority: 0.8,
+      }))
     } catch {
       blogPages = []
     }
   }
 
-  return [...staticPages, ...toolPages, ...appPagesMerged, ...blogPages]
+  // Blog category pages (from categories store)
+  let categoryPages: MetadataRoute.Sitemap = []
+  try {
+    const categories = getAllCategories()
+    categoryPages = categories.map(c => ({
+      url: `${URL}/blog/category/${c.slug}`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    }))
+  } catch {
+    categoryPages = []
+  }
+
+  return [...staticPages, ...toolPages, ...appPagesMerged, ...categoryPages, ...blogPages]
 }

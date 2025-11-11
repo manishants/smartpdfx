@@ -31,7 +31,7 @@ import {
   Trash2,
   Image
 } from 'lucide-react';
-import { BlogPost, BlogPostForm, SEOData, SEOIssue } from '@/types/cms';
+import { BlogPost, BlogPostForm, SEOData, SEOIssue, Category } from '@/types/cms';
 import { cmsStore } from '@/lib/cms/store';
 import { SEOAnalyzer } from '@/lib/seo/analyzer';
 import { MediaLibraryModal } from '@/components/media-library';
@@ -84,6 +84,7 @@ export default function EditBlogPost() {
 
   const [seoAnalysis, setSeoAnalysis] = useState<SEOData | null>(null);
   const [previewMode, setPreviewMode] = useState<'edit' | 'preview'>('edit');
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
 
   // Load existing post
   useEffect(() => {
@@ -158,6 +159,34 @@ export default function EditBlogPost() {
       }));
     }
   }, [formData.title, formData.content, formData.seo.metaTitle, formData.seo.metaDescription, formData.seo.focusKeyword]);
+
+  // Load available categories for selection from project-backed store
+  useEffect(() => {
+    (async () => {
+      const cats = await cmsStore.getAllCategories();
+      setAvailableCategories(cats);
+    })();
+  }, []);
+
+  // Auto-generate meta description from excerpt if empty
+  useEffect(() => {
+    if (formData.excerpt && !formData.seo.metaDescription) {
+      setFormData(prev => ({
+        ...prev,
+        seo: { ...prev.seo, metaDescription: formData.excerpt }
+      }));
+    }
+  }, [formData.excerpt]);
+
+  // Derive featuredImageAlt from URL when missing
+  useEffect(() => {
+    if (formData.featuredImage && !formData.featuredImageAlt) {
+      const url = String(formData.featuredImage || '');
+      const base = (url.split('/').pop() || '').replace(/\.[^.]+$/, '');
+      const altDefault = base.replace(/[-_]+/g, ' ').toLowerCase();
+      setFormData(prev => ({ ...prev, featuredImageAlt: altDefault }));
+    }
+  }, [formData.featuredImage]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -738,7 +767,7 @@ export default function EditBlogPost() {
               <div>
                 <Label>Categories</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {['Technology', 'Business', 'Lifestyle', 'Health', 'Education'].map((category) => (
+                  {(availableCategories.length ? availableCategories.map(c => c.name) : ['Technology', 'Business', 'Lifestyle', 'Health', 'Education']).map((category) => (
                     <Badge
                       key={category}
                       variant={formData.categories.includes(category) ? 'default' : 'outline'}
@@ -817,6 +846,17 @@ export default function EditBlogPost() {
                 <MediaLibraryModal
                   onSelect={(file) => {
                     handleInputChange('featuredImage', file.url);
+                    const providedAlt = (file.alt || '').trim();
+                    if (!formData.featuredImageAlt) {
+                      if (providedAlt) {
+                        setFormData(prev => ({ ...prev, featuredImageAlt: providedAlt }));
+                      } else {
+                        const url = String(file.url || '');
+                        const base = (url.split('/').pop() || '').replace(/\.[^.]+$/, '');
+                        const altDefault = base.replace(/[-_]+/g, ' ').toLowerCase();
+                        setFormData(prev => ({ ...prev, featuredImageAlt: altDefault }));
+                      }
+                    }
                   }}
                   trigger={
                     <Button variant="outline" className="gap-2">
@@ -849,9 +889,9 @@ export default function EditBlogPost() {
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
-    </div>
+  </div>
+  </div>
+  </div>
   );
 }
 

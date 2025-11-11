@@ -8,7 +8,6 @@ import {
     Users, 
     FileText, 
     Settings, 
-    BarChart3, 
     Menu, 
     X,
     ChevronLeft,
@@ -36,12 +35,6 @@ const menuItems = [
         title: 'Documents',
         icon: FileText,
         href: '/admin/documents',
-        active: false
-    },
-    {
-        title: 'Analytics',
-        icon: BarChart3,
-        href: '/admin/analytics',
         active: false
     },
     {

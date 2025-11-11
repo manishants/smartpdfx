@@ -9,7 +9,6 @@ import {
   Settings, 
   Globe, 
   Search, 
-  BarChart3,
   ChevronDown,
   PlusCircle,
   Edit,
@@ -25,7 +24,8 @@ import {
   TrendingUp,
   Key as KeyIcon,
   LogOut,
-  Mail
+  Mail,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -68,17 +68,11 @@ export function SuperadminSidebar() {
   const isBlogActive = pathname.startsWith('/superadmin/blog');
   const isPageActive = pathname.startsWith('/superadmin/pages');
   const isSEOActive = pathname.startsWith('/superadmin/seo') || pathname.startsWith('/superadmin/pages/seo');
-  const isAnalyticsActive = pathname.startsWith('/superadmin/analytics');
 
   const handleLogout = async () => {
     try {
       // Attempt to sign out Supabase user if present
       await supabase.auth.signOut();
-    } catch {}
-
-    // Clear server-side admin session cookie
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
     } catch {}
 
     // Redirect to login
@@ -103,28 +97,10 @@ export function SuperadminSidebar() {
               Dashboard
             </NavLink>
             
-            {/* Analytics Section */}
-            <div className="mt-2">
-              <Collapsible defaultOpen={isAnalyticsActive}>
-                <CollapsibleTrigger className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-slate-700 transition-all duration-200 hover:text-slate-900 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:shadow-sm [&[data-state=open]>svg]:rotate-180">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-200">
-                      <BarChart3 className="h-3.5 w-3.5 text-white" />
-                    </div>
-                    <span className="font-semibold">Analytics</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-8 mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
-                  <NavLink href="/superadmin/analytics/overview" icon={BarChart3}>
-                    Overview
-                  </NavLink>
-                  <NavLink href="/superadmin/analytics/config" icon={KeyIcon}>
-                    Credentials
-                  </NavLink>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
+            {/* Analytics */}
+            <NavLink href="/superadmin/analytics" icon={TrendingUp}>
+              Analytics
+            </NavLink>
 
             {/* Blog Management */}
             <div className="mt-4">
@@ -238,6 +214,10 @@ export function SuperadminSidebar() {
                 API Key
               </NavLink>
               
+              <NavLink href="/superadmin/export" icon={Download}>
+                Export Data
+              </NavLink>
+
               <NavLink href="/superadmin/settings" icon={Settings}>
                 System Settings
               </NavLink>

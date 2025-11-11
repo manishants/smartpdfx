@@ -6,6 +6,7 @@ class CMSStore {
     POSTS: 'cms_blog_posts',
     PAGES: 'cms_pages',
     CATEGORIES: 'cms_categories',
+    CATEGORIES_INIT: 'cms_categories_initialized',
     TAGS: 'cms_tags',
     MEDIA: 'cms_media',
     ACTIVITY: 'cms_activity',
@@ -513,8 +514,35 @@ class CMSStore {
   // Categories & Tags
   async getAllCategories(): Promise<Category[]> {
     if (typeof window === 'undefined') return [];
-    const categories = localStorage.getItem(this.STORAGE_KEYS.CATEGORIES);
-    return categories ? JSON.parse(categories) : this.getDefaultCategories();
+    // Prefer server-backed categories stored in the project files
+    try {
+      const resp = await fetch('/api/cms/categories');
+      if (resp.ok) {
+        const json = await resp.json();
+        const cats = Array.isArray(json.categories) ? json.categories : (Array.isArray(json.data) ? json.data : []);
+        if (Array.isArray(cats)) return cats;
+      }
+    } catch {}
+
+    // Fallback to localStorage
+    const raw = localStorage.getItem(this.STORAGE_KEYS.CATEGORIES);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    // Only seed defaults once on first initialization; never re-seed after user modifications
+    const initialized = localStorage.getItem(this.STORAGE_KEYS.CATEGORIES_INIT);
+    if (!initialized) {
+      const defaults = this.getDefaultCategories();
+      localStorage.setItem(this.STORAGE_KEYS.CATEGORIES, JSON.stringify(defaults));
+      localStorage.setItem(this.STORAGE_KEYS.CATEGORIES_INIT, 'true');
+      return defaults;
+    }
+    return [];
   }
 
   async getAllTags(): Promise<Tag[]> {
@@ -526,6 +554,8 @@ class CMSStore {
   private saveCategories(categories: Category[]): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+      // Mark as initialized to avoid re-seeding defaults after user changes
+      localStorage.setItem(this.STORAGE_KEYS.CATEGORIES_INIT, 'true');
     }
   }
 
@@ -536,9 +566,23 @@ class CMSStore {
   }
 
   async createCategory(data: Omit<Category, 'id' | 'postCount' | 'slug'> & { slug?: string }): Promise<Category> {
-    const categories = await this.getAllCategories();
     const name = (data.name || '').trim();
     const slug = (data.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+    // Try server-backed persistence first
+    try {
+      const resp = await fetch('/api/cms/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description: data.description || '', slug })
+      });
+      if (resp.ok) {
+        const created = await resp.json();
+        await this.logActivity({ type: 'page_updated', message: `Created category: ${created.name}`, entityId: created.id });
+        return created as Category;
+      }
+    } catch {}
+    // Fallback to localStorage persistence
+    const categories = await this.getAllCategories();
     const newCategory: Category = {
       id: this.generateId(),
       name,
@@ -553,11 +597,24 @@ class CMSStore {
   }
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+    // Try server-backed update first
+    try {
+      const resp = await fetch(`/api/cms/categories/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      if (resp.ok) {
+        const updated = await resp.json();
+        await this.logActivity({ type: 'page_updated', message: `Updated category: ${updated.name}`, entityId: updated.id });
+        return updated as Category;
+      }
+    } catch {}
+    // Fallback to localStorage update
     const categories = await this.getAllCategories();
     const idx = categories.findIndex(c => c.id === id);
     if (idx === -1) return null;
     const updated: Category = { ...categories[idx], ...updates };
-    // Normalize slug if name changed and slug not provided
     if (updates.name && !updates.slug) {
       updated.slug = updates.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
@@ -568,6 +625,15 @@ class CMSStore {
   }
 
   async deleteCategory(id: string): Promise<boolean> {
+    // Try server-backed delete first
+    try {
+      const resp = await fetch(`/api/cms/categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (resp.status === 204) {
+        await this.logActivity({ type: 'page_updated', message: `Deleted category: ${id}`, entityId: id });
+        return true;
+      }
+    } catch {}
+    // Fallback to localStorage delete
     const categories = await this.getAllCategories();
     const idx = categories.findIndex(c => c.id === id);
     if (idx === -1) return false;

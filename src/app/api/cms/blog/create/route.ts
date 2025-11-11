@@ -1,23 +1,19 @@
-import { requireSuperadmin } from '@/lib/api/auth';
-import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
+import type { BlogPost } from '@/lib/types';
+import { readBlogStore, upsertBlog } from '@/lib/blogFs';
 
 export async function POST(req: Request) {
-  const unauthorized = await requireSuperadmin();
-  if (unauthorized) return unauthorized;
-
   try {
     const body = await req.json();
-    const supabase = createClient();
-
-    const title: string = body.title || '';
-    const slug: string = body.slug || '';
-    const content: string = body.content || '';
-    const author: string = body.author || 'Admin';
+    const title: string = (body.title || '').trim();
+    const slug: string = (body.slug || '').trim();
+    const content: string = (body.content || '').trim();
+    const author: string = (body.author || 'Admin').trim();
     const status: string = body.status || 'draft';
-    const imageUrl: string = body.featuredImage || body.imageUrl || '';
-    const published: boolean = body.status === 'published' || body.published === true;
+    const imageUrl: string = (body.featuredImage || body.imageUrl || '').trim();
+    const published: boolean = status === 'published' || body.published === true;
     const seoTitle: string | undefined = body.metaTitle || body.seoTitle || title;
-    const metaDescription: string | undefined = body.metaDescription || '';
+    const metaDescription: string | undefined = body.metaDescription || body.excerpt || '';
     const category: string | undefined = (Array.isArray(body.categories) && body.categories[0]) || body.category || 'general';
     const popular: boolean = !!body.popular;
     const layoutSettings: any = body.layoutSettings || null;
@@ -28,57 +24,40 @@ export async function POST(req: Request) {
     const supportLabel: string | undefined = body.supportLabel || undefined;
 
     if (!title || !slug || !content) {
-      return new Response(JSON.stringify({ error: 'Missing required fields: title, slug, content' }), { status: 400 });
-    }
-    if (!imageUrl) {
-      return new Response(JSON.stringify({ error: 'featuredImage/imageUrl is required' }), { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields: title, slug, content' }, { status: 400 });
     }
 
-    // Pre-check for duplicate slug for clearer error message
-    const { data: existing, error: existingErr } = await supabase
-      .from('blogs')
-      .select('id')
-      .eq('slug', slug)
-      .limit(1);
-    if (!existingErr && Array.isArray(existing) && existing.length > 0) {
-      return new Response(JSON.stringify({ error: 'Slug already exists. Please choose a different slug.' }), { status: 409 });
+    // Duplicate slug check in local JSON store
+    const store = readBlogStore();
+    if (store.posts.some(p => p.slug === slug)) {
+      return NextResponse.json({ error: 'Slug already exists. Please choose a different slug.' }, { status: 409 });
     }
 
-    const { data, error } = await supabase
-      .from('blogs')
-      .insert([
-        {
-          // Use lowercase keys to match Postgres normalized column names
-          slug,
-          title,
-          content,
-          author,
-          imageurl: imageUrl,
-          published,
-          status,
-          seotitle: seoTitle,
-          metadescription: metaDescription,
-          faqs,
-          category,
-          popular,
-          layoutsettings: layoutSettings,
-          upiid: upiId,
-          paypalid: paypalId,
-          supportqrurl: supportQrUrl,
-          supportlabel: supportLabel,
-        },
-      ])
-      .select('*')
-      .single();
+    const now = new Date().toISOString();
+    const post: BlogPost = {
+      id: Date.now(),
+      slug,
+      title,
+      content,
+      imageUrl: imageUrl || '',
+      author,
+      date: now,
+      published,
+      seoTitle,
+      metaDescription,
+      faqs,
+      category,
+      popular,
+      layoutSettings,
+      upiId,
+      paypalId,
+      supportQrUrl,
+      supportLabel,
+    };
 
-    if (error) {
-      // Map common PG errors to clearer HTTP statuses
-      const msg = error.message || 'Failed to create blog post';
-      const isDuplicate = /duplicate key value/i.test(msg);
-      return new Response(JSON.stringify({ error: msg }), { status: isDuplicate ? 409 : 500 });
-    }
-    return Response.json(data);
+    const saved = upsertBlog(post);
+    return NextResponse.json(saved, { status: 200 });
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message || 'Invalid request' }), { status: 400 });
+    return NextResponse.json({ error: e?.message || 'Invalid request' }, { status: 400 });
   }
 }

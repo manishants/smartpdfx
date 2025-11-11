@@ -3,14 +3,9 @@
 
 import { revalidatePath } from 'next/cache';
 import type { BlogPost, Faq } from '@/lib/types';
-import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
+import { getAllBlogs as fsGetAllBlogs, getBlogBySlug as fsGetBlogBySlug, upsertBlog as fsUpsertBlog, saveBlogImage as fsSaveBlogImage } from '@/lib/blogFs';
 
-// When Supabase is disabled or credentials are missing, serve local fallback data
-const isSupabaseDisabled = () =>
-  process.env.NEXT_PUBLIC_DISABLE_SUPABASE === 'true' ||
-  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Local fallback sample when store is empty
 
 const fallbackPosts: BlogPost[] = [
   {
@@ -50,129 +45,17 @@ const fallbackPosts: BlogPost[] = [
 ];
 
 export async function getBlogs(): Promise<BlogPost[]> {
-  if (isSupabaseDisabled()) {
-    // Offline fallback
-    return fallbackPosts;
-  }
-
-  try {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    const { data, error } = await supabase
-      .from('blogs')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching blogs:', error);
-      return fallbackPosts;
-    }
-
-    // Normalize DB keys (lowercase) to camelCase expected by the app
-    return (data || []).map((post: any) => ({
-      id: post.id,
-      slug: post.slug,
-      title: post.title,
-      content: post.content,
-      imageUrl: post.imageUrl ?? post.imageurl,
-      author: post.author,
-      date: post.date,
-      published: !!post.published,
-      seoTitle: post.seoTitle ?? post.seotitle ?? post.title,
-      metaDescription: post.metaDescription ?? post.metadescription ?? '',
-      faqs: Array.isArray(post.faqs) ? post.faqs : [],
-      category: post.category ?? 'general',
-      popular: !!post.popular,
-      layoutSettings: post.layoutSettings ?? post.layoutsettings ?? {
-        showBreadcrumbs: true,
-        leftSidebarEnabled: true,
-        rightSidebarEnabled: true,
-        leftSticky: false,
-        tocFontSize: 'text-sm',
-        tocH3Indent: 12,
-        tocHoverColor: 'hover:text-primary',
-      },
-      upiId: post.upiId ?? post.upiid,
-      paypalId: post.paypalId ?? post.paypalid,
-      supportQrUrl: post.supportQrUrl ?? post.supportqrurl,
-      supportLabel: post.supportLabel ?? post.supportlabel,
-    }));
-  } catch (e) {
-    console.error('Supabase unavailable, using fallback posts:', e);
-    return fallbackPosts;
-  }
+  const local = fsGetAllBlogs();
+  return local.length > 0 ? local : fallbackPosts;
 }
 
 export async function getPost(slug: string): Promise<BlogPost | null> {
-  if (isSupabaseDisabled()) {
-    return fallbackPosts.find(p => p.slug === slug) || null;
-  }
-
-  try {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    const { data, error } = await supabase
-      .from('blogs')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-
-    if (error) {
-      console.error(`Error fetching blog post with slug ${slug}:`, error);
-      return null;
-    }
-    // Normalize Supabase row keys (which may be lowercase) to our BlogPost shape
-    const post = data as any;
-    const normalized: BlogPost = {
-      id: post.id,
-      slug: post.slug,
-      title: post.title,
-      content: post.content,
-      imageUrl: post.imageUrl ?? post.imageurl,
-      author: post.author,
-      date: post.date,
-      published: !!post.published,
-      seoTitle: post.seoTitle ?? post.seotitle ?? post.title,
-      metaDescription: post.metaDescription ?? post.metadescription ?? '',
-      faqs: Array.isArray(post.faqs) ? post.faqs : [],
-      category: post.category ?? 'general',
-      popular: !!post.popular,
-      layoutSettings: post.layoutSettings ?? post.layoutsettings ?? {
-        showBreadcrumbs: true,
-        leftSidebarEnabled: true,
-        rightSidebarEnabled: true,
-        leftSticky: false,
-        tocFontSize: 'text-sm',
-        tocH3Indent: 12,
-        tocHoverColor: 'hover:text-primary',
-      },
-      upiId: post.upiId ?? post.upiid,
-      paypalId: post.paypalId ?? post.paypalid,
-      supportQrUrl: post.supportQrUrl ?? post.supportqrurl,
-      supportLabel: post.supportLabel ?? post.supportlabel,
-    };
-
-    return normalized;
-  } catch (e) {
-    console.error('Supabase error when fetching post:', e);
-    // Do not default to a sample post; only return a matching fallback when available
-    return fallbackPosts.find(p => p.slug === slug) || null;
-  }
+  const local = fsGetBlogBySlug(slug);
+  if (local) return local;
+  return fallbackPosts.find(p => p.slug === slug) || null;
 }
 
 export async function createPost(formData: FormData) {
-  if (isSupabaseDisabled()) {
-    // Simulate success when offline
-    return { success: 'Supabase disabled: post not persisted (development mode).' };
-  }
-
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'You must be logged in to create a post.' };
-  }
 
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
@@ -203,37 +86,15 @@ export async function createPost(formData: FormData) {
   }
 
   const finalSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-  const imageName = `${finalSlug}-${Date.now()}`;
-  
-  const { data: imageData, error: imageError } = await supabase.storage
-    .from('blogs')
-    .upload(imageName, image);
+  const imageUrl = await fsSaveBlogImage(image, finalSlug);
 
-  if (imageError) {
-    console.error('Error uploading image:', imageError);
-    return { error: 'Failed to upload image. Make sure you have a "blogs" bucket in your Supabase Storage.' };
-  }
-
-  const { data: imageUrlData } = supabase.storage
-    .from('blogs')
-    .getPublicUrl(imageData.path);
-    
-  const imageUrl = imageUrlData.publicUrl;
-
-  // Optional support QR upload
+  // Optional support QR upload to local filesystem
   let supportQrUrl: string | undefined = undefined;
   if (supportQr && supportQr.size > 0) {
-    const qrName = `support-${finalSlug}-${Date.now()}`;
-    const { data: qrData, error: qrError } = await supabase.storage
-      .from('blogs')
-      .upload(qrName, supportQr);
-    if (!qrError && qrData) {
-      const { data: qrPublic } = supabase.storage
-        .from('blogs')
-        .getPublicUrl(qrData.path);
-      supportQrUrl = qrPublic.publicUrl;
-    } else {
-      console.error('Error uploading support QR:', qrError);
+    try {
+      supportQrUrl = await fsSaveBlogImage(supportQr, `support-${finalSlug}`);
+    } catch (e) {
+      console.error('Error saving support QR locally:', e);
     }
   }
 
@@ -254,17 +115,12 @@ export async function createPost(formData: FormData) {
     supportLabel: supportLabel || undefined,
   };
   
-  const { error: insertError } = await supabase
-    .from('blogs')
-    .insert([newPost]);
-
-  if (insertError) {
-    console.error('Error creating post:', insertError);
-    if (insertError.code === '42P01') { // '42P01' is the code for 'undefined_table'
-        return { error: 'The "blogs" table does not exist. Please create it in your Supabase project.' };
-    }
-    return { error: 'Failed to create blog post in the database.' };
-  }
+  // Write to local JSON store
+  const post: BlogPost = {
+    id: Date.now().toString(),
+    ...newPost,
+  } as BlogPost;
+  fsUpsertBlog(post);
 
   revalidatePath('/admin/dashboard');
   revalidatePath('/blog');
@@ -284,86 +140,12 @@ export async function getBlogsPaginated(page = 1, perPage = 6, onlyPublished = t
   const pageSize = Math.max(1, Number(perPage) || 6);
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
-
-  if (isSupabaseDisabled()) {
-    const source = onlyPublished ? fallbackPosts.filter(p => p.published) : fallbackPosts;
-    return {
-      posts: source.slice(from, to + 1),
-      total: source.length,
-      page: currentPage,
-      perPage: pageSize,
-    };
-  }
-
-  try {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-
-    let query = supabase
-      .from('blogs')
-      .select('*', { count: 'exact' })
-      .order('date', { ascending: false });
-
-    if (onlyPublished) {
-      query = query.eq('published', true);
-    }
-
-    const { data, error, count } = await query.range(from, to);
-
-    if (error) {
-      console.error('Error fetching paginated blogs:', error);
-      const source = onlyPublished ? fallbackPosts.filter(p => p.published) : fallbackPosts;
-      return {
-        posts: source.slice(from, to + 1),
-        total: source.length,
-        page: currentPage,
-        perPage: pageSize,
-      };
-    }
-
-    const posts: BlogPost[] = (data || []).map((post: any) => ({
-      id: post.id,
-      slug: post.slug,
-      title: post.title,
-      content: post.content,
-      imageUrl: post.imageUrl ?? post.imageurl,
-      author: post.author,
-      date: post.date,
-      published: !!post.published,
-      seoTitle: post.seoTitle ?? post.seotitle ?? post.title,
-      metaDescription: post.metaDescription ?? post.metadescription ?? '',
-      faqs: Array.isArray(post.faqs) ? post.faqs : [],
-      category: post.category ?? 'general',
-      popular: !!post.popular,
-      layoutSettings: post.layoutSettings ?? post.layoutsettings ?? {
-        showBreadcrumbs: true,
-        leftSidebarEnabled: true,
-        rightSidebarEnabled: true,
-        leftSticky: false,
-        tocFontSize: 'text-sm',
-        tocH3Indent: 12,
-        tocHoverColor: 'hover:text-primary',
-      },
-      upiId: post.upiId ?? post.upiid,
-      paypalId: post.paypalId ?? post.paypalid,
-      supportQrUrl: post.supportQrUrl ?? post.supportqrurl,
-      supportLabel: post.supportLabel ?? post.supportlabel,
-    }));
-
-    return {
-      posts,
-      total: typeof count === 'number' ? count : posts.length,
-      page: currentPage,
-      perPage: pageSize,
-    };
-  } catch (e) {
-    console.error('Supabase unavailable, using fallback posts (paginated):', e);
-    const source = onlyPublished ? fallbackPosts.filter(p => p.published) : fallbackPosts;
-    return {
-      posts: source.slice(from, to + 1),
-      total: source.length,
-      page: currentPage,
-      perPage: pageSize,
-    };
-  }
+  const src = fsGetAllBlogs();
+  const source = onlyPublished ? src.filter(p => p.published) : src;
+  return {
+    posts: source.slice(from, to + 1),
+    total: source.length,
+    page: currentPage,
+    perPage: pageSize,
+  };
 }
