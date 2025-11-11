@@ -13,8 +13,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/**', '/blog', '/blog/**', '/blog/category', '/blog/category/**'],
-        disallow: ['/superadmin', '/superadmin/', '/admin', '/admin/'],
+        // Allow everything by default; only restrict sensitive dashboards
+        disallow: [
+          '/admin',
+          '/admin/**',
+          '/superadmin',
+          '/superadmin/**',
+        ],
       },
     ],
     sitemap: [`${URL}/sitemap.xml`, `${URL}/blog/sitemap.xml`],
