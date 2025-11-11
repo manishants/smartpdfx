@@ -29,8 +29,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       slug: body.slug !== undefined ? String(body.slug) : existing.slug,
       imageUrl:
         body.featuredImage !== undefined || body.imageUrl !== undefined
-          ? (String(body.featuredImage ?? body.imageUrl || '')).trim()
-          : existing.imageUrl || '',
+          ? (String((body.featuredImage ?? body.imageUrl) ?? '').trim())
+          : (existing.imageUrl || ''),
       published:
         body.published !== undefined
           ? !!body.published
