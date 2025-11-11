@@ -3,16 +3,6 @@ FROM node:20-bookworm AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Install system dependencies including LibreOffice for PDF conversion
-RUN apt-get update && apt-get install -y \
-    libreoffice \
-    libreoffice-java-common \
-    libreoffice-writer \
-    fonts-liberation \
-    fonts-dejavu \
-    fonts-freefont-ttf \
-    fonts-opensymbol \
-    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
@@ -43,32 +33,36 @@ ENV NEXT_TELEMETRY_DISABLED=1
  # Explicit path for LibreOffice binary to ensure discovery in app code
  ENV LIBREOFFICE_PATH=/usr/bin/soffice
 
-# Install LibreOffice in production image
-RUN apt-get update && apt-get install -y \
-    libreoffice \
-    libreoffice-java-common \
-    libreoffice-writer \
-    fonts-liberation \
-    fonts-dejavu \
-    fonts-freefont-ttf \
-    fonts-opensymbol \
-    curl \
-    libnss3 \
-    libx11-6 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libasound2 \
-    xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
+# Install LibreOffice and minimal runtime libs in production image
+ENV DEBIAN_FRONTEND=noninteractive
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      libreoffice \
+      libreoffice-java-common \
+      libreoffice-writer \
+      fonts-liberation \
+      fonts-dejavu \
+      fonts-freefont-ttf \
+      fonts-opensymbol \
+      curl \
+      libnss3 \
+      libx11-6 \
+      libxcomposite1 \
+      libxdamage1 \
+      libxext6 \
+      libxfixes3 \
+      libxrandr2 \
+      libgbm1 \
+      libgtk-3-0 \
+      libatk1.0-0 \
+      libatk-bridge2.0-0 \
+      libcups2 \
+      libdrm2 \
+      libasound2 \
+      xdg-utils; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

@@ -384,6 +384,15 @@ export const BlogPostSchema = z.object({
     faqs: z.array(FaqSchema).optional(),
     category: z.string().optional(),
     popular: z.boolean().optional(),
+    manualToc: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          text: z.string(),
+          level: z.union([z.literal(2), z.literal(3)])
+        })
+      )
+      .optional(),
     // Support The Author fields
     upiId: z.string().optional(),
     paypalId: z.string().optional(),

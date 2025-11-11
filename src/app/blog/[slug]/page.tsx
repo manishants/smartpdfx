@@ -90,16 +90,16 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       tocHoverColor: post.layoutSettings?.tocHoverColor ?? 'hover:text-primary',
     };
 
-    // Extract H2/H3 headings and add ids to content
-    const slugify = (str: string) => str
-      .toLowerCase()
-      .replace(/<[^>]*>/g, '')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
+  // Extract H2/H3 headings and add ids to content
+  const slugify = (str: string) => str
+    .toLowerCase()
+    .replace(/<[^>]*>/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
 
-    const headings: TOCHeading[] = [];
-    let contentWithIds = post.content;
+  const headings: TOCHeading[] = [];
+  let contentWithIds = post.content;
 
     const processTag = (tag: 'h2' | 'h3') => {
       const regex = new RegExp(`<${tag}[^>]*>(.*?)<\/${tag}>`, 'gi');
@@ -113,8 +113,13 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       });
     };
 
-    processTag('h2');
-    processTag('h3');
+  processTag('h2');
+  processTag('h3');
+
+  // If manual TOC is present, override headings while keeping ids in content
+  const finalHeadings: TOCHeading[] = Array.isArray((post as any).manualToc) && (post as any).manualToc.length > 0
+    ? (post as any).manualToc.map((h: any) => ({ id: h.id || slugify(h.text), text: h.text, level: h.level }))
+    : headings;
 
     // Breadcrumb items
     const breadcrumbItems = [
@@ -143,12 +148,17 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           {layout.leftSidebarEnabled && (
             <aside className="hidden lg:block lg:col-span-2">
               <BlogTOC
-                headings={headings}
+                headings={finalHeadings}
                 sticky={layout.leftSticky}
                 fontSizeClass={layout.tocFontSize}
                 h3Indent={layout.tocH3Indent}
                 hoverClass={layout.tocHoverColor}
               />
+              {layout.rightSidebarEnabled && (
+                <div className="mt-6">
+                  <BlogRightSidebar post={post as BlogPost} />
+                </div>
+              )}
             </aside>
           )}
 
@@ -185,7 +195,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                   <summary className="cursor-pointer select-none font-medium">Table of Contents</summary>
                   <div className="mt-3">
                     <BlogTOC
-                      headings={headings}
+                      headings={finalHeadings}
                       sticky={false}
                       fontSizeClass={layout.tocFontSize}
                       h3Indent={layout.tocH3Indent}
@@ -198,12 +208,15 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               {/* Mid-post Advertisement */}
               <GoogleAd />
 
-              <div className="prose prose-lg dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: contentWithIds }} />
+              <div
+                className="prose prose-lg dark:prose-invert max-w-none prose-h2:mt-6 prose-h3:mt-4 prose-h2:scroll-mt-24 prose-h3:scroll-mt-24 prose-img:rounded-lg prose-img:border"
+                dangerouslySetInnerHTML={{ __html: contentWithIds }}
+              />
           </article>
         </div>
 
-          {/* Right Sidebar */}
-          {layout.rightSidebarEnabled && (
+          {/* Right Sidebar (only on right when TOC disabled) */}
+          {layout.rightSidebarEnabled && !layout.leftSidebarEnabled && (
             <aside className="lg:col-span-2 lg:sticky lg:top-24">
               <BlogRightSidebar post={post as BlogPost} />
             </aside>

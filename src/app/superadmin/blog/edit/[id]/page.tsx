@@ -61,6 +61,7 @@ export default function EditBlogPost() {
     tags: [],
     featuredImage: '',
     featuredImageAlt: '',
+    manualToc: [],
     seo: {
       metaTitle: '',
       metaDescription: '',
@@ -104,6 +105,7 @@ export default function EditBlogPost() {
             tags: post.tags,
             featuredImage: post.featuredImage || '',
             featuredImageAlt: post.featuredImageAlt || '',
+            manualToc: Array.isArray(post.manualToc) ? post.manualToc : [],
             seo: {
               metaTitle: post.metaTitle || post.title,
               metaDescription: post.metaDescription || '',
@@ -226,6 +228,42 @@ export default function EditBlogPost() {
       ...prev,
       layoutSettings: { ...(prev.layoutSettings || {}), [field]: value }
     }));
+  };
+
+  const addTocItem = () => {
+    setFormData(prev => ({
+      ...prev,
+      manualToc: [...(prev.manualToc || []), { text: '', level: 2 }]
+    }));
+  };
+
+  const updateTocItem = (index: number, field: 'text' | 'level', value: any) => {
+    setFormData(prev => {
+      const next = [...(prev.manualToc || [])];
+      const item = { ...(next[index] || { text: '', level: 2 }) } as { text: string; level: 2 | 3; id?: string };
+      (item as any)[field] = field === 'level' ? (value === '3' ? 3 : 2) : value;
+      next[index] = item;
+      return { ...prev, manualToc: next };
+    });
+  };
+
+  const removeTocItem = (index: number) => {
+    setFormData(prev => {
+      const next = [...(prev.manualToc || [])];
+      next.splice(index, 1);
+      return { ...prev, manualToc: next };
+    });
+  };
+
+  const moveTocItem = (index: number, direction: -1 | 1) => {
+    setFormData(prev => {
+      const next = [...(prev.manualToc || [])];
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= next.length) return prev;
+      const [item] = next.splice(index, 1);
+      next.splice(newIndex, 0, item);
+      return { ...prev, manualToc: next };
+    });
   };
 
   const handleSave = async (status?: 'draft' | 'published' | 'scheduled') => {
@@ -424,17 +462,48 @@ export default function EditBlogPost() {
                   <div className="grid lg:grid-cols-12 gap-6">
                     {formData.layoutSettings?.leftSidebarEnabled && (
                       <aside className="hidden lg:block lg:col-span-3">
-                        <BlogTOC
-                          headings={addIdsAndExtract(formData.content || '').headings}
-                          sticky={!!formData.layoutSettings?.leftSticky}
-                          fontSizeClass={formData.layoutSettings?.tocFontSize || 'text-sm'}
-                          h3Indent={formData.layoutSettings?.tocH3Indent || 12}
-                          hoverClass={formData.layoutSettings?.tocHoverColor || 'hover:text-primary'}
-                        />
+                        {(() => {
+                          const extracted = addIdsAndExtract(formData.content || '');
+                          const slugify = (str: string) => str
+                            .toLowerCase()
+                            .replace(/<[^>]*>/g, '')
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .trim()
+                            .replace(/\s+/g, '-');
+                          const headings = (formData.manualToc && formData.manualToc.length > 0)
+                            ? formData.manualToc.map(h => ({
+                                id: h.id || slugify(h.text),
+                                text: h.text,
+                                level: h.level,
+                              }))
+                            : extracted.headings;
+                          return (
+                            <BlogTOC
+                              headings={headings}
+                              sticky={!!formData.layoutSettings?.leftSticky}
+                              fontSizeClass={formData.layoutSettings?.tocFontSize || 'text-sm'}
+                              h3Indent={formData.layoutSettings?.tocH3Indent || 12}
+                              hoverClass={formData.layoutSettings?.tocHoverColor || 'hover:text-primary'}
+                            />
+                          );
+                        })()}
+                        {formData.layoutSettings?.rightSidebarEnabled && (
+                          <div className="mt-6">
+                            <div className="border rounded p-4 space-y-4">
+                              {formData.layoutSettings?.showBreadcrumbs && (
+                                <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog' }, { label: (formData.categories?.[0] || 'General') as string }, { label: formData.title || 'Untitled Post' }]} />
+                              )}
+                              <div>
+                                <h3 className="font-semibold mb-2">Subscribe</h3>
+                                <NewsletterForm category={(formData.categories?.[0] || 'General') as string} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </aside>
                     )}
                     <div className="lg:col-span-6">
-                      <article className="prose max-w-none">
+                      <article className="prose max-w-none prose-h2:mt-6 prose-h3:mt-4 prose-h2:scroll-mt-24 prose-h3:scroll-mt-24 prose-img:rounded-lg prose-img:border">
                         <h1>{formData.title || 'Untitled Post'}</h1>
                         {formData.excerpt && (
                           <p className="lead text-muted-foreground">{formData.excerpt}</p>
@@ -442,7 +511,7 @@ export default function EditBlogPost() {
                         <div dangerouslySetInnerHTML={{ __html: addIdsAndExtract(formData.content || '').contentWithIds }} />
                       </article>
                     </div>
-                    {formData.layoutSettings?.rightSidebarEnabled && (
+                    {formData.layoutSettings?.rightSidebarEnabled && !formData.layoutSettings?.leftSidebarEnabled && (
                       <aside className="lg:col-span-3 space-y-6">
                         {formData.layoutSettings?.showBreadcrumbs && (
                           <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog' }, { label: (formData.categories?.[0] || 'General') as string }, { label: formData.title || 'Untitled Post' }]} />
@@ -456,6 +525,59 @@ export default function EditBlogPost() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Manual Table of Contents Editor */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Hash className="h-5 w-5" />
+                Manual Table of Contents
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Add custom TOC entries. When present, these replace the auto-generated TOC. IDs are auto-computed from text for smooth scrolling.
+              </p>
+
+              <div className="space-y-3">
+                {(formData.manualToc || []).map((item, idx) => (
+                  <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                    <div className="col-span-2">
+                      <Label className="sr-only">Level</Label>
+                      <Select value={String(item.level)} onValueChange={(val) => updateTocItem(idx, 'level', val)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">H2</SelectItem>
+                          <SelectItem value="3">H3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-7">
+                      <Label className="sr-only">Heading text</Label>
+                      <Input
+                        value={item.text}
+                        onChange={(e) => updateTocItem(idx, 'text', e.target.value)}
+                        placeholder={item.level === 2 ? 'Section heading' : 'Subsection heading'}
+                      />
+                    </div>
+                    <div className="col-span-3 flex gap-2 justify-end">
+                      <Button variant="outline" size="sm" onClick={() => moveTocItem(idx, -1)} disabled={idx === 0}>↑</Button>
+                      <Button variant="outline" size="sm" onClick={() => moveTocItem(idx, 1)} disabled={idx === (formData.manualToc?.length || 0) - 1}>↓</Button>
+                      <Button variant="destructive" size="sm" onClick={() => removeTocItem(idx)}>Remove</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={addTocItem}>Add TOC Item</Button>
+                {(formData.manualToc && formData.manualToc.length > 0) && (
+                  <Button variant="ghost" onClick={() => handleInputChange('manualToc', [])}>Clear</Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 

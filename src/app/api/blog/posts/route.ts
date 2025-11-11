@@ -31,6 +31,7 @@ export async function GET() {
       createdAt: p.date,
       updatedAt: p.date,
       layoutSettings: p.layoutSettings,
+      manualToc: p.manualToc,
     }
   })
 

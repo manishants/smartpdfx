@@ -42,6 +42,9 @@ export interface BlogPost {
     tocH3Indent?: number; // px value for indent
     tocHoverColor?: string; // tailwind color class or hex
   };
+
+  // Manual Table of Contents (optional override for auto-generated TOC)
+  manualToc?: Array<{ id?: string; text: string; level: 2 | 3 }>;
 }
 
 export interface Page {
@@ -215,6 +218,8 @@ export interface BlogPostForm {
     tocH3Indent?: number;
     tocHoverColor?: string;
   };
+  // Manual TOC editor data
+  manualToc?: Array<{ id?: string; text: string; level: 2 | 3 }>;
 }
 
 export interface PageForm {

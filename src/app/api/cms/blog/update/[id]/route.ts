@@ -19,6 +19,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const newExcerpt = body.excerpt !== undefined ? String(body.excerpt) : (existing as any).excerpt || '';
     const newSeoTitle = (body.metaTitle !== undefined ? body.metaTitle : body.seoTitle);
     const newMetaDescription = body.metaDescription !== undefined ? String(body.metaDescription) : (existing.metaDescription || newExcerpt);
+    const newManualToc = Array.isArray(body.manualToc) ? body.manualToc : existing.manualToc;
 
     const updated: BlogPost = {
       ...existing,
@@ -36,6 +37,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
           : existing.published,
       seoTitle: newSeoTitle !== undefined ? newSeoTitle : (existing.seoTitle || newTitle),
       metaDescription: newMetaDescription,
+      manualToc: newManualToc,
       category:
         (Array.isArray(body.categories) && body.categories[0]) || body.category !== undefined
           ? ((Array.isArray(body.categories) && body.categories[0]) || body.category)

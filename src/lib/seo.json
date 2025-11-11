@@ -212,6 +212,16 @@
     "description": "",
     "keywords": []
   },
+  "/media-kit": {
+    "title": "Media Kit",
+    "description": "Brand assets, logos, usage guidelines, and press information.",
+    "keywords": ["media kit", "brand assets", "press", "logos"]
+  },
+  "/write-for-us": {
+    "title": "Write for Us",
+    "description": "Submit articles for review; we publish selected pieces within a week.",
+    "keywords": ["write for us", "guest post", "submit article"]
+  },
   "/compress-pdf": {
     "title": "Compress PDF",
     "description": "",

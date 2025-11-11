@@ -6,8 +6,7 @@ function toCSV(rows: Record<string, any>[]): string {
   const headers = Object.keys(rows[0])
   const escape = (v: any) => {
     const s = v === null || v === undefined ? '' : String(v)
-    const needsQuotes = /[,
-"]/.test(s)
+    const needsQuotes = /[,\n"]/ .test(s)
     const escaped = s.replace(/"/g, '""')
     return needsQuotes ? `"${escaped}"` : escaped
   }

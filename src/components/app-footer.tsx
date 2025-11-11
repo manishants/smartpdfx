@@ -104,6 +104,12 @@ export function AppFooter() {
                             <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 Contact Us
                             </Link>
+                            <Link href="/media-kit" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Media Kit
+                            </Link>
+                            <Link href="/write-for-us" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Write for Us
+                            </Link>
                             <Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 Privacy Policy
                             </Link>

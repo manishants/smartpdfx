@@ -72,6 +72,7 @@ class CMSStore {
             tags: Array.isArray(p.tags) ? p.tags : [],
             views: Number(p.views || 0),
             readingTime: calculateReadingTime(p.content || ''),
+            manualToc: Array.isArray(p.manualToc) ? p.manualToc : [],
             layoutSettings: p.layoutSettings || {
               showBreadcrumbs: true,
               leftSidebarEnabled: true,
@@ -122,6 +123,7 @@ class CMSStore {
           featuredImageAlt: postData.featuredImageAlt || '',
           categories: postData.categories || [],
           tags: postData.tags || [],
+          manualToc: postData.manualToc || [],
           layoutSettings: postData.layoutSettings || {
             showBreadcrumbs: true,
             leftSidebarEnabled: true,
@@ -169,6 +171,7 @@ class CMSStore {
           tags: postData.tags || [],
           views: 0,
           readingTime: calculateReadingTime(supabasePost.content || ''),
+          manualToc: Array.isArray(postData.manualToc) ? postData.manualToc : [],
           layoutSettings: postData.layoutSettings || {
             showBreadcrumbs: true,
             leftSidebarEnabled: true,
@@ -212,6 +215,7 @@ class CMSStore {
       tags: postData.tags || [],
       views: 0,
       readingTime: calculateReadingTime(postData.content || ''),
+      manualToc: Array.isArray(postData.manualToc) ? postData.manualToc : [],
       layoutSettings: postData.layoutSettings || {
         showBreadcrumbs: true,
         leftSidebarEnabled: true,
@@ -264,6 +268,7 @@ class CMSStore {
           featuredImageAlt: updates.featuredImageAlt || '',
           categories: updates.categories || [],
           tags: updates.tags || [],
+          manualToc: updates.manualToc || [],
           layoutSettings: updates.layoutSettings || {
             showBreadcrumbs: true,
             leftSidebarEnabled: true,
@@ -311,6 +316,7 @@ class CMSStore {
           tags: updates.tags || [],
           views: 0,
           readingTime: calculateReadingTime(supabasePost.content || updates.content || ''),
+          manualToc: Array.isArray(updates.manualToc) ? updates.manualToc : [],
           layoutSettings: updates.layoutSettings || {
             showBreadcrumbs: true,
             leftSidebarEnabled: true,

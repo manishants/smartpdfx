@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     const category: string | undefined = (Array.isArray(body.categories) && body.categories[0]) || body.category || 'general';
     const popular: boolean = !!body.popular;
     const layoutSettings: any = body.layoutSettings || null;
+    const manualToc: any[] = Array.isArray(body.manualToc) ? body.manualToc : [];
     const faqs: any[] = Array.isArray(body.faqs) ? body.faqs : [];
     const upiId: string | undefined = body.upiId || undefined;
     const paypalId: string | undefined = body.paypalId || undefined;
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
       category,
       popular,
       layoutSettings,
+      manualToc,
       upiId,
       paypalId,
       supportQrUrl,
