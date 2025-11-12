@@ -1,4 +1,4 @@
-import { getLogs } from '@/lib/logsStore.js'
+import { getLogs } from '@/lib/logsStore'
 
 
 export default async function SuperadminLogsPage() {
