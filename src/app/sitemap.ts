@@ -30,7 +30,7 @@ function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'pag
   ]
 
   for (const c of candidates) {
-    if (fs.existsSync(c.dir)) return c
+    if (fs.existsSync(c.dir)) return { appDir: c.dir, pageFileName: c.pageFileName }
   }
   return { appDir: path.join(process.cwd(), 'src', 'app'), pageFileName: 'page.tsx' }
 }

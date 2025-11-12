@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,21 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { Crown, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import { UserRole } from '@/lib/auth/roles';
-import type { SupabaseClient } from '@supabase/supabase-js';
+// Supabase removed: local-only authentication
 
 export default function SuperadminLoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
-    const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
     const router = useRouter();
-
-    useEffect(() => {
-        setSupabase(createClient());
-    }, []);
+    
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,78 +24,19 @@ export default function SuperadminLoginPage() {
         setIsLoading(true);
 
         try {
-            const canUseSupabase = supabase && typeof (supabase as any).auth?.signInWithPassword === 'function';
-
-            if (!canUseSupabase) {
-                // Fallback: local superadmin login via env credentials
-                const resp = await fetch('/api/auth/local-login', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                if (!resp.ok) {
-                    const data = await resp.json().catch(() => ({}));
-                    toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
-                    setIsLoading(false);
-                    return;
-                }
-                toast({ title: 'Login Successful', description: 'Welcome to SuperAdmin Dashboard!' });
-                router.push('/superadmin/dashboard');
-                return;
-            }
-
-            const { data: authData, error: authError } = await (supabase as any).auth.signInWithPassword({
-                email,
-                password,
+            // Local superadmin login only
+            const resp = await fetch('/api/auth/local-login', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ email, password })
             });
-
-            if (authError) {
-                // If Supabase is not configured, fallback to local superadmin login
-                if ((authError?.message || '').toLowerCase().includes('supabase not configured')) {
-                    const resp = await fetch('/api/auth/local-login', {
-                        method: 'POST',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ email, password })
-                    });
-                    if (!resp.ok) {
-                        const data = await resp.json().catch(() => ({}));
-                        toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
-                        setIsLoading(false);
-                        return;
-                    }
-                    try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
-                    toast({ title: 'Login Successful', description: 'Welcome to SuperAdmin Dashboard!' });
-                    router.push('/superadmin/dashboard');
-                    return;
-                }
-                toast({ title: "Login Failed", description: authError.message, variant: "destructive" });
+            if (!resp.ok) {
+                const data = await resp.json().catch(() => ({}));
+                toast({ title: 'Login Failed', description: data?.error || 'Invalid credentials', variant: 'destructive' });
                 setIsLoading(false);
                 return;
             }
-
-            const { data: profile, error: profileError } = await (supabase as any)
-                .from('profiles')
-                .select('role')
-                .eq('id', authData.user.id)
-                .single();
-
-            if (profileError || !profile) {
-                await (supabase as any).auth.signOut();
-                toast({ title: "Access Denied", description: "Unable to verify your permissions.", variant: "destructive" });
-                setIsLoading(false);
-                return;
-            }
-
-            if (profile.role !== UserRole.SUPERADMIN) {
-                await (supabase as any).auth.signOut();
-                toast({ title: "Access Denied", description: "You don't have superadmin privileges.", variant: "destructive" });
-                setIsLoading(false);
-                return;
-            }
-
-            // Issue cookie for server-side guard
-            try { await fetch('/api/auth/superadmin-cookie', { method: 'POST' }); } catch {}
-            toast({ title: "Login Successful", description: "Welcome to SuperAdmin Dashboard!" });
+            toast({ title: 'Login Successful', description: 'Welcome to SuperAdmin Dashboard!' });
             router.push('/superadmin/dashboard');
             return;
         } catch (error) {

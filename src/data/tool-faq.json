@@ -1,0 +1,26 @@
+{
+  "jpg-to-pdf": [
+    {
+      "question": "Which image formats are supported?",
+      "answer": "JPG/JPEG, PNG, and WEBP are supported. You can mix formats in one PDF.",
+      "updatedAt": "2025-11-12T00:00:00.000Z"
+    },
+    {
+      "question": "Will the conversion reduce image quality?",
+      "answer": "Images are embedded without extra compression to preserve original quality.",
+      "updatedAt": "2025-11-12T00:00:00.000Z"
+    }
+  ],
+  "png-to-pdf": [
+    {
+      "question": "Can I upload non-PNG formats?",
+      "answer": "Yes. PNG, JPG/JPEG, and WEBP are supported and converted into a single PDF.",
+      "updatedAt": "2025-11-12T00:00:00.000Z"
+    },
+    {
+      "question": "How are pages sized and arranged?",
+      "answer": "Images are auto-fitted to A4 pages with centered layout for best readability.",
+      "updatedAt": "2025-11-12T00:00:00.000Z"
+    }
+  ]
+}

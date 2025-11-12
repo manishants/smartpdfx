@@ -154,7 +154,12 @@ export default function EditBlogPost() {
       );
       const analysis = analyzer.analyze();
       
-      setSeoAnalysis(analysis);
+      setSeoAnalysis({
+        ...analysis,
+        metaTitle: formData.seo.metaTitle,
+        metaDescription: formData.seo.metaDescription,
+        focusKeyword: formData.seo.focusKeyword
+      });
       setFormData(prev => ({
         ...prev,
         seo: { ...prev.seo, ...analysis }
@@ -588,7 +593,7 @@ export default function EditBlogPost() {
                 <Target className="h-5 w-5" />
                 SEO Settings
                 {seoAnalysis && (
-                  <Badge variant={getSeoScoreBadgeVariant(seoAnalysis.score)}>
+                  <Badge variant={getSeoScoreBadgeVariant(seoAnalysis.score || 0)}>
                     {seoAnalysis.score}/100
                   </Badge>
                 )}
@@ -698,7 +703,7 @@ export default function EditBlogPost() {
                         </div>
                       )}
 
-                      {seoAnalysis.suggestions.length > 0 && (
+                      {seoAnalysis?.suggestions?.length > 0 && (
                         <div>
                           <h4 className="font-semibold text-green-600 flex items-center gap-2 mb-2">
                             <CheckCircle className="h-4 w-4" />

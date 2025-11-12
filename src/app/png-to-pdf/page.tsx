@@ -1,23 +1,18 @@
-
 "use client";
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
- 
-import { Input } from "@/components/ui/input";
-import { UploadCloud, X, FileImage, FileDown, Loader2, Sparkles, Zap, FileText, ImageIcon } from "lucide-react";
-import { convertImagesToPdf } from '@/lib/actions/convert-images-to-pdf';
 import { useToast } from '@/hooks/use-toast';
-import type { ConvertImagesToPdfInput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
-// Tool-specific sections removed
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import ToolFaqRenderer from '@/components/tool-faq-renderer';
+import type { ConvertImagesToPdfInput } from '@/lib/types';
+import { convertImagesToPdf } from '@/lib/actions/convert-images-to-pdf';
+import { FileImage, FileDown, Loader2, Sparkles, Zap, FileText, Image as ImageIcon } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,9 +23,7 @@ interface UploadedFile {
 
 // FAQs are now dynamically editable per tool via ToolFaqRenderer
 
-
-export default function JpgToPdfPage() {
-  // Tool-specific sections removed
+export default function PngToPdfPage() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isConverting, setIsConverting] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -40,7 +33,7 @@ export default function JpgToPdfPage() {
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Invalid file type",
-        description: `${file.name} is not a valid image file. Please select JPG, PNG, GIF, BMP, or WEBP files.`,
+        description: `${file.name} is not a valid image file. Please select PNG, JPG/JPEG, or WEBP files.`,
         variant: "destructive"
       });
       return;
@@ -135,14 +128,14 @@ export default function JpgToPdfPage() {
 
   return (
     <ModernPageLayout
-      title="AI Image to PDF Converter"
-      description="Transform your images into professional PDFs with intelligent layout optimization"
+      title="AI PNG to PDF Converter"
+      description="Convert PNG images into professional PDFs with intelligent layout optimization"
       icon={<FileText className="h-8 w-8" />}
       backgroundVariant="home"
     >
       <ModernSection
         title="Smart PDF Creation"
-        subtitle="Upload multiple images and let our AI create the perfect PDF layout"
+        subtitle="Upload PNG images and let our AI create the perfect PDF layout"
         icon={<ImageIcon className="h-6 w-6" />}
       >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -153,8 +146,8 @@ export default function JpgToPdfPage() {
                   onFileSelect={handleFileChange}
                   accept="image/*"
                   multiple={true}
-                  title="Upload Images"
-                  subtitle="Drag & drop your images here or click to browse"
+                  title="Upload PNG Images"
+                  subtitle="Drag & drop your PNGs here or click to browse"
                 />
 
                 {files.length > 0 && (
@@ -174,7 +167,8 @@ export default function JpgToPdfPage() {
                           <img src={file.preview} alt={`preview ${index}`} className="w-full h-32 object-cover" />
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button variant="destructive" size="icon" onClick={() => handleRemoveFile(index)} className="rounded-full">
-                              <X className="h-4 w-4" />
+                              {/* X icon to remove */}
+                              <span className="sr-only">Remove</span>
                             </Button>
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
@@ -278,10 +272,8 @@ export default function JpgToPdfPage() {
         </div>
       </ModernSection>
 
-      {/* Tool-specific sections removed */}
-
-      <ToolFaqRenderer slug="jpg-to-pdf" />
-      <ToolCustomSectionRenderer slug="jpg-to-pdf" />
+      <ToolFaqRenderer slug="png-to-pdf" />
+      <ToolCustomSectionRenderer slug="png-to-pdf" />
       <AllTools />
     </ModernPageLayout>
   );

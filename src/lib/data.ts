@@ -146,6 +146,14 @@ export const tools = [
     color: '#ca8a04' // mud yellow
   },
   {
+    title: "PNG to PDF",
+    description: "Convert PNG images to PDF.",
+    icon: FileImage,
+    href: "/png-to-pdf",
+    category: 'convert',
+    color: '#ca8a04' // mud yellow
+  },
+  {
     title: "Image Converter",
     description: "Convert between image formats.",
     icon: Repeat,

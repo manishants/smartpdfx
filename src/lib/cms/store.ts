@@ -286,7 +286,7 @@ class CMSStore {
         
         // Log activity
         await this.logActivity({
-          type: updates.status === 'published' ? 'post_published' : 'post_updated',
+          type: updates.status === 'published' ? 'post_published' : 'page_updated',
           message: `Updated post: ${supabasePost.title}`,
           entityId: String(supabasePost.id)
         });
@@ -360,7 +360,7 @@ class CMSStore {
     
     // Log activity
     await this.logActivity({
-      type: updates.status === 'published' ? 'post_published' : 'post_updated',
+      type: updates.status === 'published' ? 'post_published' : 'page_updated',
       message: `Updated post: ${updatedPost.title}`,
       entityId: updatedPost.id
     });

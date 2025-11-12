@@ -254,7 +254,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             <h2 className="text-2xl font-bold">Comments</h2>
 
             {/* Comment Form */}
-            <form action={createComment} className="space-y-4 border rounded-md p-4">
+            <form action={createComment} className="space-y-4 border rounded-md p-4" method="post">
               <input type="hidden" name="blogSlug" value={params.slug} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
