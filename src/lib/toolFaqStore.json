@@ -1,1 +1,19 @@
-{}
+{
+  "jpg-to-pdf": [
+    {
+      "question": "Which image formats are supported?",
+      "answer": "JPG/JPEG, PNG, and WEBP are supported. You can mix formats in one PDF.",
+      "updatedAt": "2025-11-12T01:18:09.475Z"
+    },
+    {
+      "question": "Will the conversion reduce image quality?",
+      "answer": "Images are embedded without extra compression to preserve original quality.",
+      "updatedAt": "2025-11-12T01:18:09.475Z"
+    },
+    {
+      "question": "Is it JPG to PDF Free Online Document Converter ?",
+      "answer": "Yes, It's free and you can use to convert multiple images to pdf with the high quality.",
+      "updatedAt": "2025-11-12T01:18:09.475Z"
+    }
+  ]
+}

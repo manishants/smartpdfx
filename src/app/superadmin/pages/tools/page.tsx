@@ -100,6 +100,11 @@ export default function ToolsPageBuilder() {
                     <Layers className="mr-2 h-4 w-4" /> Edit Section Below FAQ
                   </Link>
                 </Button>
+                <Button asChild size="sm" variant="secondary">
+                  <Link href={`/superadmin/pages/tools/faq-editor/${toSlug(tool.href)}`}>
+                    Edit FAQs
+                  </Link>
+                </Button>
               </div>
           </Card>
         ))}
