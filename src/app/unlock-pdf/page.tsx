@@ -104,38 +104,6 @@ export default function UnlockPdfPage() {
     }
   };
 
-  // Dev-only helper: load /public/sample.pdf and auto-unlock with known password
-  const unlockSampleDirect = async () => {
-    setIsUnlocking(true);
-    setResult(null);
-    try {
-      const resp = await fetch('/sample.pdf');
-      if (!resp.ok) throw new Error('Sample PDF not found at /sample.pdf');
-      const blob = await resp.blob();
-      const sampleFile = new File([blob], 'sample.pdf', { type: 'application/pdf' });
-      const pdfUri = await fileToDataUri(sampleFile);
-      const input: UnlockPdfInput = { pdfUri, password: 'mani2711' };
-      const res = await fetch('/api/unlock-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || 'Unlocking sample failed.');
-      }
-      setFile({ file: sampleFile, name: 'sample.pdf' });
-      setPassword('mani2711');
-      setResult(data as UnlockPdfOutput);
-      toast({ title: 'Sample unlocked', description: 'sample.pdf unlocked successfully', variant: 'default' });
-    } catch (e: any) {
-      console.error('Sample unlock failed:', e);
-      toast({ title: 'Sample unlock failed', description: String(e?.message || e), variant: 'destructive' });
-    } finally {
-      setIsUnlocking(false);
-    }
-  };
-
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -227,16 +195,6 @@ export default function UnlockPdfPage() {
               subtitle="Select a password-protected PDF file to unlock"
               icon={<FileText className="h-12 w-12 text-primary/60" />}
             />
-          )}
-
-          {/* Dev-only: Try sample.pdf */}
-          {process.env.NODE_ENV !== 'production' && (
-            <div className="mt-2 flex items-center gap-3">
-              <Button onClick={unlockSampleDirect} size="sm" variant="outline">
-                Try sample.pdf (auto-unlock)
-              </Button>
-              <span className="text-xs text-muted-foreground">Password: mani2711</span>
-            </div>
           )}
 
           {/* File Info and Password Input */}

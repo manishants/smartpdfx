@@ -1,6 +1,17 @@
 {
   "logs": [
     {
+      "id": "1763236442350_3ubr92",
+      "createdAt": "2025-11-15T19:54:02.350Z",
+      "type": "unlock_pdf",
+      "message": "Rebuilt PDF with ignoreEncryption fallback",
+      "context": {
+        "inputSize": 73011,
+        "outputSize": 69088,
+        "pages": 2
+      }
+    },
+    {
       "id": "1763235996603_5jq7gd",
       "createdAt": "2025-11-15T19:46:36.603Z",
       "type": "unlock_pdf",
