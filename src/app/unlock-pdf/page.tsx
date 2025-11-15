@@ -19,6 +19,7 @@ import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 import * as pdfjsLib from 'pdfjs-dist';
+import { PDFDocument } from 'pdf-lib';
 
 export const dynamic = 'force-dynamic';
 
@@ -191,8 +192,8 @@ export default function UnlockPdfPage() {
       const pdfPage = doc.addPage([pngImage.width, pngImage.height]);
       pdfPage.drawImage(pngImage, { x: 0, y: 0, width: pngImage.width, height: pngImage.height });
     }
-    const outBytes = await doc.save();
-    return `data:application/pdf;base64,${Buffer.from(outBytes).toString('base64')}`;
+    const outDataUri = await doc.saveAsBase64({ dataUri: true });
+    return outDataUri;
   };
 
   const handleUnlock = async () => {
