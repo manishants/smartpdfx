@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
+import * as pdfjsLib from 'pdfjs-dist';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +73,14 @@ export default function UnlockPdfPage() {
   const [result, setResult] = useState<UnlockPdfOutput | null>(null);
   const { toast } = useToast();
 
+  // Configure PDF.js worker on the client
+  useEffect(() => {
+    try {
+      // Use CDN worker to avoid bundling the worker locally
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    } catch {}
+  }, []);
+
   const handleFileChange = (selectedFile: File) => {
     if (selectedFile.type === 'application/pdf') {
       setFile({ file: selectedFile, name: selectedFile.name });
@@ -113,6 +122,79 @@ export default function UnlockPdfPage() {
     });
   };
 
+  // --- Blank-page detection and robust fallback rebuild (client-side) ---
+  const dataUriToArrayBuffer = async (dataUri: string): Promise<ArrayBuffer> => {
+    const res = await fetch(dataUri);
+    return await res.arrayBuffer();
+  };
+
+  const renderPageToCanvas = async (page: any, scale = 1.5): Promise<HTMLCanvasElement> => {
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.ceil(viewport.width);
+    canvas.height = Math.ceil(viewport.height);
+    if (!ctx) return canvas;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    return canvas;
+  };
+
+  const isCanvasBlank = (canvas: HTMLCanvasElement): boolean => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return true;
+    const samples = 80; // random pixel samples
+    for (let i = 0; i < samples; i++) {
+      const x = Math.floor(Math.random() * canvas.width);
+      const y = Math.floor(Math.random() * canvas.height);
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      // If any pixel is not pure white, consider non-blank
+      if (!(pixel[0] === 255 && pixel[1] === 255 && pixel[2] === 255 && pixel[3] === 255)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const pdfUriSeemsBlank = async (pdfDataUri: string): Promise<boolean> => {
+    try {
+      const buf = await dataUriToArrayBuffer(pdfDataUri);
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf), disableWorker: false }).promise;
+      const pageCount = pdf.numPages;
+      let nonBlankFound = false;
+      for (let i = 1; i <= pageCount; i++) {
+        const page = await pdf.getPage(i);
+        const canvas = await renderPageToCanvas(page, 1.25);
+        if (!isCanvasBlank(canvas)) {
+          nonBlankFound = true;
+          break;
+        }
+      }
+      return !nonBlankFound;
+    } catch (e) {
+      // If detection fails, assume not blank to avoid false positives
+      console.warn('Blank detection failed, skipping fallback:', e);
+      return false;
+    }
+  };
+
+  const rebuildFromOriginalAsImages = async (srcFile: File, pw: string): Promise<string> => {
+    const ab = await srcFile.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(ab), password: pw, disableWorker: false }).promise;
+    const doc = await PDFDocument.create();
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const canvas = await renderPageToCanvas(page, 2.0);
+      const dataUrl = canvas.toDataURL('image/png');
+      const base64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+      const pngBytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const pngImage = await doc.embedPng(pngBytes);
+      const pdfPage = doc.addPage([pngImage.width, pngImage.height]);
+      pdfPage.drawImage(pngImage, { x: 0, y: 0, width: pngImage.width, height: pngImage.height });
+    }
+    const outBytes = await doc.save();
+    return `data:application/pdf;base64,${Buffer.from(outBytes).toString('base64')}`;
+  };
+
   const handleUnlock = async () => {
     if (!file) {
       toast({ title: "No file selected", description: "Please select a PDF to unlock.", variant: "destructive" });
@@ -137,7 +219,15 @@ export default function UnlockPdfPage() {
         throw new Error(data?.error || 'Unlocking failed. Please verify the password and file.');
       }
       if (data && data.unlockedPdfUri) {
-        setResult(data as UnlockPdfOutput);
+        // Validate unlocked content and apply robust fallback if pages render blank
+        const looksBlank = await pdfUriSeemsBlank(data.unlockedPdfUri);
+        if (looksBlank) {
+          toast({ title: 'Detected blank output', description: 'Applying robust rebuild fallback to restore visible pages.' });
+          const rebuiltUri = await rebuildFromOriginalAsImages(file.file, password);
+          setResult({ unlockedPdfUri: rebuiltUri });
+        } else {
+          setResult(data as UnlockPdfOutput);
+        }
       } else {
         throw new Error('Unlocking returned no data.');
       }
