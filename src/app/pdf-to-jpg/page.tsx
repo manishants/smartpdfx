@@ -24,6 +24,7 @@ import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 import ToolHowtoRenderer from '@/components/tool-howto-renderer';
+import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
 
 
 type PdfToJpgOutput = {
@@ -72,6 +73,7 @@ const ToolDescription = () => (
         Download individual images by clicking on them, or get all images at once in a convenient ZIP archive for easy organization and sharing.
       </p>
     </div>
+    <ToolRelatedBlogLink slug="pdf-to-jpg" />
   </ModernSection>
 );
 

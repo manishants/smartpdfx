@@ -48,6 +48,33 @@ export function ToolCustomSectionRenderer({ slug, className }: RendererProps) {
 
   if (!sections || sections.length === 0) return null;
 
+  const sanitizeParagraph = (html: string) => {
+    try {
+      // Run only in the browser
+      if (typeof window === 'undefined') return html;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      // Remove risky elements
+      doc.querySelectorAll('script, iframe, object, embed, style').forEach(el => el.remove());
+      // Clean attributes
+      doc.querySelectorAll('*').forEach(el => {
+        for (const attr of Array.from(el.attributes)) {
+          if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+          if (attr.name === 'href') {
+            const val = attr.value || '';
+            if (!/^(https?:|mailto:|tel:|\/)/i.test(val)) el.removeAttribute(attr.name);
+          }
+          if (attr.name === 'target' || attr.name === 'rel') {
+            el.removeAttribute(attr.name);
+          }
+        }
+      });
+      return doc.body.innerHTML;
+    } catch {
+      return html;
+    }
+  };
+
   const renderButtons = (buttons?: ToolCustomSectionData['buttons']) => {
     if (!buttons || buttons.length === 0) return null;
     return (
@@ -136,7 +163,10 @@ export function ToolCustomSectionRenderer({ slug, className }: RendererProps) {
         const TextEl = (
           <div className="space-y-4">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{section.heading}</h2>
-            <p className="text-muted-foreground text-base leading-relaxed">{section.paragraph}</p>
+            <p
+              className="text-muted-foreground text-base leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: sanitizeParagraph(section.paragraph) }}
+            />
             {renderButtons(section.buttons)}
           </div>
         );

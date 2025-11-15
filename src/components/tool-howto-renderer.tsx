@@ -5,6 +5,7 @@ import { ModernSection } from '@/components/modern-section';
 import type { ToolHowtoData, ToolHowtoStep } from '@/lib/tool-howto';
 import { toolHowtoFallback } from '@/lib/tool-howto';
 import { ListOrdered, Sparkles } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface RendererProps {
   slug: string;
@@ -74,7 +75,7 @@ export function ToolHowtoRenderer({ slug, className, title = "How to Use", subti
         {howto.steps.map((step, idx) => (
           <li key={idx} className="space-y-2">
             <div className="font-semibold">{step.title}</div>
-            <p className="text-muted-foreground">{step.text}</p>
+            <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.text) }} />
             {step.imageUrl && (
               <img src={step.imageUrl} alt={step.imageAlt || step.title} className="rounded-md border" />
             )}

@@ -10,6 +10,7 @@ import type { CompressImageOutput } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { AllTools } from '@/components/all-tools';
 import { compressImageToSize } from '@/lib/actions/compress-image-to-size';
+import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {
   file: File;
@@ -27,6 +28,7 @@ const ToolDescription = () => (
                 <p>
                     <strong>Note:</strong> For images larger than 1MB, achieving the {TARGET_KB + 1}KB target will likely cause a significant reduction in quality. The tool will do its best to get as close as possible.
                 </p>
+                <ToolRelatedBlogLink slug="under-30kb-image" />
             </CardContent>
         </Card>
     </div>

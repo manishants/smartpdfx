@@ -24,6 +24,7 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import ToolHowtoRenderer from '@/components/tool-howto-renderer';
+import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
 // Tool-specific sections removed
 
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,7 @@ const ToolDescription = () => (
                 <p className="text-sm">
                     This service is free to use. To support our work, please consider a <Link href="#" className="text-primary font-bold hover:underline">Donation of just ₹1</Link>. It helps us keep the lights on!
                 </p>
+                <ToolRelatedBlogLink slug="compress-pdf" />
             </CardContent>
         </Card>
     </div>

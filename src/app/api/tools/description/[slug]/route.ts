@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDescriptionBySlug, setDescriptionForSlug } from '@/lib/toolDescriptionFs'
+import { tools } from '@/lib/data'
 
 export async function GET(
   _req: NextRequest,
@@ -7,8 +8,11 @@ export async function GET(
 ) {
   try {
     const { slug } = params
-    const description = getDescriptionBySlug(slug)
-    return NextResponse.json({ description: description || null })
+    const override = getDescriptionBySlug(slug)
+    const href = `/${slug}`
+    const fallback = tools.find(t => t.href === href)?.description || null
+    const description = override || fallback || null
+    return NextResponse.json({ description })
   } catch (e) {
     return NextResponse.json({ description: null }, { status: 200 })
   }

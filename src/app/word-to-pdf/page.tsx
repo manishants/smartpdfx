@@ -22,6 +22,7 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
 import { AllTools } from '@/components/all-tools';
+import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
 interface ConversionResult {
   success: boolean;
   pdfUri?: string;
@@ -89,6 +90,7 @@ const ToolDescription = () => (
           </div>
         </div>
       </div>
+      <ToolRelatedBlogLink slug="word-to-pdf" />
     </div>
   </ModernSection>
 );

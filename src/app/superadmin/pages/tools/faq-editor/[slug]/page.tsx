@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { checkRouteAccess } from "@/lib/auth/middleware";
@@ -28,6 +28,8 @@ export default function ToolFaqEditorPage() {
   const [faqs, setFaqs] = useState<ToolFaqItem[]>(initialFaqs);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [linkInputs, setLinkInputs] = useState<Record<number, { text: string; url: string }>>({});
+  const answerRefs = useRef<Record<number, HTMLTextAreaElement | null>>({});
 
   useEffect(() => {
     const enforceAccess = async () => {
@@ -80,6 +82,43 @@ export default function ToolFaqEditorPage() {
       next[index] = { ...next[index], [field]: value, updatedAt: new Date().toISOString() };
       return next;
     });
+  };
+
+  const updateLinkInput = (index: number, type: 'text' | 'url', value: string) => {
+    setLinkInputs((prev) => ({
+      ...prev,
+      [index]: { text: type === 'text' ? value : (prev[index]?.text || ''), url: type === 'url' ? value : (prev[index]?.url || '') }
+    }));
+  };
+
+  const insertLinkAtCursor = (index: number) => {
+    const ref = answerRefs.current[index];
+    const link = linkInputs[index] || { text: '', url: '' };
+    const text = (link.text || '').trim();
+    const url = (link.url || '').trim();
+    if (!ref) return;
+    if (!text || !url) {
+      toast({ title: "Missing link details", description: "Please provide link text and URL", variant: "destructive" });
+      return;
+    }
+    const openTag = `<a href="${url}" target="_blank" rel="noopener">`;
+    const closeTag = `</a>`;
+    const start = ref.selectionStart ?? 0;
+    const end = ref.selectionEnd ?? start;
+    const before = faqs[index]?.answer?.slice(0, start) || '';
+    const selected = faqs[index]?.answer?.slice(start, end) || '';
+    const after = faqs[index]?.answer?.slice(end) || '';
+    const anchor = openTag + (selected || text) + closeTag;
+    const nextAnswer = before + anchor + after;
+    updateFaq(index, "answer", nextAnswer);
+    // move caret after inserted anchor
+    setTimeout(() => {
+      try {
+        const pos = before.length + anchor.length;
+        ref.setSelectionRange(pos, pos);
+        ref.focus();
+      } catch {}
+    }, 0);
   };
 
   const saveFaqs = async () => {
@@ -180,7 +219,23 @@ export default function ToolFaqEditorPage() {
                     placeholder="Answer"
                     value={faq.answer}
                     onChange={(e) => updateFaq(index, "answer", e.target.value)}
+                    ref={(el) => { answerRefs.current[index] = el; }}
                   />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Input
+                      placeholder="Link text"
+                      value={linkInputs[index]?.text || ''}
+                      onChange={(e) => updateLinkInput(index, 'text', e.target.value)}
+                    />
+                    <Input
+                      placeholder="https://example.com/article"
+                      value={linkInputs[index]?.url || ''}
+                      onChange={(e) => updateLinkInput(index, 'url', e.target.value)}
+                    />
+                    <Button variant="secondary" type="button" onClick={() => insertLinkAtCursor(index)}>
+                      Insert link at cursor
+                    </Button>
+                  </div>
                 </div>
                 <Separator />
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { checkRouteAccess } from "@/lib/auth/middleware";
@@ -39,6 +39,8 @@ export default function HowtoEditorPage() {
   }, [slug]);
 
   const [form, setForm] = useState<ToolHowtoData>(initial);
+  const [linkInputs, setLinkInputs] = useState<Record<number, { text: string; url: string }>>({});
+  const stepRefs = useRef<Record<number, HTMLTextAreaElement | null>>({});
 
   const addStep = () => {
     setForm((prev) => ({
@@ -56,6 +58,46 @@ export default function HowtoEditorPage() {
       ...prev,
       steps: prev.steps.map((s, i) => (i === index ? { ...s, ...updates } : s))
     }));
+  };
+
+  const updateLinkInput = (index: number, type: 'text' | 'url', value: string) => {
+    setLinkInputs((prev) => ({
+      ...prev,
+      [index]: {
+        text: type === 'text' ? value : (prev[index]?.text || ''),
+        url: type === 'url' ? value : (prev[index]?.url || ''),
+      }
+    }));
+  };
+
+  const insertLinkAtCursor = (index: number) => {
+    const ref = stepRefs.current[index];
+    const link = linkInputs[index] || { text: '', url: '' };
+    const text = (link.text || '').trim();
+    const url = (link.url || '').trim();
+    if (!ref) return;
+    if (!text || !url) {
+      toast({ title: 'Missing link details', description: 'Please provide link text and URL', variant: 'destructive' });
+      return;
+    }
+    const openTag = `<a href="${url}" target="_blank" rel="noopener">`;
+    const closeTag = `</a>`;
+    const start = ref.selectionStart ?? 0;
+    const end = ref.selectionEnd ?? start;
+    const current = form.steps[index]?.text || '';
+    const before = current.slice(0, start);
+    const selected = current.slice(start, end);
+    const after = current.slice(end);
+    const anchor = openTag + (selected || text) + closeTag;
+    const next = before + anchor + after;
+    updateStep(index, { text: next });
+    setTimeout(() => {
+      try {
+        const pos = before.length + anchor.length;
+        ref.setSelectionRange(pos, pos);
+        ref.focus();
+      } catch {}
+    }, 0);
   };
 
   const uploadImageForStep = async (index: number, file: File) => {
@@ -163,7 +205,23 @@ export default function HowtoEditorPage() {
                     placeholder="Explain the step"
                     value={step.text}
                     onChange={(e) => updateStep(index, { text: e.target.value })}
+                    ref={(el) => { stepRefs.current[index] = el; }}
                   />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Input
+                      placeholder="Link text"
+                      value={linkInputs[index]?.text || ''}
+                      onChange={(e) => updateLinkInput(index, 'text', e.target.value)}
+                    />
+                    <Input
+                      placeholder="https://example.com/article"
+                      value={linkInputs[index]?.url || ''}
+                      onChange={(e) => updateLinkInput(index, 'url', e.target.value)}
+                    />
+                    <Button variant="secondary" type="button" onClick={() => insertLinkAtCursor(index)}>
+                      Insert link at cursor
+                    </Button>
+                  </div>
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Optional image</label>
                     <div className="grid gap-2 md:grid-cols-2">

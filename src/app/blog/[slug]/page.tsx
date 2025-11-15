@@ -146,7 +146,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           <div className="grid lg:grid-cols-12 gap-10">
           {/* Left TOC Sidebar (desktop) */}
           {layout.leftSidebarEnabled && (
-            <aside className="hidden lg:block lg:col-span-2">
+            <aside className="hidden lg:block lg:col-span-3">
               <BlogTOC
                 headings={finalHeadings}
                 sticky={layout.leftSticky}
@@ -163,7 +163,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           )}
 
           {/* Main Article */}
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-9">
             <article className="space-y-8">
               <div className="space-y-4">
                 {/* Breadcrumbs above Back to all posts within main column */}
@@ -193,7 +193,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               {layout.leftSidebarEnabled && (
                 <details className="lg:hidden border rounded-md p-3 bg-muted/30">
                   <summary className="cursor-pointer select-none font-medium">Table of Contents</summary>
-                  <div className="mt-3">
+                  <div className="mt-3 space-y-4">
+                    {/* TOC first */}
                     <BlogTOC
                       headings={finalHeadings}
                       sticky={false}
@@ -201,6 +202,12 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                       h3Indent={layout.tocH3Indent}
                       hoverClass={layout.tocHoverColor}
                     />
+                    {/* Sticky Subscribe/Support directly below TOC (mobile only) */}
+                    {layout.rightSidebarEnabled && (
+                      <div className="sticky top-20 z-10">
+                        <BlogRightSidebar post={post as BlogPost} />
+                      </div>
+                    )}
                   </div>
                 </details>
               )}
@@ -209,6 +216,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               <GoogleAd />
 
               <div
+                id="article-body"
                 className="prose prose-lg dark:prose-invert max-w-none prose-h2:mt-6 prose-h3:mt-4 prose-h2:scroll-mt-24 prose-h3:scroll-mt-24 prose-img:rounded-lg prose-img:border"
                 dangerouslySetInnerHTML={{ __html: contentWithIds }}
               />

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getHeadingBySlug, setHeadingForSlug } from '@/lib/toolHeadingFs'
+import { tools } from '@/lib/data'
 
 export async function GET(
   _req: NextRequest,
@@ -7,8 +8,11 @@ export async function GET(
 ) {
   try {
     const { slug } = params
-    const heading = getHeadingBySlug(slug)
-    return NextResponse.json({ heading: heading || null })
+    const override = getHeadingBySlug(slug)
+    const href = `/${slug}`
+    const fallback = tools.find(t => t.href === href)?.title || null
+    const heading = override || fallback || null
+    return NextResponse.json({ heading })
   } catch (e) {
     return NextResponse.json({ heading: null }, { status: 200 })
   }

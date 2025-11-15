@@ -17,6 +17,7 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
+import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {
   file: File;
@@ -55,6 +56,7 @@ const ToolDescription = () => (
                     <strong className="text-foreground">Pro Tip:</strong> For specific size targets, try our specialized tools: <Link href="/under-100kb-image" className="text-primary hover:underline font-medium">Under 100KB Image</Link> or <Link href="/under-30kb-image" className="text-primary hover:underline font-medium">Under 30KB Image</Link>.
                 </p>
             </div>
+            <ToolRelatedBlogLink slug="compress-image" />
         </div>
     </ModernSection>
 );

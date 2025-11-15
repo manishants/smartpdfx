@@ -53,6 +53,8 @@ export default function ToolsManagement() {
   const [tools, setTools] = useState<Tool[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [relatedBlogUrls, setRelatedBlogUrls] = useState<Record<string, string>>({})
+  const [relatedSaving, setRelatedSaving] = useState<Record<string, boolean>>({})
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null)
@@ -101,6 +103,44 @@ export default function ToolsManagement() {
   useEffect(() => {
     fetchTools()
   }, [])
+
+  // Load related blog URLs for each tool
+  useEffect(() => {
+    const loadRelatedUrls = async () => {
+      const tasks = tools.map(async (tool) => {
+        try {
+          const res = await fetch(`/api/tools/related-blog/${tool.slug}`, { cache: 'no-store' })
+          const json = await res.json()
+          const url = String(json?.relatedBlogUrl || '')
+          setRelatedBlogUrls((prev) => ({ ...prev, [tool.slug]: url }))
+        } catch {}
+      })
+      await Promise.all(tasks)
+    }
+    if (tools.length > 0) loadRelatedUrls()
+  }, [tools])
+
+  const saveRelatedUrl = async (slug: string) => {
+    const url = String(relatedBlogUrls[slug] || '').trim()
+    setRelatedSaving((prev) => ({ ...prev, [slug]: true }))
+    try {
+      const res = await fetch(`/api/tools/related-blog/${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relatedBlogUrl: url }),
+      })
+      if (res.ok) {
+        toast({ description: 'Related blog URL saved' })
+      } else {
+        const err = await res.json().catch(() => ({}))
+        toast({ description: err.error || 'Failed to save related blog URL', variant: 'destructive' })
+      }
+    } catch {
+      toast({ description: 'Network error saving related blog URL', variant: 'destructive' })
+    } finally {
+      setRelatedSaving((prev) => ({ ...prev, [slug]: false }))
+    }
+  }
 
   // Handle form input changes
   const handleInputChange = (field: string, value: any) => {
@@ -434,6 +474,7 @@ export default function ToolsManagement() {
                 <TableHead>Status</TableHead>
                 <TableHead>Featured</TableHead>
                 <TableHead>Sort Order</TableHead>
+                <TableHead>Related Blog URL</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -469,6 +510,23 @@ export default function ToolsManagement() {
                     )}
                   </TableCell>
                   <TableCell>{tool.sort_order}</TableCell>
+                  <TableCell>
+                    <div className="grid gap-2 md:grid-cols-[1fr_auto] items-center">
+                      <Input
+                        placeholder="https://smartpdfx.com/blog/..."
+                        value={relatedBlogUrls[tool.slug] || ''}
+                        onChange={(e) => setRelatedBlogUrls((prev) => ({ ...prev, [tool.slug]: e.target.value }))}
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => saveRelatedUrl(tool.slug)}
+                        disabled={!!relatedSaving[tool.slug]}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button

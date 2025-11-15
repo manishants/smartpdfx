@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, FileDown, Loader2, RefreshCw, KeyRound, FileText, CheckCircle, Eye, EyeOff, Sparkles, Zap, Shield, Lock } from "lucide-react";
-import { unlockPdf } from '@/lib/actions/unlock-pdf';
 import { useToast } from '@/hooks/use-toast';
 import type { UnlockPdfInput, UnlockPdfOutput } from '@/lib/types';
 import { Label } from '@/components/ui/label';
@@ -105,6 +104,38 @@ export default function UnlockPdfPage() {
     }
   };
 
+  // Dev-only helper: load /public/sample.pdf and auto-unlock with known password
+  const unlockSampleDirect = async () => {
+    setIsUnlocking(true);
+    setResult(null);
+    try {
+      const resp = await fetch('/sample.pdf');
+      if (!resp.ok) throw new Error('Sample PDF not found at /sample.pdf');
+      const blob = await resp.blob();
+      const sampleFile = new File([blob], 'sample.pdf', { type: 'application/pdf' });
+      const pdfUri = await fileToDataUri(sampleFile);
+      const input: UnlockPdfInput = { pdfUri, password: 'mani2711' };
+      const res = await fetch('/api/unlock-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Unlocking sample failed.');
+      }
+      setFile({ file: sampleFile, name: 'sample.pdf' });
+      setPassword('mani2711');
+      setResult(data as UnlockPdfOutput);
+      toast({ title: 'Sample unlocked', description: 'sample.pdf unlocked successfully', variant: 'default' });
+    } catch (e: any) {
+      console.error('Sample unlock failed:', e);
+      toast({ title: 'Sample unlock failed', description: String(e?.message || e), variant: 'destructive' });
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -128,13 +159,19 @@ export default function UnlockPdfPage() {
     try {
       const pdfUri = await fileToDataUri(file.file);
       const input: UnlockPdfInput = { pdfUri, password };
-      
-      const unlockResult = await unlockPdf(input);
-      
-      if (unlockResult && unlockResult.unlockedPdfUri) {
-        setResult(unlockResult);
+      const res = await fetch('/api/unlock-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Unlocking failed. Please verify the password and file.');
+      }
+      if (data && data.unlockedPdfUri) {
+        setResult(data as UnlockPdfOutput);
       } else {
-        throw new Error("Unlocking returned no data.");
+        throw new Error('Unlocking returned no data.');
       }
     } catch (error: any) {
       console.error("Unlocking failed:", error);
@@ -190,6 +227,16 @@ export default function UnlockPdfPage() {
               subtitle="Select a password-protected PDF file to unlock"
               icon={<FileText className="h-12 w-12 text-primary/60" />}
             />
+          )}
+
+          {/* Dev-only: Try sample.pdf */}
+          {process.env.NODE_ENV !== 'production' && (
+            <div className="mt-2 flex items-center gap-3">
+              <Button onClick={unlockSampleDirect} size="sm" variant="outline">
+                Try sample.pdf (auto-unlock)
+              </Button>
+              <span className="text-xs text-muted-foreground">Password: mani2711</span>
+            </div>
           )}
 
           {/* File Info and Password Input */}

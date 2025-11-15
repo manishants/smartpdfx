@@ -61,6 +61,14 @@
   body {
     @apply bg-background text-foreground overflow-x-hidden;
   }
+  a {
+    /* Default anchor color: orange */
+    color: #ff7a00;
+  }
+  a:hover {
+    /* Darker orange on hover */
+    color: #cc6300;
+  }
 }
 
 @layer components {

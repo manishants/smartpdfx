@@ -1,22 +1,5 @@
 {
-  "compress-image": [
-    {
-      "type": "A",
-      "heading": "Compress Image with Manish Singh",
-      "paragraph": "Your paragraph text appears here. This will support your heading.\n\nYour paragraph text appears here. This will support your heading.\n\nYour paragraph text appears here. This will support your heading.\n\n",
-      "image": {
-        "src": "/hero_section_smartpdfx.webp",
-        "alt": "hero_section_smartpdfx"
-      },
-      "buttons": [
-        {
-          "text": "Pdf to JPG",
-          "href": "/pdf-jpg"
-        }
-      ],
-      "updatedAt": "2025-11-02T11:13:18.840Z"
-    }
-  ],
+  "compress-image": [],
   "compress-pdf": [],
   "rotate-pdf": [],
   "jpg-to-pdf": [

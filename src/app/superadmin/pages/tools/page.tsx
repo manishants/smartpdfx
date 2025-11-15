@@ -95,6 +95,11 @@ export default function ToolsPageBuilder() {
                 <Button asChild size="sm" variant="outline">
                   <Link href={tool.href} target="_blank">Open Public</Link>
                 </Button>
+                <Button asChild size="sm" variant="default">
+                  <Link href={`/superadmin/pages/tools/content-editor/${toSlug(tool.href)}`}>
+                    Content Editor
+                  </Link>
+                </Button>
                 <Button asChild size="sm">
                   <Link href={`/superadmin/pages/tools/section-builder/${toSlug(tool.href)}`}>
                     <Layers className="mr-2 h-4 w-4" /> Edit Section Below FAQ
@@ -103,16 +108,6 @@ export default function ToolsPageBuilder() {
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/superadmin/pages/tools/howto-editor/${toSlug(tool.href)}`}>
                     HowTo Editor
-                  </Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href={`/superadmin/pages/tools/heading-editor/${toSlug(tool.href)}`}>
-                    H1 Heading Editor
-                  </Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href={`/superadmin/pages/tools/description-editor/${toSlug(tool.href)}`}>
-                    Description Editor
                   </Link>
                 </Button>
                 <Button asChild size="sm" variant="secondary">

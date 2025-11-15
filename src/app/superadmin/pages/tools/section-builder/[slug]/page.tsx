@@ -41,6 +41,9 @@ export default function ToolSectionBuilderPage() {
   const [btn1Href, setBtn1Href] = useState('');
   const [btn2Text, setBtn2Text] = useState('');
   const [btn2Href, setBtn2Href] = useState('');
+  const [linkText, setLinkText] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const [cursorPos, setCursorPos] = useState<number | null>(null);
   const [showDesktopPreview, setShowDesktopPreview] = useState(true);
   const [sections, setSections] = useState<any[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -282,7 +285,80 @@ export default function ToolSectionBuilderPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="paragraph">Paragraph</Label>
-              <Textarea id="paragraph" value={paragraph} onChange={(e) => setParagraph(e.target.value)} placeholder="Enter supporting text" rows={6} />
+              <Textarea
+                id="paragraph"
+                value={paragraph}
+                onChange={(e) => setParagraph(e.target.value)}
+                onClick={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  setCursorPos(target.selectionStart ?? null);
+                }}
+                onKeyUp={(e) => {
+                  const target = e.currentTarget as HTMLTextAreaElement;
+                  setCursorPos(target.selectionStart ?? null);
+                }}
+                onSelect={(e) => {
+                  const target = e.currentTarget as HTMLTextAreaElement;
+                  setCursorPos(target.selectionStart ?? null);
+                }}
+                placeholder="Enter supporting text; you can insert internal hyperlinks below"
+                rows={6}
+              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                <div className="space-y-1">
+                  <Label htmlFor="linkText">Link Text</Label>
+                  <Input id="linkText" value={linkText} onChange={(e) => setLinkText(e.target.value)} placeholder="e.g., Unlock PDF" />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <Label htmlFor="linkUrl">Link URL</Label>
+                  <Input id="linkUrl" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="/internal-path or https://example.com" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const text = (linkText || '').trim();
+                    const url = (linkUrl || '').trim();
+                    if (!text || !url) {
+                      toast({ title: 'Missing link data', description: 'Please provide both Link Text and Link URL', variant: 'destructive' });
+                      return;
+                    }
+                    // Only allow safe schemes or relative paths
+                    if (!/^(https?:\/\/|mailto:|tel:|\/)/i.test(url)) {
+                      toast({ title: 'Invalid URL', description: 'Use a relative path (e.g., /unlock-pdf) or http(s) URL.', variant: 'destructive' });
+                      return;
+                    }
+                    const anchor = `<a href="${url}">${text}</a>`;
+                    if (typeof cursorPos === 'number' && cursorPos >= 0) {
+                      const before = paragraph.slice(0, cursorPos);
+                      const after = paragraph.slice(cursorPos);
+                      const next = `${before}${anchor}${after}`;
+                      setParagraph(next);
+                      // move cursor to end of inserted link
+                      setTimeout(() => {
+                        const ta = document.getElementById('paragraph') as HTMLTextAreaElement | null;
+                        if (ta) {
+                          const pos = (before + anchor).length;
+                          ta.selectionStart = pos;
+                          ta.selectionEnd = pos;
+                          ta.focus();
+                          setCursorPos(pos);
+                        }
+                      }, 0);
+                    } else {
+                      setParagraph(p => (p || '') + anchor);
+                    }
+                    // reset link inputs
+                    setLinkText('');
+                    setLinkUrl('');
+                  }}
+                >
+                  Insert Link
+                </Button>
+                <p className="text-xs text-muted-foreground">Links render inline and use theme color by default.</p>
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Upload Image</Label>

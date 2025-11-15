@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ModernSection } from '@/components/modern-section';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Sparkles } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import type { ToolFaqItem } from '@/lib/tool-faq';
 import { toolFaqFallback } from '@/lib/tool-faq';
 
@@ -70,7 +71,9 @@ export function ToolFaqRenderer({ slug, className, title = "Tool FAQs", subtitle
         {faqs.map((faq, idx) => (
           <AccordionItem key={idx} value={`item-${idx + 1}`}>
             <AccordionTrigger>{faq.question}</AccordionTrigger>
-            <AccordionContent>{faq.answer}</AccordionContent>
+            <AccordionContent>
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(faq.answer) }} />
+            </AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>

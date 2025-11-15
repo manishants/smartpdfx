@@ -90,6 +90,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     '',
     '/about',
+    '/tools',
     // '/blog' excluded for now
     '/contact',
     '/privacy-policy',

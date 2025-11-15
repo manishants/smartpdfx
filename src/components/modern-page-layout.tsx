@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import ToolSchemaInjector from '@/components/tool-schema-injector';
+import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
 
 interface ModernPageLayoutProps {
   title: string;
@@ -124,6 +125,10 @@ export function ModernPageLayout({
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {displayDescription}
             </p>
+            {/* Related Blog Link */}
+            <div className="flex justify-center">
+              <ToolRelatedBlogLink slug={slug} />
+            </div>
           </div>
         </div>
         {/* Inject WebApplication JSON-LD for this tool page */}
