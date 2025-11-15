@@ -215,12 +215,21 @@
   "/media-kit": {
     "title": "Media Kit",
     "description": "Brand assets, logos, usage guidelines, and press information.",
-    "keywords": ["media kit", "brand assets", "press", "logos"]
+    "keywords": [
+      "media kit",
+      "brand assets",
+      "press",
+      "logos"
+    ]
   },
   "/write-for-us": {
     "title": "Write for Us",
     "description": "Submit articles for review; we publish selected pieces within a week.",
-    "keywords": ["write for us", "guest post", "submit article"]
+    "keywords": [
+      "write for us",
+      "guest post",
+      "submit article"
+    ]
   },
   "/compress-pdf": {
     "title": "Compress PDF",
@@ -256,5 +265,15 @@
     "title": "",
     "description": "",
     "keywords": []
+  },
+  "/png-to-pdf": {
+    "title": "Multiple PNG to PDF Document Converter",
+    "description": "Using our PNG to PDF high quality Document Converter not only one, multiple png to pdf high quality converter. With our advanced AI integration, you can convert your documents fast and securely.",
+    "keywords": [
+      "png to pdf",
+      "free online",
+      "download",
+      "png to pdf multiple converter"
+    ]
   }
 }

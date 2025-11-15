@@ -19,6 +19,7 @@ import { ModernUploadArea } from "@/components/modern-upload-area";
 import { AllTools } from "@/components/all-tools";
 // Tool-specific sections removed
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 interface ConversionResult {
   success: boolean;
@@ -489,6 +490,7 @@ export default function PdfToWordPage() {
       <ModernSection>
         <FAQ />
       </ModernSection>
+      <ToolHowtoRenderer slug="pdf-to-word" />
       <ToolCustomSectionRenderer slug="pdf-to-word" />
       <AllTools />
     </>

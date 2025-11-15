@@ -12,6 +12,7 @@ import { AllTools } from '@/components/all-tools';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 interface UploadedFile {
   file: File;
@@ -224,7 +225,8 @@ export default function ImageColorPickerPage() {
         </Card>
       </div>
       <FAQ />
-    <ToolCustomSectionRenderer slug="image-color-picker" />
+      <ToolHowtoRenderer slug="image-color-picker" />
+      <ToolCustomSectionRenderer slug="image-color-picker" />
     </div>
     <AllTools />
     </>

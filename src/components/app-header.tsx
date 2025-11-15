@@ -318,7 +318,6 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
 
 function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) {
   const [upiCopied, setUpiCopied] = useState(false);
-  const [paypalCopied, setPaypalCopied] = useState(false);
 
   const copyToClipboard = (text: string, setter: (value: boolean) => void) => {
     navigator.clipboard.writeText(text);
@@ -327,7 +326,6 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
   };
   
   const upiId = "manishants@ybl";
-  const paypalId = "manishants@gmail.com";
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -362,15 +360,7 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
             </div>
           </div>
           
-           <div className="space-y-2">
-            <Label htmlFor="paypalId" className="font-semibold">PayPal</Label>
-             <div className="flex items-center gap-2">
-              <Input id="paypalId" value={paypalId} readOnly />
-              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(paypalId, setPaypalCopied)}>
-                 {paypalCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+          {/* PayPal removed per request */}
 
         </div>
       </DialogContent>

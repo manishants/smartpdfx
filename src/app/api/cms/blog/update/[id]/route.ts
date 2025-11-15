@@ -48,7 +48,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         body.layoutSettings !== undefined ? body.layoutSettings : existing.layoutSettings,
       faqs: Array.isArray(body.faqs) ? body.faqs : existing.faqs,
       upiId: body.upiId !== undefined ? body.upiId : existing.upiId,
-      paypalId: body.paypalId !== undefined ? body.paypalId : existing.paypalId,
       supportQrUrl: body.supportQrUrl !== undefined ? body.supportQrUrl : existing.supportQrUrl,
       supportLabel: body.supportLabel !== undefined ? body.supportLabel : existing.supportLabel,
       date: existing.date, // preserve original date

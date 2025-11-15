@@ -16,6 +16,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 export const dynamic = 'force-dynamic';
 
@@ -418,6 +419,7 @@ export default function PdfOcrPage() {
       <ModernSection>
         <FAQ />
       </ModernSection>
+      <ToolHowtoRenderer slug="pdf-ocr" />
       <ToolCustomSectionRenderer slug="pdf-ocr" />
       
       <AllTools />

@@ -14,6 +14,7 @@ import type { GenerateQrCodeInput, GenerateQrCodeOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 
 const FAQ = () => (
@@ -130,7 +131,8 @@ export default function QrCodeGeneratorPage() {
       {/* Tool-specific sections removed (home-only CMS sections) */}
         
         <FAQ />
-        <ToolCustomSectionRenderer slug="qr-code-generator" />
+      <ToolHowtoRenderer slug="qr-code-generator" />
+      <ToolCustomSectionRenderer slug="qr-code-generator" />
       </div>
     </div>
     <AllTools />

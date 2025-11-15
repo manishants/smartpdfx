@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 
 function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) {
   const [upiCopied, setUpiCopied] = useState(false);
-  const [paypalCopied, setPaypalCopied] = useState(false);
   const copyToClipboard = (text: string, setter: (value: boolean) => void) => {
     navigator.clipboard.writeText(text);
     setter(true);
@@ -24,7 +23,6 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
   };
   
   const upiId = "manishants@ybl";
-  const paypalId = "manishants@gmail.com";
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border border-white/10">
@@ -61,15 +59,7 @@ function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange:
             </div>
           </div>
           
-           <div className="space-y-2">
-            <Label htmlFor="paypalId" className="font-semibold">PayPal</Label>
-             <div className="flex items-center gap-2">
-              <Input id="paypalId" value={paypalId} readOnly className="bg-white/5 border-white/10" />
-              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(paypalId, setPaypalCopied)} className="hover:bg-white/10">
-                 {paypalCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+          {/* PayPal removed per request */}
         </div>
       </DialogContent>
     </Dialog>

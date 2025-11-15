@@ -48,7 +48,6 @@ export async function GET(req: Request) {
   const stores = {
     pageStore: readJsonSafe(path.join(libDir, 'pageStore.json')),
     blogStore: readJsonSafe(path.join(libDir, 'blogStore.json')),
-    commentsStore: readJsonSafe(path.join(libDir, 'commentsStore.json')),
     newsletterStore: readJsonSafe(path.join(libDir, 'newsletterStore.json')),
     categoriesStore: readJsonSafe(path.join(libDir, 'categoriesStore.json')),
     analyticsStore: readJsonSafe(path.join(libDir, 'analyticsStore.json')),

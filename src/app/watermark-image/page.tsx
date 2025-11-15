@@ -17,6 +17,7 @@ import type { WatermarkImageInput, WatermarkImageOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 export const dynamic = 'force-dynamic';
 
@@ -282,7 +283,8 @@ export default function WatermarkImagePage() {
           </CardContent>
         </Card>
         <FAQ />
-        <ToolCustomSectionRenderer slug="watermark-image" />
+      <ToolHowtoRenderer slug="watermark-image" />
+      <ToolCustomSectionRenderer slug="watermark-image" />
       </div>
     </main>
     <AllTools />

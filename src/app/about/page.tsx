@@ -266,6 +266,24 @@ export default function AboutUsPage() {
                     </div>
                 </div>
             </section>
+            {/* JSON-LD Schema for AboutPage */}
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'AboutPage',
+                  name: 'About SmartPDFx',
+                  url: 'https://smartpdfx.com/about',
+                  description: 'Learn about SmartPDFx, our mission, team, and commitment to free, privacy-first document tools.',
+                  publisher: {
+                    '@type': 'Organization',
+                    name: 'SmartPDFx',
+                    url: 'https://smartpdfx.com'
+                  }
+                })
+              }}
+            />
         </main>
     );
 }

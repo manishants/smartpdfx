@@ -21,6 +21,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 import { AIPoweredFeatures } from "@/components/ai-powered-features";
 import { ProTip } from "@/components/pro-tip";
@@ -833,8 +834,9 @@ export default function SplitPdfPage() {
 
             {/* Tool-specific sections removed (home-only CMS sections) */}
 
-            <FAQ />
-            <ToolCustomSectionRenderer slug="split-pdf" />
+      <ToolHowtoRenderer slug="split-pdf" />
+      <FAQ />
+      <ToolCustomSectionRenderer slug="split-pdf" />
             <AllTools />
         </ModernPageLayout>
     )

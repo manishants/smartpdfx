@@ -18,7 +18,7 @@ export default function SuperadminExportPage() {
   const [search, setSearch] = useState("");
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [format, setFormat] = useState<"json" | "csv">("json");
-  const [withComments, setWithComments] = useState(true);
+  // Comments export removed per request
   const [includeAssets, setIncludeAssets] = useState(false);
 
   useEffect(() => {
@@ -45,18 +45,11 @@ export default function SuperadminExportPage() {
   const buildBlogsExportHref = () => {
     const params = new URLSearchParams();
     params.set("format", format);
-    if (withComments) params.set("withComments", "1");
     if (selectedSlugs.length) params.set("slugs", selectedSlugs.join(","));
     return `/api/export/blogs?${params.toString()}`;
   };
 
-  const buildCommentsExportHref = (slug?: string, status?: string, csv?: boolean) => {
-    const params = new URLSearchParams();
-    params.set("format", csv ? "csv" : "json");
-    if (slug) params.set("slug", slug);
-    if (status) params.set("status", status);
-    return `/api/export/comments?${params.toString()}`;
-  };
+  // Comments export removed; helper deleted
 
   const newsletterHref = (csv?: boolean) => `/api/export/newsletter?format=${csv ? "csv" : "json"}`;
   const pagesHref = `/api/export/pages`;
@@ -75,14 +68,14 @@ export default function SuperadminExportPage() {
         <Breadcrumbs items={[{ label: "Superadmin", href: "/superadmin/analytics" }, { label: "Export" }]} />
         <header>
           <h1 className="text-3xl font-bold tracking-tight">Data Export</h1>
-          <p className="text-muted-foreground">Download blogs, comments, newsletter subscribers, and editable tool pages.</p>
+          <p className="text-muted-foreground">Download blogs, newsletter subscribers, and editable tool pages.</p>
         </header>
 
         {/* Blogs Export */}
         <Card>
           <CardHeader>
             <CardTitle>Blogs</CardTitle>
-            <CardDescription>Select posts, include comments, and choose format.</CardDescription>
+            <CardDescription>Select posts and choose format.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
@@ -97,10 +90,7 @@ export default function SuperadminExportPage() {
                   <option value="csv">CSV</option>
                 </select>
               </div>
-              <div className="flex items-center gap-2">
-                <input id="withComments" type="checkbox" checked={withComments} onChange={(e) => setWithComments(e.target.checked)} />
-                <Label htmlFor="withComments">Include comments (JSON only)</Label>
-              </div>
+              {/* Include comments removed */}
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -132,58 +122,11 @@ export default function SuperadminExportPage() {
                   Download Blogs
                 </Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href={buildCommentsExportHref(undefined, undefined, true)} download>
-                  Download All Comments (CSV)
-                </Link>
-              </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Comments Export */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Comments</CardTitle>
-            <CardDescription>Filter by blog and status; export JSON or CSV.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid sm:grid-cols-3 gap-3">
-              <div>
-                <Label>Blog slug</Label>
-                <select className="border rounded-md px-2 py-1 w-full" value={selectedSlugs[0] || ''} onChange={(e) => setSelectedSlugs(e.target.value ? [e.target.value] : [])}>
-                  <option value="">All</option>
-                  {posts.map((p) => (
-                    <option key={p.slug} value={p.slug}>{p.slug}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label>Status</Label>
-                <select className="border rounded-md px-2 py-1 w-full" id="status">
-                  <option value="">Any</option>
-                  <option value="approved">approved</option>
-                  <option value="pending">pending</option>
-                  <option value="spam">spam</option>
-                </select>
-              </div>
-              <div className="flex items-end">
-                <div className="flex gap-3">
-                  <Button asChild>
-                    <Link href={buildCommentsExportHref(selectedSlugs[0] || undefined, (document.getElementById('status') as HTMLSelectElement)?.value || undefined)} download>
-                      Download JSON
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href={buildCommentsExportHref(selectedSlugs[0] || undefined, (document.getElementById('status') as HTMLSelectElement)?.value || undefined, true)} download>
-                      Download CSV
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Comments export removed per request */}
 
         {/* Newsletter Export */}
         <Card>

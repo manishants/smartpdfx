@@ -40,7 +40,6 @@ export function CreatePostForm() {
     const [activeFormats, setActiveFormats] = useState<string[]>([]);
     // Support The Author fields
     const [upiId, setUpiId] = useState('');
-    const [paypalId, setPaypalId] = useState('');
     const [supportLabel, setSupportLabel] = useState('Support The Author');
 
     useEffect(() => {
@@ -118,7 +117,6 @@ export function CreatePostForm() {
 
         // Support fields
         if (upiId) formData.set('upiId', upiId);
-        if (paypalId) formData.set('paypalId', paypalId);
         if (supportLabel) formData.set('supportLabel', supportLabel);
         const supportQrInput = event.currentTarget.elements.namedItem('supportQr') as HTMLInputElement | null;
         if (supportQrInput && supportQrInput.files && supportQrInput.files[0]) {
@@ -149,7 +147,6 @@ export function CreatePostForm() {
             setMetaDescription('');
             setFaqs([]);
             setUpiId('');
-            setPaypalId('');
             setSupportLabel('Support The Author');
         }
 
@@ -342,10 +339,7 @@ export function CreatePostForm() {
                                 <Label htmlFor="upiId">UPI ID</Label>
                                 <Input id="upiId" name="upiId" placeholder="name@bank" value={upiId} onChange={e => setUpiId(e.target.value)} />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="paypalId">PayPal ID (email)</Label>
-                                <Input id="paypalId" name="paypalId" placeholder="your-email@example.com" value={paypalId} onChange={e => setPaypalId(e.target.value)} />
-                            </div>
+                            {/* PayPal field removed per request */}
                             <div className="space-y-2">
                                 <Label htmlFor="supportQr">Support QR Code</Label>
                                 <Input id="supportQr" name="supportQr" type="file" accept="image/*" />

@@ -35,7 +35,6 @@ export async function getBlogs(): Promise<BlogPost[]> {
     popular: !!post.popular,
     layoutSettings: post.layoutsettings ?? post.layoutSettings,
     upiId: post.upiid ?? post.upiId,
-    paypalId: post.paypalid ?? post.paypalId,
     supportQrUrl: post.supportqrurl ?? post.supportQrUrl,
     supportLabel: post.supportlabel ?? post.supportLabel,
   }));
@@ -71,7 +70,6 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
     popular: !!p.popular,
     layoutSettings: p.layoutsettings ?? p.layoutSettings,
     upiId: p.upiid ?? p.upiId,
-    paypalId: p.paypalid ?? p.paypalId,
     supportQrUrl: p.supportqrurl ?? p.supportQrUrl,
     supportLabel: p.supportlabel ?? p.supportLabel,
   } as BlogPost;
@@ -96,7 +94,6 @@ export async function createPost(formData: FormData) {
   const metaDescription = formData.get('metaDescription') as string;
   const published = formData.get('published') === 'true';
   const upiId = formData.get('upiId') as string | null;
-  const paypalId = formData.get('paypalId') as string | null;
   const supportLabel = (formData.get('supportLabel') as string | null) || null;
   const supportQr = formData.get('supportQr') as File | null;
 
@@ -162,7 +159,6 @@ export async function createPost(formData: FormData) {
     metadescription: metaDescription,
     faqs,
     upiid: upiId || undefined,
-    paypalid: paypalId || undefined,
     supportqrurl: supportQrUrl,
     supportlabel: supportLabel || undefined,
   };

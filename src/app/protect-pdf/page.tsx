@@ -16,6 +16,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 
 export const dynamic = 'force-dynamic';
@@ -349,6 +350,7 @@ export default function ProtectPdfPage() {
 
       {/* Tool-specific sections removed (home-only CMS sections) */}
 
+      <ToolHowtoRenderer slug="protect-pdf" />
       <FAQ />
       <ToolCustomSectionRenderer slug="protect-pdf" />
       <AllTools />

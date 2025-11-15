@@ -10,6 +10,7 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import ToolFaqRenderer from '@/components/tool-faq-renderer';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import type { ConvertImagesToPdfInput } from '@/lib/types';
 import { convertImagesToPdf } from '@/lib/actions/convert-images-to-pdf';
 import { FileImage, FileDown, Loader2, Sparkles, Zap, FileText, Image as ImageIcon } from "lucide-react";
@@ -272,6 +273,7 @@ export default function PngToPdfPage() {
         </div>
       </ModernSection>
 
+      <ToolHowtoRenderer slug="png-to-pdf" />
       <ToolFaqRenderer slug="png-to-pdf" />
       <ToolCustomSectionRenderer slug="png-to-pdf" />
       <AllTools />

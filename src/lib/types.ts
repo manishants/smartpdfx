@@ -395,7 +395,6 @@ export const BlogPostSchema = z.object({
       .optional(),
     // Support The Author fields
     upiId: z.string().optional(),
-    paypalId: z.string().optional(),
     supportQrUrl: z.string().optional(),
     supportLabel: z.string().optional(),
     layoutSettings: z
@@ -413,18 +412,7 @@ export const BlogPostSchema = z.object({
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 
 // Blog Comments
-export const BlogCommentSchema = z.object({
-  id: z.number().optional(),
-  blog_slug: z.string(),
-  name: z.string(),
-  email: z.string(),
-  content: z.string(),
-  link_url: z.string().nullable().optional(),
-  status: z.enum(['pending','spam','approved']).default('pending'),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
-});
-export type BlogComment = z.infer<typeof BlogCommentSchema>;
+// Comments backend removed; schema and type deleted
 
 const PointSchema = z.object({ x: z.number(), y: z.number() });
 

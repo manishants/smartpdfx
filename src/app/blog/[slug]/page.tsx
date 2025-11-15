@@ -8,7 +8,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from 'next';
 import { getPost, getBlogs } from "@/app/actions/blog";
-import { getApprovedComments, createComment } from "@/app/actions/comments";
+// Comments UI removed per request; keeping backend actions intact but not imported
 import { BlogTOC, TOCHeading } from '@/components/blog/BlogTOC';
 import { BlogRightSidebar } from '@/components/blog/BlogRightSidebar';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -73,7 +73,7 @@ export async function generateMetadata(
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
     const post = await getPost(params.slug);
     const allPosts = await getBlogs();
-    const comments = await getApprovedComments(params.slug);
+    // Comments removed from UI; no need to fetch approved comments
 
     if (!post || !post.published) {
         notFound();
@@ -249,54 +249,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </section>
           )}
 
-          {/* Comments Section */}
-          <section className="space-y-6">
-            <h2 className="text-2xl font-bold">Comments</h2>
-
-            {/* Comment Form */}
-            <form action={createComment} className="space-y-4 border rounded-md p-4" method="post">
-              <input type="hidden" name="blogSlug" value={params.slug} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium" htmlFor="name">Name</label>
-                  <input id="name" name="name" type="text" required className="mt-1 w-full border rounded-md px-3 py-2 bg-background" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium" htmlFor="email">Email</label>
-                  <input id="email" name="email" type="email" required className="mt-1 w-full border rounded-md px-3 py-2 bg-background" />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium" htmlFor="content">Comment</label>
-                <textarea id="content" name="content" required rows={4} className="mt-1 w-full border rounded-md px-3 py-2 bg-background" />
-              </div>
-              <div>
-                <label className="text-sm font-medium" htmlFor="linkUrl">Link (optional)</label>
-                <input id="linkUrl" name="linkUrl" type="url" className="mt-1 w-full border rounded-md px-3 py-2 bg-background" />
-                <p className="text-xs text-muted-foreground mt-1">If you include a link, your comment may be flagged for review.</p>
-              </div>
-              <button type="submit" className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:opacity-90">
-                Submit Comment
-              </button>
-            </form>
-
-            {/* Approved comments below the form */}
-            {comments.length === 0 ? (
-              <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
-            ) : (
-              <div className="space-y-4">
-                {comments.map((c) => (
-                  <div key={c.id} className="border rounded-md p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium">{c.name}</p>
-                      <span className="text-xs text-muted-foreground">{c.created_at ? new Date(c.created_at).toLocaleString() : ''}</span>
-                    </div>
-                    <p className="mt-2 text-sm">{c.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+          {/* Comments Section removed per request */}
         </div>
       </div>
     )

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -131,6 +132,7 @@ export default function WhatsMyIpPage() {
         </Card>
         <ToolDescription />
         <FAQ />
+        <ToolHowtoRenderer slug="whats-my-ip" />
         <ToolCustomSectionRenderer slug="whats-my-ip" />
       </div>
     </div>

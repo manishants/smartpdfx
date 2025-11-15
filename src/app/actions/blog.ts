@@ -38,7 +38,6 @@ const fallbackPosts: BlogPost[] = [
       tocHoverColor: 'hover:text-primary',
     },
     upiId: 'manishants@ybl',
-    paypalId: 'manishants@gmail.com',
     supportQrUrl: '/qr.jpg',
     supportLabel: 'Support The Author',
   }
@@ -66,7 +65,6 @@ export async function createPost(formData: FormData) {
   const metaDescription = formData.get('metaDescription') as string;
   const published = formData.get('published') === 'true';
   const upiId = formData.get('upiId') as string | null;
-  const paypalId = formData.get('paypalId') as string | null;
   const supportLabel = (formData.get('supportLabel') as string | null) || null;
   const supportQr = formData.get('supportQr') as File | null;
 
@@ -110,7 +108,6 @@ export async function createPost(formData: FormData) {
     metaDescription,
     faqs,
     upiId: upiId || undefined,
-    paypalId: paypalId || undefined,
     supportQrUrl,
     supportLabel: supportLabel || undefined,
   };

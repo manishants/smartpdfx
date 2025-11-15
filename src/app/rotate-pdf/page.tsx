@@ -19,6 +19,7 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 type Stage = 'upload' | 'rotate' | 'download';
 
@@ -520,7 +521,8 @@ export default function RotatePdfPage() {
             {/* Tool-specific sections removed as part of home-only sections refactor */}
 
             <FAQ />
-            <ToolCustomSectionRenderer slug="rotate-pdf" />
+      <ToolHowtoRenderer slug="rotate-pdf" />
+      <ToolCustomSectionRenderer slug="rotate-pdf" />
             <AllTools />
         </ModernPageLayout>
     );

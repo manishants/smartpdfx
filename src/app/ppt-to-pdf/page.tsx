@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 
 const ToolDescription = () => (
@@ -169,6 +170,7 @@ export default function PptToPdfPage() {
       </div>
       <ToolDescription />
       <FAQ />
+      <ToolHowtoRenderer slug="ppt-to-pdf" />
       <ToolCustomSectionRenderer slug="ppt-to-pdf" />
       {/* Tool-specific sections removed (home-only CMS sections) */}
     </main>

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import * as pdfjsLib from 'pdfjs-dist';
 import PptxGenJS from 'pptxgenjs';
 import { saveAs } from 'file-saver';
@@ -343,7 +344,8 @@ export default function PdfToPptPage() {
           <ModernSection>
             <FAQ />
           </ModernSection>
-          <ToolCustomSectionRenderer slug="pdf-to-ppt" />
+      <ToolHowtoRenderer slug="pdf-to-ppt" />
+      <ToolCustomSectionRenderer slug="pdf-to-ppt" />
         </div>
       </ModernPageLayout>
       <AllTools />

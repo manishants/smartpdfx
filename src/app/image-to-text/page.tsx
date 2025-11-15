@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { imageToText } from '@/ai/flows/image-to-text';
 import type { ImageToTextInput, ImageToTextOutput } from '@/lib/types';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 
 export const dynamic = 'force-dynamic';
@@ -254,7 +255,8 @@ export default function ImageToTextPage() {
         </Card>
       </div>
       <FAQ />
-    <ToolCustomSectionRenderer slug="image-to-text" />
+      <ToolHowtoRenderer slug="image-to-text" />
+      <ToolCustomSectionRenderer slug="image-to-text" />
     </main>
     <AllTools />
     </>

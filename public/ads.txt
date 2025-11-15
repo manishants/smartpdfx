@@ -1,0 +1,5 @@
+# Authorized Digital Sellers for smartpdfx.com
+# Google AdSense
+# Reference: https://support.google.com/adsense/answer/7532444
+
+google.com, 9014719958396297, DIRECT, f08c47fec0942fa0

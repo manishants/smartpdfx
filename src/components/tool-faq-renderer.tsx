@@ -44,6 +44,20 @@ export function ToolFaqRenderer({ slug, className, title = "Tool FAQs", subtitle
 
   if (!faqs || faqs.length === 0) return null;
 
+  // Build FAQPage JSON-LD
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    }))
+  };
+
   return (
     <ModernSection
       title={title}
@@ -60,6 +74,8 @@ export function ToolFaqRenderer({ slug, className, title = "Tool FAQs", subtitle
           </AccordionItem>
         ))}
       </Accordion>
+
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </ModernSection>
   );
 }

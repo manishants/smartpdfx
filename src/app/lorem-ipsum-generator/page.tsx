@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 const ToolDescription = () => (
     <div className="mt-12">
@@ -200,7 +201,8 @@ export default function LoremIpsumGeneratorPage() {
         
         <ToolDescription />
         <FAQ />
-        <ToolCustomSectionRenderer slug="lorem-ipsum-generator" />
+      <ToolHowtoRenderer slug="lorem-ipsum-generator" />
+      <ToolCustomSectionRenderer slug="lorem-ipsum-generator" />
       </div>
     </div>
     <AllTools />

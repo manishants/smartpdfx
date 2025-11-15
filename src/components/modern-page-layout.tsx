@@ -1,9 +1,11 @@
 "use client";
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+import ToolSchemaInjector from '@/components/tool-schema-injector';
 
 interface ModernPageLayoutProps {
   title: string;
@@ -26,6 +28,45 @@ export function ModernPageLayout({
   children,
   className
 }: ModernPageLayoutProps) {
+  const pathname = usePathname();
+  const slug = useMemo(() => {
+    const parts = (pathname || '/').split('/').filter(Boolean);
+    return parts[parts.length - 1] || '';
+  }, [pathname]);
+  const [displayTitle, setDisplayTitle] = useState<string>(title);
+  const [displayDescription, setDisplayDescription] = useState<string>(description);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchHeading = async () => {
+      try {
+        if (!slug) return;
+        const res = await fetch(`/api/tools/heading/${slug}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const h = String(json?.heading || '').trim();
+        if (!cancelled && h) {
+          setDisplayTitle(h);
+        }
+      } catch {}
+    };
+    const fetchDescription = async () => {
+      try {
+        if (!slug) return;
+        const res = await fetch(`/api/tools/description/${slug}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const json = await res.json();
+        const d = String(json?.description || '').trim();
+        if (!cancelled && d) {
+          setDisplayDescription(d);
+        }
+      } catch {}
+    };
+    fetchHeading();
+    fetchDescription();
+    return () => { cancelled = true; };
+  }, [slug]);
+
   return (
     <div className={cn("min-h-screen bg-gradient-to-br from-background via-background to-background", className)}>
       {/* Hero Section */}
@@ -76,15 +117,17 @@ export function ModernPageLayout({
               // Theme-aware heading gradient similar to homepage
               `from-slate-900 via-blue-900 to-purple-900 dark:from-white dark:via-blue-100 dark:to-purple-100`
             )}>
-              {title}
+              {displayTitle}
             </h1>
             
             {/* Description */}
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              {description}
+              {displayDescription}
             </p>
           </div>
         </div>
+        {/* Inject WebApplication JSON-LD for this tool page */}
+        <ToolSchemaInjector slug={slug} />
       </div>
       
       {/* Content */}

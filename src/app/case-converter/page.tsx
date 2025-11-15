@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 
 const ToolDescription = () => (
@@ -268,7 +269,8 @@ export default function CaseConverterPage() {
           
           <ToolDescription />
           <FAQ />
-          <ToolCustomSectionRenderer slug="case-converter" />
+      <ToolHowtoRenderer slug="case-converter" />
+      <ToolCustomSectionRenderer slug="case-converter" />
           <AllTools />
         </div>
       </ModernSection>

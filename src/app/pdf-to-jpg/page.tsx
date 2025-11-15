@@ -23,6 +23,7 @@ import { pdfToPng } from '@/lib/actions/pdf-to-png';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 
 type PdfToJpgOutput = {
@@ -404,6 +405,7 @@ export default function PdfToJpgPage() {
 
       {/* Tool-specific sections removed */}
 
+      <ToolHowtoRenderer slug="pdf-to-jpg" />
       <FAQ />
       <ToolCustomSectionRenderer slug="pdf-to-jpg" />
       <AllTools />

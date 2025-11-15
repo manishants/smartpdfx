@@ -23,6 +23,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // Tool-specific sections removed
 
 export const dynamic = 'force-dynamic';
@@ -505,6 +506,7 @@ export default function CompressPdfPage() {
       {/* Tool-specific sections removed */}
 
       <FAQ />
+      <ToolHowtoRenderer slug="compress-pdf" />
       <ToolCustomSectionRenderer slug="compress-pdf" />
       <AllTools />
     </ModernPageLayout>

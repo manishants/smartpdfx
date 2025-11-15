@@ -13,6 +13,7 @@ import type { GenerateFaviconInput, GenerateFaviconOutput } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 interface UploadedFile {
   file: File;
@@ -199,6 +200,7 @@ export default function FaviconGeneratorPage() {
       
       {/* Tool-specific sections removed as part of home-only sections refactor */}
       
+      <ToolHowtoRenderer slug="favicon-generator" />
       <FAQ />
       <ToolCustomSectionRenderer slug="favicon-generator" />
     </main>

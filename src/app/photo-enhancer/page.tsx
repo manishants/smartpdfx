@@ -17,6 +17,7 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // Removed ToolSections and useToolSections imports as part of home-only sections refactor
 
 export const dynamic = 'force-dynamic';
@@ -392,6 +393,7 @@ export default function EnhancePhotoPage() {
 
       <FAQ />
 
+      <ToolHowtoRenderer slug="photo-enhancer" />
       <ToolCustomSectionRenderer slug="photo-enhancer" />
       <ModernSection>
         <AllTools />

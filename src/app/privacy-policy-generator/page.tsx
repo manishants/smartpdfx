@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 // ToolSections and useToolSections removed as part of home-only sections architecture
 
 const FAQ = () => (
@@ -158,7 +159,8 @@ If you have any questions about this Privacy Policy, You can contact us:
       {/* Tool-specific sections removed (home-only CMS sections) */}
         
         <FAQ />
-        <ToolCustomSectionRenderer slug="privacy-policy-generator" />
+      <ToolHowtoRenderer slug="privacy-policy-generator" />
+      <ToolCustomSectionRenderer slug="privacy-policy-generator" />
       </div>
     </div>
     <AllTools />

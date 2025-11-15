@@ -18,6 +18,7 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 // Tool-specific sections removed
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import ToolFaqRenderer from '@/components/tool-faq-renderer';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 export const dynamic = 'force-dynamic';
 
@@ -280,6 +281,7 @@ export default function JpgToPdfPage() {
 
       {/* Tool-specific sections removed */}
 
+      <ToolHowtoRenderer slug="jpg-to-pdf" />
       <ToolFaqRenderer slug="jpg-to-pdf" />
       <ToolCustomSectionRenderer slug="jpg-to-pdf" />
       <AllTools />

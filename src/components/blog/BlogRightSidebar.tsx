@@ -11,7 +11,7 @@ import DonateDialog from '@/components/donate-dialog';
 export function BlogRightSidebar({ post }: { post: BlogPost }) {
   const category = post.category || 'general';
 
-  const hasSupportInfo = Boolean(post.supportQrUrl || post.upiId || post.paypalId);
+  const hasSupportInfo = Boolean(post.supportQrUrl || post.upiId);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
 
   return (
@@ -53,12 +53,7 @@ export function BlogRightSidebar({ post }: { post: BlogPost }) {
                   <div className="text-muted-foreground break-all">{post.upiId}</div>
                 </div>
               )}
-              {post.paypalId && (
-                <div className="text-sm">
-                  <div className="font-medium">PayPal</div>
-                  <div className="text-muted-foreground break-all">{post.paypalId}</div>
-                </div>
-              )}
+              {/* PayPal UI removed per request */}
               <Button className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white" onClick={() => setIsDonateOpen(true)}>
                 Support
               </Button>
@@ -79,7 +74,6 @@ export function BlogRightSidebar({ post }: { post: BlogPost }) {
         isOpen={isDonateOpen}
         onOpenChange={setIsDonateOpen}
         upiId={post.upiId || undefined}
-        paypalId={post.paypalId || undefined}
         qrUrl={post.supportQrUrl || undefined}
         title={post.supportLabel || 'Support SmartPDFx'}
       />

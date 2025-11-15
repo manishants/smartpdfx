@@ -78,7 +78,7 @@ export default function ToolsPageBuilder() {
             Choose a tool to edit its page content. Use “Edit Section Below FAQ” to add Type A/B sections saved to code.
           </CardDescription>
         </CardHeader>
-        <div className="grid gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 p-6 md:grid-cols-2 lg:grid-cols-2">
           {filtered.map((tool) => (
             <Card key={tool.href} className="p-4">
               <div className="flex items-start justify-between">
@@ -98,6 +98,21 @@ export default function ToolsPageBuilder() {
                 <Button asChild size="sm">
                   <Link href={`/superadmin/pages/tools/section-builder/${toSlug(tool.href)}`}>
                     <Layers className="mr-2 h-4 w-4" /> Edit Section Below FAQ
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/superadmin/pages/tools/howto-editor/${toSlug(tool.href)}`}>
+                    HowTo Editor
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/superadmin/pages/tools/heading-editor/${toSlug(tool.href)}`}>
+                    H1 Heading Editor
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/superadmin/pages/tools/description-editor/${toSlug(tool.href)}`}>
+                    Description Editor
                   </Link>
                 </Button>
                 <Button asChild size="sm" variant="secondary">

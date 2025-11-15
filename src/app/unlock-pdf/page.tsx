@@ -16,6 +16,7 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 
@@ -339,6 +340,7 @@ export default function UnlockPdfPage() {
       {/* Tool-specific sections removed as part of home-only sections refactor */}
 
       <FAQ />
+      <ToolHowtoRenderer slug="unlock-pdf" />
       <ToolCustomSectionRenderer slug="unlock-pdf" />
       <AllTools />
     </ModernPageLayout>

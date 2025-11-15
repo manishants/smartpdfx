@@ -20,7 +20,6 @@ export async function POST(req: Request) {
     const manualToc: any[] = Array.isArray(body.manualToc) ? body.manualToc : [];
     const faqs: any[] = Array.isArray(body.faqs) ? body.faqs : [];
     const upiId: string | undefined = body.upiId || undefined;
-    const paypalId: string | undefined = body.paypalId || undefined;
     const supportQrUrl: string | undefined = body.supportQrUrl || undefined;
     const supportLabel: string | undefined = body.supportLabel || undefined;
 
@@ -52,7 +51,6 @@ export async function POST(req: Request) {
       layoutSettings,
       manualToc,
       upiId,
-      paypalId,
       supportQrUrl,
       supportLabel,
     };

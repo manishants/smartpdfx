@@ -21,6 +21,7 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 export const dynamic = 'force-dynamic';
 
@@ -305,7 +306,8 @@ export default function ImageConverterPage() {
         {/* Tool-specific sections removed (home-only CMS sections) */}
 
         <FAQ />
-        <ToolCustomSectionRenderer slug="image-converter" />
+      <ToolHowtoRenderer slug="image-converter" />
+      <ToolCustomSectionRenderer slug="image-converter" />
         <AllTools />
       </div>
     </ModernPageLayout>

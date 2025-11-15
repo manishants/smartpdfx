@@ -17,6 +17,7 @@ import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 // Tool-specific sections removed
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 
@@ -384,6 +385,7 @@ export default function MergePdfPage() {
       {/* Tool-specific sections removed */}
 
       <FAQ />
+      <ToolHowtoRenderer slug="merge-pdf" />
       <ToolCustomSectionRenderer slug="merge-pdf" />
       <AllTools />
     </ModernPageLayout>

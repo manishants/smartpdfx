@@ -15,6 +15,7 @@ import { pdfToExcelAi } from '@/ai/flows/pdf-to-excel';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 import * as pdfjsLib from 'pdfjs-dist';
 import * as XLSX from 'xlsx';
 
@@ -294,6 +295,7 @@ export default function PdfToExcelPage() {
         </Accordion>
       </ModernSection>
 
+      <ToolHowtoRenderer slug="pdf-to-excel" />
       <ToolCustomSectionRenderer slug="pdf-to-excel" />
       <AllTools />
     </ModernPageLayout>

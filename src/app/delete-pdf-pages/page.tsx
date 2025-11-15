@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
+import ToolHowtoRenderer from '@/components/tool-howto-renderer';
 
 
 type Stage = 'upload' | 'select' | 'download';
@@ -331,7 +332,8 @@ export default function DeletePdfPagesPage() {
             </div>
             <ToolDescription />
             <FAQ />
-            <ToolCustomSectionRenderer slug="delete-pdf-pages" />
+      <ToolHowtoRenderer slug="delete-pdf-pages" />
+      <ToolCustomSectionRenderer slug="delete-pdf-pages" />
             <AllTools/>
         </div>
     )

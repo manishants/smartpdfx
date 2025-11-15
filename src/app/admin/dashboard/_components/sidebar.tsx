@@ -61,9 +61,7 @@ export function Sidebar() {
                                 <NavLink href="/admin/blog/new" icon={PlusCircle}>
                                     New Post
                                 </NavLink>
-                                <NavLink href="/admin/blog/comments" icon={MessageSquare}>
-                                    Comments
-                                </NavLink>
+                                {/* Comments section removed per request */}
                             </CollapsibleContent>
                         </Collapsible>
                     </nav>

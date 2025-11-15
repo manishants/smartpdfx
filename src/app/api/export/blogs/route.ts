@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAllBlogs, getBlogBySlug } from '@/lib/blogFs'
-import { getAllCommentsFs } from '@/lib/commentsFs'
+// Comments export removed
 
 function toCSV(rows: Record<string, any>[]): string {
   if (!rows.length) return ''
@@ -19,7 +19,7 @@ function toCSV(rows: Record<string, any>[]): string {
 export async function GET(req: Request) {
   const url = new URL(req.url)
   const format = (url.searchParams.get('format') || 'json').toLowerCase()
-  const withComments = url.searchParams.get('withComments') === '1' || url.searchParams.get('withComments') === 'true'
+  // 'withComments' parameter is no longer supported; comments backend removed
   const slugsParam = url.searchParams.get('slugs') || ''
   const slugs = slugsParam
     .split(',')
@@ -53,30 +53,9 @@ export async function GET(req: Request) {
     })
   }
 
-  if (!withComments) {
-    const filename = `blogs_${new Date().toISOString().slice(0,10)}.json`
-    return NextResponse.json(
-      { posts },
-      {
-        headers: {
-          'content-disposition': `attachment; filename="${filename}"`,
-        },
-      }
-    )
-  }
-
-  const comments = getAllCommentsFs()
-  const bySlug: Record<string, any[]> = {}
-  for (const c of comments) {
-    const key = c.blog_slug
-    if (!key) continue
-    ;(bySlug[key] = bySlug[key] || []).push(c)
-  }
-
-  const result = posts.map(p => ({ ...p, comments: bySlug[p.slug] || [] }))
-  const filename = `blogs_with_comments_${new Date().toISOString().slice(0,10)}.json`
+  const filename = `blogs_${new Date().toISOString().slice(0,10)}.json`
   return NextResponse.json(
-    { posts: result },
+    { posts },
     {
       headers: {
         'content-disposition': `attachment; filename="${filename}"`,

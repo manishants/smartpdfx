@@ -143,12 +143,6 @@ export function SuperadminSidebar() {
                   <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pl-8 mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
-                  <NavLink href="/superadmin/pages" icon={Globe}>
-                    All Pages
-                  </NavLink>
-                  <NavLink href="/superadmin/pages/create" icon={PlusCircle}>
-                    Create Page
-                  </NavLink>
                   <NavLink href="/superadmin/pages/tools" icon={PenTool}>
                     Edit Tool Pages
                   </NavLink>

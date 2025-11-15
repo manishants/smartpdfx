@@ -12,14 +12,12 @@ type DonateDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   upiId?: string;
-  paypalId?: string;
   qrUrl?: string;
   title?: string;
 };
 
-export default function DonateDialog({ isOpen, onOpenChange, upiId, paypalId, qrUrl, title }: DonateDialogProps) {
+export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title }: DonateDialogProps) {
   const [upiCopied, setUpiCopied] = useState(false);
-  const [paypalCopied, setPaypalCopied] = useState(false);
 
   const copyToClipboard = (text: string, setter: (v: boolean) => void) => {
     if (!text) return;
@@ -29,7 +27,6 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, paypalId, qr
   };
 
   const fallbackUpi = "manishants@ybl";
-  const fallbackPaypal = "manishants@gmail.com";
   const heading = title || "Support SmartPDFx";
 
   return (
@@ -65,17 +62,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, paypalId, qr
               </Button>
             </div>
           </div>
-
-          {/* PayPal */}
-          <div className="space-y-2">
-            <Label htmlFor="paypalId" className="font-semibold">PayPal</Label>
-            <div className="flex items-center gap-2">
-              <Input id="paypalId" value={paypalId || fallbackPaypal} readOnly className="bg-white/5 border-white/10" />
-              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(paypalId || fallbackPaypal, setPaypalCopied)} className="hover:bg-white/10">
-                {paypalCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+          {/* PayPal removed per request */}
         </div>
       </DialogContent>
     </Dialog>

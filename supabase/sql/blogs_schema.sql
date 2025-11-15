@@ -35,7 +35,6 @@ create table if not exists public.blogs (
   popular boolean default false,
   layoutSettings jsonb,
   upiId text,
-  paypalId text,
   supportQrUrl text,
   supportLabel text,
   created_at timestamptz not null default now(),
@@ -225,7 +224,7 @@ using (bucket_id = 'blogs' and (public.is_admin() or public.is_superadmin()));
 insert into public.blogs (
   slug, title, content, author, imageUrl, published,
   status, seoTitle, metaDescription, faqs, category, popular,
-  layoutSettings, upiId, paypalId, supportQrUrl, supportLabel
+  layoutSettings, upiId, supportQrUrl, supportLabel
 ) values (
   'sample-post',
   'Sample Post',
@@ -241,7 +240,6 @@ insert into public.blogs (
   false,
   '{"showBreadcrumbs": true, "leftSidebarEnabled": true, "rightSidebarEnabled": true}'::jsonb,
   'manishants@ybl',
-  'manishants@gmail.com',
   'https://example.com/qr.png',
   'Support The Author'
 )
