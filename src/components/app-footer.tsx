@@ -113,6 +113,12 @@ export function AppFooter() {
                             <Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 Privacy Policy
                             </Link>
+                            <Link href="/refund-policy" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Refund Policy
+                            </Link>
+                            <Link href="/shipping-policy" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Shipping & Delivery Policy
+                            </Link>
                             <Link href="/terms-and-conditions" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 Terms & Conditions
                             </Link>
