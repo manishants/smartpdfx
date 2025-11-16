@@ -94,6 +94,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // '/blog' excluded for now
     '/contact',
     '/privacy-policy',
+    '/refund-policy',
     '/terms-and-conditions',
     '/disclaimer',
   ].map((route) => ({
