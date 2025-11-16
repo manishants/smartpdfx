@@ -1,0 +1,59 @@
+{
+  "hero": {
+    "badge": "KI-gestützt und sicher",
+    "title": "Alle PDF-Tools – Kostenlos, schnell und sicher",
+    "subtitle": "PDFs und Bilder konvertieren, komprimieren, bearbeiten und schützen – mit klarem Design und starker Privatsphäre."
+  },
+  "features": {
+    "fast": "Blitzschnell",
+    "secure": "Sicher durch Design",
+    "quality": "Premiumqualität"
+  },
+  "sections": {
+    "explore": {
+      "title": "Tools erkunden",
+      "subtitle": "Klicke auf ein beliebiges Tool, um zu starten. Symbole und kurze Beschreibungen helfen bei der Auswahl."
+    },
+    "links": {
+      "title": "Links zu allen Tools",
+      "subtitle": "Schnelle interne Links zu jedem Tool für bessere Auffindbarkeit und Navigation"
+    },
+    "howto": {
+      "title": "Schritte zur Nutzung",
+      "subtitle": "Einfache Anleitung zur Nutzung der SmartPDFx-Tools"
+    },
+    "faq": {
+      "title": "Häufige Fragen",
+      "subtitle": "Alles, was du wissen musst"
+    }
+  },
+  "howto": {
+    "step1": "Wähle ein Tool aus dem obigen Raster.",
+    "step2": "Lade deine Datei per Drag & Drop oder über die Upload-Schaltfläche hoch.",
+    "step3": "Passe die verfügbaren Optionen für beste Ergebnisse an.",
+    "step4": "Verarbeite die Datei und warte auf das Ergebnis.",
+    "step5": "Lade dein Ergebnis sicher herunter."
+  },
+  "faq": {
+    "q1": "Ist SmartPDFx wirklich kostenlos?",
+    "a1": "Ja. Die meisten unserer Tools sind kostenlos. Wir legen Wert auf Leistung, Privatsphäre und Qualität.",
+    "q2": "Bewahrt ihr meine Dateien auf?",
+    "a2": "Nein. Dateien werden vorübergehend oder clientseitig verarbeitet. Wir speichern deine Dateien nicht.",
+    "q3": "Funktioniert es auf meinem Handy?",
+    "a3": "Ja. Die Tools-Seite ist vollständig responsive und für Mobilgeräte und Google Discover optimiert."
+  },
+  "sidebar": {
+    "blogs": {
+      "title": "Neueste Blogs",
+      "subtitle": "Anleitungen und Tipps zu unseren Tools",
+      "empty": "Noch keine Beiträge. Schau bald wieder vorbei."
+    }
+  },
+  "jsonld": {
+    "itemListName": "Alle PDF-Tools – Kostenlos, schnell und sicher",
+    "faqName": "Sind die SmartPDFx-Tools kostenlos?",
+    "faqA": "Ja. Die meisten sind kostenlos. Wir setzen auf schnelle, sichere und datenschutzfreundliche Verarbeitung.",
+    "howtoName": "So nutzt du die SmartPDFx-Tools",
+    "howtoDesc": "Wähle ein Tool, lade die Datei hoch, konfiguriere Optionen, verarbeite und lade herunter."
+  }
+}

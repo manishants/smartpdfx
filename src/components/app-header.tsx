@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 
 const NavLink = ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => {
@@ -553,7 +554,9 @@ export function AppHeader() {
                         <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
                         <span className="sr-only">Search Tools</span>
                     </Button>
-                    
+
+                    <LanguageSwitcher />
+
                     <ThemeSwitcher />
                     
                     <Button

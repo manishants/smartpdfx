@@ -1,0 +1,59 @@
+{
+  "hero": {
+    "badge": "Impulsado por IA y seguro",
+    "title": "Todas las herramientas PDF – Gratis, rápidas y seguras",
+    "subtitle": "Convierte, comprime, edita y protege PDFs e imágenes con un diseño limpio y privacidad sólida."
+  },
+  "features": {
+    "fast": "Velocidad relámpago",
+    "secure": "Seguro por diseño",
+    "quality": "Calidad premium"
+  },
+  "sections": {
+    "explore": {
+      "title": "Explorar herramientas",
+      "subtitle": "Haz clic en cualquier herramienta para empezar. Los iconos y descripciones cortas te ayudan a elegir."
+    },
+    "links": {
+      "title": "Enlaces de todas las herramientas",
+      "subtitle": "Enlaces internos rápidos a cada herramienta para mejor descubrimiento y navegación"
+    },
+    "howto": {
+      "title": "Pasos de uso",
+      "subtitle": "Una guía sencilla para usar las herramientas de SmartPDFx"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "subtitle": "Todo lo que necesitas saber"
+    }
+  },
+  "howto": {
+    "step1": "Selecciona una herramienta del panel superior.",
+    "step2": "Sube tu archivo por arrastrar y soltar o con el botón de subir.",
+    "step3": "Ajusta las opciones disponibles para mejores resultados.",
+    "step4": "Procesa el archivo y espera el resultado.",
+    "step5": "Descarga tu salida de forma segura."
+  },
+  "faq": {
+    "q1": "¿SmartPDFx es realmente gratis?",
+    "a1": "Sí. La mayoría de nuestras herramientas son gratuitas. Nos centramos en rendimiento, privacidad y calidad.",
+    "q2": "¿Guardáis mis archivos?",
+    "a2": "No. Los archivos se procesan de forma transitoria o del lado del cliente. No retenemos tus archivos.",
+    "q3": "¿Funciona en mi teléfono?",
+    "a3": "Sí. La página de herramientas es totalmente responsive y optimizada para móviles y Google Discover."
+  },
+  "sidebar": {
+    "blogs": {
+      "title": "Últimos blogs",
+      "subtitle": "Guías y consejos relacionados con nuestras herramientas",
+      "empty": "Aún no hay publicaciones. Vuelve pronto."
+    }
+  },
+  "jsonld": {
+    "itemListName": "Todas las herramientas PDF – Gratis, rápidas y seguras",
+    "faqName": "¿Las herramientas de SmartPDFx son gratuitas?",
+    "faqA": "Sí. La mayoría son gratuitas. Nos centramos en procesamiento rápido, seguro y con privacidad.",
+    "howtoName": "Cómo usar las herramientas de SmartPDFx",
+    "howtoDesc": "Elige una herramienta, sube tu archivo, configura opciones, procesa y descarga."
+  }
+}

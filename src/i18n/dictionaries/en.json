@@ -1,0 +1,59 @@
+{
+  "hero": {
+    "badge": "AI-Powered & Secure",
+    "title": "All PDF Tools – Free, Fast & Secure",
+    "subtitle": "Convert, compress, edit, and protect PDFs with a clean, minimal design and strong privacy."
+  },
+  "features": {
+    "fast": "Lightning Fast",
+    "secure": "Secure by Design",
+    "quality": "Premium Quality"
+  },
+  "sections": {
+    "explore": {
+      "title": "Explore Tools",
+      "subtitle": "Click any tool to start. Icons and short descriptions help you choose."
+    },
+    "links": {
+      "title": "All Tools Links",
+      "subtitle": "Quick internal links to every tool for better discovery and navigation"
+    },
+    "howto": {
+      "title": "How-To Steps",
+      "subtitle": "A simple guide to using SmartPDFx tools"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know"
+    }
+  },
+  "howto": {
+    "step1": "Select a tool from the grid above.",
+    "step2": "Upload your file via drag & drop or the upload button.",
+    "step3": "Adjust any available options for best results.",
+    "step4": "Process the file and wait for the result.",
+    "step5": "Download your output securely."
+  },
+  "faq": {
+    "q1": "Is SmartPDFx really free?",
+    "a1": "Yes. Most of our tools are free. We focus on performance, privacy, and quality.",
+    "q2": "Do you keep my files?",
+    "a2": "No. Files are processed transiently or client-side. We do not retain your files.",
+    "q3": "Will it work on my phone?",
+    "a3": "Yes. The tools page is fully responsive and optimized for mobile and Google Discover."
+  },
+  "sidebar": {
+    "blogs": {
+      "title": "Latest Blogs",
+      "subtitle": "Guides and tips related to our tools",
+      "empty": "No posts yet. Check back soon."
+    }
+  },
+  "jsonld": {
+    "itemListName": "All PDF Tools – Free, Fast & Secure",
+    "faqName": "Are SmartPDFx tools free to use?",
+    "faqA": "Yes. Most tools are free to use. We focus on fast, secure, and privacy-friendly processing.",
+    "howtoName": "How to use SmartPDFx tools",
+    "howtoDesc": "Choose a tool, upload your file, configure options, process, and download."
+  }
+}

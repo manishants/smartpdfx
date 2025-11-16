@@ -1,24 +1,28 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server'
 
-// Server-side guard: require superadmin cookie for all /superadmin routes except login
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  if (!pathname.startsWith('/superadmin')) return NextResponse.next();
+const LOCALE_REGEX = /^(en|hi|es|fr|de)$/
 
-  const isLoginPath = pathname === '/superadmin/login';
-  if (isLoginPath) return NextResponse.next();
+export function middleware(req: Request) {
+  const url = new URL(req.url)
+  const { pathname } = url
+  const parts = pathname.split('/').filter(Boolean)
+  if (parts.length === 0) return NextResponse.next()
 
-  const cookie = req.cookies.get('smartpdfx_superadmin');
-  const hasCookie = cookie?.value === 'true';
+  const maybeLocale = parts[0]
+  if (!LOCALE_REGEX.test(maybeLocale)) return NextResponse.next()
 
-  if (hasCookie) return NextResponse.next();
+  // Keep localized Tools route; rewrite other localized paths to root equivalents
+  if (parts[1] === 'tools') {
+    return NextResponse.next()
+  }
 
-  const url = req.nextUrl.clone();
-  url.pathname = '/superadmin/login';
-  url.searchParams.set('redirect', pathname);
-  return NextResponse.redirect(url);
+  // Rewrite /{locale}/x/y -> /x/y (URL remains localized)
+  const rest = parts.slice(1).join('/')
+  const target = `/${rest}`
+  url.pathname = target
+  return NextResponse.rewrite(url)
 }
 
 export const config = {
-  matcher: ['/superadmin/:path*'],
-};
+  matcher: ['/((?!_next|assets|api).*)'],
+}
