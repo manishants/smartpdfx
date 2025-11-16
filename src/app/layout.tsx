@@ -53,10 +53,10 @@ export default function RootLayout({
         {/* Preconnect to AdSense domain without blocking rendering */}
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        {/* Defer AdSense script loading to after page becomes interactive */}
+        {/* Google AdSense script in <head>; loads after hydration */}
         <Script
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-          strategy="lazyOnload"
+          strategy="afterInteractive"
           async
           crossOrigin="anonymous"
         />
