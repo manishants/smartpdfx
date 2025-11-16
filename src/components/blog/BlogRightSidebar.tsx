@@ -31,7 +31,7 @@ export function BlogRightSidebar({ post }: { post: BlogPost }) {
       {/* Support The Author */}
       <Card>
         <CardHeader>
-          <CardTitle>{post.supportLabel || 'Support The Author'}</CardTitle>
+          <CardTitle>{post.supportLabel || 'Buy a Cup of Coffee for me'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {hasSupportInfo ? (
@@ -55,14 +55,14 @@ export function BlogRightSidebar({ post }: { post: BlogPost }) {
               )}
               {/* PayPal UI removed per request */}
               <Button className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white" onClick={() => setIsDonateOpen(true)}>
-                Support
+                Buy a Cup of Coffee for me
               </Button>
             </>
           ) : (
             <>
               <p className="text-sm text-muted-foreground">If you find our tools helpful, consider supporting our work.</p>
               <Button className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white" onClick={() => setIsDonateOpen(true)}>
-                Support
+                Buy a Cup of Coffee for me
               </Button>
             </>
           )}
@@ -75,7 +75,7 @@ export function BlogRightSidebar({ post }: { post: BlogPost }) {
         onOpenChange={setIsDonateOpen}
         upiId={post.upiId || undefined}
         qrUrl={post.supportQrUrl || undefined}
-        title={post.supportLabel || 'Support SmartPDFx'}
+        title={post.supportLabel || 'Buy a Cup of Coffee for me'}
       />
     </div>
   );

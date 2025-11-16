@@ -167,7 +167,7 @@ export default function HomeClient() {
                   
                   <Button size="lg" variant="outline" onClick={() => setIsDonateOpen(true)} className="border-primary/20 hover:bg-primary/5 group">
                     <Heart className="mr-2 h-5 w-5 fill-current text-red-500 group-hover:scale-110 transition-transform" />
-                    Support Us
+                    Buy a Cup of Coffee for me
                   </Button>
               </div>
             </div>
@@ -212,7 +212,7 @@ export default function HomeClient() {
         </div>
       </section>
       <AllTools />
-      <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} qrUrl="/qr.jpg" title="Support SmartPDFx" />
+      <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} qrUrl="/qr.jpg" />
     </>
   );
 }

@@ -38,7 +38,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
   };
 
   const fallbackUpi = "manishants@ybl";
-  const heading = title || "Support SmartPDFx";
+  const heading = title || "Buy a Cup of Coffee for me";
 
   const loadRazorpayScript = useCallback(() => {
     return new Promise<boolean>((resolve) => {
@@ -91,7 +91,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
         amount: orderJson.order.amount,
         currency: orderJson.order.currency,
         name: "SmartPDFx",
-        description: "Support SmartPDFx",
+        description: "Buy a Cup of Coffee for me",
         order_id: orderJson.order.id,
         theme: { color: "#3b82f6" },
         handler: async (resp: any) => {
@@ -172,7 +172,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
             <div className="flex items-center gap-2">
               <Input id="donationAmount" type="number" min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-white/5 border-white/10" />
               <Button onClick={startRazorpayCheckout} disabled={loading} className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white">
-                {loading ? 'Processing…' : 'Support with Razorpay'}
+                {loading ? 'Processing…' : 'Buy a Cup of Coffee for me'}
               </Button>
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}

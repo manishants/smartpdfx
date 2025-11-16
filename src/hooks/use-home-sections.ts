@@ -29,7 +29,7 @@ const defaultHomeSections: HomeSectionData[] = [
       ],
       buttons: [
         { text: 'Start Creating', href: '#tools', variant: 'primary' },
-        { text: 'Support Us', action: 'donate', variant: 'outline' }
+        { text: 'Buy a Cup of Coffee for me', action: 'donate', variant: 'outline' }
       ],
       image: '/hero_section_smartpdfx.webp'
     },

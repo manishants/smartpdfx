@@ -517,7 +517,7 @@ export function AppHeader() {
                         className="relative hover:bg-accent/50 transition-colors group"
                     >
                         <Heart className="h-4 w-4 fill-current text-red-500 group-hover:scale-110 transition-transform" />
-                        <span className="sr-only">Support Us</span>
+                        <span className="sr-only">Buy a Cup of Coffee for me</span>
                     </Button>
 
                     <AuthArea />
@@ -525,7 +525,7 @@ export function AppHeader() {
             </div>
         </header>
         <SmartSearchDialog isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
-        <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} qrUrl="/qr.jpg" title="Support SmartPDFx" />
+        <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} qrUrl="/qr.jpg" />
         </>
     );
 }
