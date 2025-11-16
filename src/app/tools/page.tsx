@@ -26,6 +26,38 @@ export default async function ToolsPage() {
     }))
   }
 
+  // Structured data for SoftwareApplication for each tool (Tools schema)
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://smartpdfx.com').replace(/\/$/, '')
+  const categoryToSubCategory: Record<string, string> = {
+    pdf_tools: 'File Conversion',
+    image_tools: 'GraphicsApplication',
+    text_tools: 'Productivity',
+    color_tools: 'GraphicsApplication'
+  }
+
+  const toolsSoftwareAppsJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': tools.map((t) => ({
+      '@type': 'SoftwareApplication',
+      name: t.title,
+      operatingSystem: 'Web',
+      applicationCategory: 'UtilitiesApplication',
+      applicationSubCategory: categoryToSubCategory[t.category] || 'UtilitiesApplication',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'INR'
+      },
+      description: t.description,
+      url: `${siteUrl}${t.href}`,
+      image: `${siteUrl}/logo.png`,
+      creator: {
+        '@type': 'Organization',
+        name: 'SmartPDFx'
+      }
+    }))
+  }
+
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -219,10 +251,11 @@ export default async function ToolsPage() {
         </div>
       </div>
 
-      {/* Schema blocks */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      {/* Schema blocks: Tools (SoftwareApplication) -> FAQ -> HowTo -> ItemList -> Breadcrumbs */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(toolsSoftwareAppsJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
     </main>
   )
