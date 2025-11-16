@@ -11,60 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import DonateDialog from "@/components/donate-dialog";
 import { AllTools } from "@/components/all-tools";
 import { Badge } from "@/components/ui/badge";
 
-function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) {
-  const [upiCopied, setUpiCopied] = useState(false);
-  const copyToClipboard = (text: string, setter: (value: boolean) => void) => {
-    navigator.clipboard.writeText(text);
-    setter(true);
-    setTimeout(() => setter(false), 2000);
-  };
-  
-  const upiId = "manishants@ybl";
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-background/95 to-background/80 backdrop-blur-xl border border-white/10">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Support SmartPDFx
-          </DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground">
-            Your contributions help keep this service free. Thank you! ✨
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4 space-y-6">
-              <div className="flex flex-col items-center gap-4">
-                 <div className="p-3 bg-white/90 rounded-2xl border border-white/20 shadow-lg">
-                <Image
-                  src="/qr.jpg"
-                  alt="Scan to pay"
-                  width={200}
-                  height={200}
-                  className="rounded-xl"
-                  data-ai-hint="qr code"
-                />
-            </div>
-             <p className="text-sm font-medium text-muted-foreground">Scan QR Code to Pay with any UPI App</p>
-          </div>
-          
-           <div className="space-y-2">
-            <Label htmlFor="upiId" className="font-semibold">UPI ID</Label>
-             <div className="flex items-center gap-2">
-              <Input id="upiId" value={upiId} readOnly className="bg-white/5 border-white/10" />
-              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(upiId, setUpiCopied)} className="hover:bg-white/10">
-                {upiCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-          
-          {/* PayPal removed per request */}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+// Use shared DonateDialog with Razorpay support
 
 function AnimatedCounter({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -261,7 +212,7 @@ export default function HomeClient() {
         </div>
       </section>
       <AllTools />
-      <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} />
+      <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} qrUrl="/qr.jpg" title="Support SmartPDFx" />
     </>
   );
 }

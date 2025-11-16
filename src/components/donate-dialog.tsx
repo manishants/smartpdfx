@@ -172,7 +172,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
             <div className="flex items-center gap-2">
               <Input id="donationAmount" type="number" min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-white/5 border-white/10" />
               <Button onClick={startRazorpayCheckout} disabled={loading} className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white">
-                {loading ? 'Processing…' : 'Donate with Razorpay'}
+                {loading ? 'Processing…' : 'Support with Razorpay'}
               </Button>
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}

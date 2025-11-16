@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, order })
   } catch (err: any) {
-    console.error('[razorpay/order] error:', err)
-    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
+    const message = err?.error?.description || err?.message || 'Failed to create order'
+    console.error('[razorpay/order] error:', message)
+    // Surface clearer error message to aid debugging (e.g., missing keys)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
