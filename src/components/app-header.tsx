@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import DonateDialog from '@/components/donate-dialog';
 
 
 const NavLink = ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => {
@@ -317,57 +318,7 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
     );
 }
 
-function DonateDialog({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) {
-  const [upiCopied, setUpiCopied] = useState(false);
-
-  const copyToClipboard = (text: string, setter: (value: boolean) => void) => {
-    navigator.clipboard.writeText(text);
-    setter(true);
-    setTimeout(() => setter(false), 2000);
-  };
-  
-  const upiId = "manishants@ybl";
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl">Support SmartPDFx</DialogTitle>
-          <DialogDescription className="text-center">
-            Your contributions help keep this service free. Thank you!
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4 space-y-6">
-          <div className="flex flex-col items-center gap-4">
-             <div className="p-2 bg-white rounded-lg border">
-                <Image
-                  src="/qr.jpg"
-                  alt="Scan to pay"
-                  width={200}
-                  height={200}
-                  data-ai-hint="qr code"
-                />
-            </div>
-             <p className="text-sm font-medium text-muted-foreground">Scan QR Code to Pay with any UPI App</p>
-          </div>
-          
-           <div className="space-y-2">
-            <Label htmlFor="upiId" className="font-semibold">UPI ID</Label>
-             <div className="flex items-center gap-2">
-              <Input id="upiId" value={upiId} readOnly />
-              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(upiId, setUpiCopied)}>
-                {upiCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-          
-          {/* PayPal removed per request */}
-
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+// Use shared DonateDialog component from '@/components/donate-dialog'
 
 const AuthArea = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -574,7 +525,7 @@ export function AppHeader() {
             </div>
         </header>
         <SmartSearchDialog isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
-        <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} />
+        <DonateDialog isOpen={isDonateOpen} onOpenChange={setIsDonateOpen} qrUrl="/qr.jpg" title="Support SmartPDFx" />
         </>
     );
 }
