@@ -30,7 +30,7 @@ export default function VoterListExtractorPage() {
   const [result, setResult] = useState<ExtractVotersOutput | null>(null);
   const [processedPages, setProcessedPages] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [maxPagesSelected, setMaxPagesSelected] = useState<number>(40);
+const [maxPagesSelected, setMaxPagesSelected] = useState<number>(40);
   const [enableLivePreview, setEnableLivePreview] = useState<boolean>(true);
   const [previewVoters, setPreviewVoters] = useState<Voter[]>([]);
   const seenKeysRef = useRef<Set<string>>(new Set());
@@ -87,7 +87,7 @@ export default function VoterListExtractorPage() {
 
         const buf = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        const maxPages = Math.min(Math.max(1, maxPagesSelected), 4000, pdf.numPages);
+const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
         setTotalPages(maxPages);
 
         const allVoters: Voter[] = [];
@@ -215,14 +215,14 @@ export default function VoterListExtractorPage() {
                     </div>
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="max-pages">Max pages to process (1–4000)</Label>
+<Label htmlFor="max-pages">Max pages to process (1–10000)</Label>
                         <Input
                           id="max-pages"
                           type="number"
                           min={1}
                           max={4000}
-                          value={maxPagesSelected}
-                          onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(4000, Number(e.target.value || 1))))}
+value={maxPagesSelected}
+onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target.value || 1))))}
                           className="mt-2"
                         />
                       </div>
