@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import type { ExtractVotersInput, ExtractVotersOutput, Voter } from '@/lib/types
 import { AllTools } from '@/components/all-tools';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -28,6 +30,10 @@ export default function VoterListExtractorPage() {
   const [result, setResult] = useState<ExtractVotersOutput | null>(null);
   const [processedPages, setProcessedPages] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [maxPagesSelected, setMaxPagesSelected] = useState<number>(40);
+  const [enableLivePreview, setEnableLivePreview] = useState<boolean>(true);
+  const [previewVoters, setPreviewVoters] = useState<Voter[]>([]);
+  const seenKeysRef = useRef<Set<string>>(new Set());
   const { toast } = useToast();
 
   const isAbortError = (error: any) => {
@@ -70,6 +76,8 @@ export default function VoterListExtractorPage() {
     setResult(null);
     setProcessedPages(0);
     setTotalPages(0);
+    setPreviewVoters([]);
+    seenKeysRef.current = new Set<string>();
     try {
       // If the input is an image, analyze directly. If it's a PDF, process up to 30 pages.
       if (file.type === 'application/pdf') {
@@ -79,7 +87,7 @@ export default function VoterListExtractorPage() {
 
         const buf = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        const maxPages = Math.min(40, pdf.numPages);
+        const maxPages = Math.min(Math.max(1, maxPagesSelected), 4000, pdf.numPages);
         setTotalPages(maxPages);
 
         const allVoters: Voter[] = [];
@@ -101,8 +109,26 @@ export default function VoterListExtractorPage() {
             const pageResult = await extractVoters(perPageInput);
             if (pageResult && Array.isArray(pageResult.voters)) {
               allVoters.push(...pageResult.voters);
+              if (enableLivePreview) {
+                // Incremental dedupe and preview update
+                setPreviewVoters((prev) => {
+                  const next = [...prev];
+                  for (const v of pageResult.voters) {
+                    const key = (v.voterId && v.voterId.trim()) || `${v.name}|${v.fatherOrHusbandName}|${v.age}|${v.gender}`;
+                    if (!seenKeysRef.current.has(key)) {
+                      seenKeysRef.current.add(key);
+                      next.push(v);
+                    }
+                  }
+                  return next;
+                });
+              }
             }
           }
+          // Release canvas memory
+          try {
+            (page as any).cleanup?.();
+          } catch {}
           setProcessedPages(i);
         }
 
@@ -187,6 +213,28 @@ export default function VoterListExtractorPage() {
                             onChange={handleFileChange}
                         />
                     </div>
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="max-pages">Max pages to process (1–4000)</Label>
+                        <Input
+                          id="max-pages"
+                          type="number"
+                          min={1}
+                          max={4000}
+                          value={maxPagesSelected}
+                          onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(4000, Number(e.target.value || 1))))}
+                          className="mt-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-3 mt-6 md:mt-0">
+                        <Checkbox
+                          id="live-preview"
+                          checked={enableLivePreview}
+                          onCheckedChange={(val) => setEnableLivePreview(Boolean(val))}
+                        />
+                        <Label htmlFor="live-preview">Show live preview while processing</Label>
+                      </div>
+                    </div>
                     {file && (
                         <div className="flex flex-col items-center gap-4 mt-6">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -206,14 +254,53 @@ export default function VoterListExtractorPage() {
             )}
 
             {isAnalyzing && (
-                <div className="flex flex-col items-center text-center">
-                    <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                    <h2 className="text-2xl font-semibold mt-4">Extracting Voter Data...</h2>
-                    {totalPages > 0 ? (
-                      <p className="text-muted-foreground">Processing page {processedPages} of {totalPages}</p>
-                    ) : (
-                      <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
-                    )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-1 flex flex-col items-center text-center">
+                      <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                      <h2 className="text-2xl font-semibold mt-4">Extracting Voter Data...</h2>
+                      {totalPages > 0 ? (
+                        <p className="text-muted-foreground">Processing page {processedPages} of {totalPages}</p>
+                      ) : (
+                        <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
+                      )}
+                  </div>
+                  {enableLivePreview && (
+                    <div className="md:col-span-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-5 w-5 text-primary" />
+                          <span className="font-medium">Live Preview</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">Extracted so far: {previewVoters.length}</span>
+                      </div>
+                      <div className="border rounded-lg max-h-[50vh] overflow-y-auto">
+                        <Table>
+                          <TableHeader className="sticky top-0 bg-background">
+                            <TableRow>
+                              <TableHead>ID</TableHead>
+                              <TableHead>Voter ID</TableHead>
+                              <TableHead>Name</TableHead>
+                              <TableHead>Father/Husband</TableHead>
+                              <TableHead>Gender</TableHead>
+                              <TableHead>Age</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {previewVoters.map((voter) => (
+                              <TableRow key={`preview-${voter.id}-${voter.voterId || voter.name}`}>
+                                <TableCell>{voter.id}</TableCell>
+                                <TableCell>{voter.voterId}</TableCell>
+                                <TableCell>{voter.name}</TableCell>
+                                <TableCell>{voter.fatherOrHusbandName}</TableCell>
+                                <TableCell>{voter.gender}</TableCell>
+                                <TableCell>{voter.age}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  )}
                 </div>
             )}
 
