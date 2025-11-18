@@ -1,7 +1,8 @@
 import Razorpay from 'razorpay'
 
 export function getRazorpayInstance() {
-  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+  // Use server-only keys; do not fall back to NEXT_PUBLIC_* for server requests
+  const keyId = process.env.RAZORPAY_KEY_ID
   const keySecret = process.env.RAZORPAY_KEY_SECRET
 
   if (!keyId || !keySecret) {
@@ -12,5 +13,6 @@ export function getRazorpayInstance() {
 }
 
 export function getPublicKeyId() {
-  return process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || ''
+  // Client-only key id exposed in browser for checkout
+  return process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || ''
 }

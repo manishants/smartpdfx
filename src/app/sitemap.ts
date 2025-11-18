@@ -1,7 +1,6 @@
 
 import { MetadataRoute } from 'next'
 import { tools } from '@/lib/data'
-import { locales } from '@/i18n/config'
 import fs from 'fs'
 import path from 'path'
 import { mergeFilesystemPages, type StoredPage } from '@/lib/pageStore'
@@ -100,52 +99,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/terms-and-conditions',
     '/disclaimer',
   ]
-
-  const staticPages = staticBaseRoutes.flatMap((route) => (
-    locales.map((locale) => ({
-      url: `${URL}/${locale}${route}`.replace(/\/\/$/, ''),
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'daily',
-      priority: route === '' ? 1 : 0.8,
-    }))
-  ))
+  const staticPages = staticBaseRoutes.map((route) => ({
+    url: `${URL}${route}` || URL,
+    lastModified: new Date().toISOString(),
+    changeFrequency: 'daily',
+    priority: route === '' ? 1 : 0.8,
+  }))
 
   // Tool pages with locales
-  const toolPages = tools.flatMap((tool) => (
-    locales.map((locale) => ({
-      url: `${URL}/${locale}${tool.href}`,
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    }))
-  ))
+  const toolPages = tools.map((tool) => ({
+    url: `${URL}${tool.href}`,
+    lastModified: new Date().toISOString(),
+    changeFrequency: 'daily',
+    priority: 0.9,
+  }))
 
   // App pages from filesystem + page store
   const fsPages = getAppPages()
   const appPagesMerged = mergeFilesystemPages(fsPages)
     .filter((p) => p.status === 'published')
-    .flatMap((p) => (
-      locales.map((locale) => ({
-        url: `${URL}/${locale}/${p.slug}`.replace(/\/+$/, ''),
-        lastModified: p.lastModified || new Date().toISOString(),
-        changeFrequency: 'daily',
-        priority: 0.85,
-      }))
-    ))
+    .map((p) => ({
+      url: `${URL}/${p.slug}`.replace(/\/+$/, ''),
+      lastModified: p.lastModified || new Date().toISOString(),
+      changeFrequency: 'daily',
+      priority: 0.85,
+    }))
 
   // Blog posts from local store (published only)
   let blogPages: MetadataRoute.Sitemap = []
   if (includeBlogInSitemap) {
     try {
       const posts = getAllBlogs().filter(p => p.published)
-      blogPages = posts.flatMap(post => (
-        locales.map(locale => ({
-          url: `${URL}/${locale}/blog/${post.slug}`,
-          lastModified: new Date(post.date || Date.now()).toISOString(),
-          changeFrequency: 'daily',
-          priority: 0.8,
-        }))
-      ))
+      blogPages = posts.map(post => ({
+        url: `${URL}/blog/${post.slug}`,
+        lastModified: new Date(post.date || Date.now()).toISOString(),
+        changeFrequency: 'daily',
+        priority: 0.8,
+      }))
     } catch {
       blogPages = []
     }
@@ -155,14 +145,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let categoryPages: MetadataRoute.Sitemap = []
   try {
     const categories = getAllCategories()
-    categoryPages = categories.flatMap(c => (
-      locales.map(locale => ({
-        url: `${URL}/${locale}/blog/category/${c.slug}`,
-        lastModified: new Date().toISOString(),
-        changeFrequency: 'daily',
-        priority: 0.6,
-      }))
-    ))
+    categoryPages = categories.map(c => ({
+      url: `${URL}/blog/category/${c.slug}`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    }))
   } catch {
     categoryPages = []
   }

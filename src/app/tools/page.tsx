@@ -6,6 +6,7 @@ import { ModernSection } from '@/components/modern-section'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Sparkles, Shield, Zap, Star } from 'lucide-react'
 import { getBlogs } from '@/app/actions/blog'
+import ToolsDonateSubscribe from '@/components/tools-donate-subscribe'
 
 export const dynamic = 'force-dynamic'
 
@@ -127,13 +128,13 @@ export default async function ToolsPage() {
                 All PDF Tools – Free, Fast & Secure
               </span>
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground dark:text-white max-w-3xl mx-auto">
               Convert, compress, edit, and protect PDFs with a clean, minimal design and strong privacy.
             </p>
             <div className="flex flex-wrap justify-center gap-3 pt-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Zap className="w-4 h-4 text-yellow-500" /> Lightning Fast</div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Shield className="w-4 h-4 text-blue-500" /> Secure by Design</div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground"><Star className="w-4 h-4 text-purple-500" /> Premium Quality</div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-white"><Zap className="w-4 h-4 text-yellow-500" /> Lightning Fast</div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-white"><Shield className="w-4 h-4 text-blue-500" /> Secure by Design</div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-white"><Star className="w-4 h-4 text-purple-500" /> Premium Quality</div>
             </div>
           </div>
         </div>
@@ -141,31 +142,39 @@ export default async function ToolsPage() {
 
       {/* Main content with grid and blog sidebar */}
       <div className="container mx-auto px-4 py-10">
-        <div className="grid gap-10 lg:grid-cols-12">
-          {/* Tools grid */}
-          <div className="lg:col-span-8 xl:col-span-9">
+        <div className="grid gap-12 lg:grid-cols-12">
+          {/* SEO article replacing the tools grid */}
+          <div className="lg:col-span-8 xl:col-span-9 space-y-8">
             <ModernSection
-              title="Explore Tools"
-              subtitle="Click any tool to start. Icons and short descriptions help you choose."
+              title="SmartPDFx: Free, Fast PDF Tools for Everyday Work"
+              subtitle="A practical guide to secure, minimal, and AI‑assisted PDF workflows"
               icon={<Sparkles className="h-6 w-6" />}
               variant="default"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                {tools.map((tool) => (
-                  <Link key={tool.href} href={tool.href} className="group">
-                    <Card className="border border-primary/10 hover:border-primary/30 transition-colors duration-200">
-                      <CardHeader className="flex flex-row items-start gap-4">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-blue-600/10">
-                          <tool.icon className="h-6 w-6" style={{ color: tool.color }} />
-                        </div>
-                        <div className="space-y-1">
-                          <CardTitle className="text-base group-hover:text-primary transition-colors">{tool.title}</CardTitle>
-                          <CardDescription className="text-sm text-muted-foreground">{tool.description}</CardDescription>
-                        </div>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                ))}
+              <div className="prose prose-sm sm:prose base max-w-none dark:prose-invert dark:text-white">
+                <p>
+                  SmartPDFx offers a clean, privacy‑focused experience for working with PDFs and images. No sign‑ups, no tracking cookies without consent, and performance tuned for quick tasks on any device.
+                </p>
+                <h2 className="text-lg font-semibold text-foreground mt-6">Why professionals choose SmartPDFx</h2>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Fast, reliable processing with client‑side and server‑side options.</li>
+                  <li>Privacy by design — temporary processing, no file retention.</li>
+                  <li>AI‑assisted tools that improve quality while keeping control.</li>
+                </ul>
+                <h2 className="text-lg font-semibold text-foreground mt-6">Popular workflows</h2>
+                <p>Get started with these commonly used tools:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <Link href="/merge-pdf" className="hover:underline text-primary dark:text-white">Merge PDF — combine documents with quality control</Link>
+                  <Link href="/word-to-pdf" className="hover:underline text-primary dark:text-white">Word to PDF — preserve layout with high fidelity</Link>
+                  <Link href="/scan-pdf" className="hover:underline text-primary dark:text-white">PDF to Scanned PDF — create rasterized, scan‑like PDFs</Link>
+                </div>
+                <h2 className="text-lg font-semibold text-foreground mt-6">Tips for best results</h2>
+                <ol className="list-decimal pl-5 space-y-2">
+                  <li>Use clear filenames and keep inputs under 50MB for speed.</li>
+                  <li>Prefer client‑side processing when privacy is critical.</li>
+                  <li>Enable analytics in cookie settings to help us improve, only if comfortable.</li>
+                </ol>
+                <p className="mt-6">Looking for something specific? Explore internal links below for the full catalog.</p>
               </div>
             </ModernSection>
 
@@ -173,12 +182,13 @@ export default async function ToolsPage() {
             <ModernSection
               title="All Tools Links"
               subtitle="Quick internal links to every tool for better discovery and navigation"
-              variant="glass"
+              variant="transparent"
+              contentClassName="dark:text-white"
             >
               <ul className="columns-1 sm:columns-2 md:columns-3 gap-4">
                 {tools.map((tool) => (
                   <li key={tool.href} className="mb-2">
-                    <Link href={tool.href} className="text-sm text-primary hover:underline" title={tool.title}>{tool.title}</Link>
+                    <Link href={tool.href} className="text-sm text-primary dark:text-white hover:underline" title={tool.title}>{tool.title}</Link>
                   </li>
                 ))}
               </ul>
@@ -225,8 +235,8 @@ export default async function ToolsPage() {
             </ModernSection>
           </div>
 
-          {/* Latest blogs sidebar */}
-          <aside className="lg:col-span-4 xl:col-span-3">
+          {/* Latest blogs sidebar with sticky Support & Subscribe below posts */}
+          <aside className="lg:col-span-4 xl:col-span-3 space-y-6">
             <ModernSection title="Latest Blogs" subtitle="Guides and tips related to our tools" variant="default">
               <div className="space-y-4">
                 {latestBlogs.length === 0 ? (
@@ -247,6 +257,8 @@ export default async function ToolsPage() {
                 )}
               </div>
             </ModernSection>
+            {/* Sticky donate + subscribe below posts */}
+            <ToolsDonateSubscribe />
           </aside>
         </div>
       </div>

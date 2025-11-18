@@ -30,7 +30,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast';
-import { LanguageSwitcher } from '@/components/language-switcher';
 import DonateDialog from '@/components/donate-dialog';
 
 
@@ -47,6 +46,7 @@ const NavLink = ({ href, children, className }: { href: string; children: React.
 const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
+    const t = (_key: string, fallback: string) => fallback;
     
     const searchResults = useMemo(() => {
         if (!searchQuery.trim()) return [];
@@ -59,7 +59,10 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
     }, [searchQuery]);
     
     const popularTools = useMemo(() => {
-        return tools.filter(tool => ['pdf-to-word', 'jpg-to-pdf', 'merge-pdf', 'compress-pdf'].includes(tool.href.replace('/', '')));
+        return tools.filter(tool => {
+            const href = (tool as any)?.href;
+            return typeof href === 'string' && ['pdf-to-word', 'jpg-to-pdf', 'merge-pdf', 'compress-pdf'].includes(href.replace('/', ''));
+        });
     }, []);
     
     const handleToolSelect = (tool: any) => {
@@ -78,7 +81,7 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
                     <div className="flex items-center gap-3">
                         <Search className="h-5 w-5 text-muted-foreground" />
                         <Input
-                            placeholder="Search tools, features, or file types..."
+                            placeholder={t('search.placeholder', 'Search tools, features, or file types...')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="border-0 focus-visible:ring-0 text-base"
@@ -114,7 +117,7 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
                             ) : (
                                 <div className="text-center py-8 text-muted-foreground">
                                     <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                    <p>No tools found for "{searchQuery}"</p>
+                                    <p>{t('search.noResults', 'No tools found for')} "{searchQuery}"</p>
                                 </div>
                             )}
                         </div>
@@ -124,7 +127,7 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
                                 <div>
                                     <h3 className="font-semibold mb-3 flex items-center gap-2">
                                         <Clock className="h-4 w-4" />
-                                        Recent Searches
+                                        {t('search.recent', 'Recent Searches')}
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {recentSearches.map(search => (
@@ -144,7 +147,7 @@ const SmartSearchDialog = ({ isOpen, onOpenChange }: { isOpen: boolean, onOpenCh
                             <div>
                                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                                     <TrendingUp className="h-4 w-4" />
-                                    Popular Tools
+                                    {t('search.popular', 'Popular Tools')}
                                 </h3>
                                 <div className="grid gap-2">
                                     {popularTools.map(tool => (
@@ -223,6 +226,7 @@ const ToolsMegaMenu = () => {
 const AIToolsMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
     const aiTools = tools.filter(t => t.category === 'ai');
+    const t = (_key: string, fallback: string) => fallback;
 
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -232,7 +236,7 @@ const AIToolsMenu = () => {
                     className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-accent-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-primary/10 transition-all duration-300 group border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 active:scale-95"
                 >
                     <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary animate-pulse group-hover:animate-spin" />
-                    <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent font-semibold">AI Tools</span>
+                    <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent font-semibold">{t('header.aiTools', 'AI Tools')}</span>
                     <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2 transition-transform duration-300 group-hover:rotate-180" />
                 </Button>
             </PopoverTrigger>
@@ -242,7 +246,7 @@ const AIToolsMenu = () => {
                         <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-primary/20 to-blue-600/20">
                             <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary animate-pulse" />
                         </div>
-                        <h3 className="text-sm sm:text-base font-semibold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">AI-Powered Tools</h3>
+                        <h3 className="text-sm sm:text-base font-semibold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">{t('header.aiPowered', 'AI-Powered Tools')}</h3>
                     </div>
                     {aiTools.map(tool => (
                         <Link
@@ -269,6 +273,7 @@ const AIToolsMenu = () => {
 };
 
 const MobileNav = ({ onClose }: { onClose: () => void }) => {
+    const t = (_key: string, fallback: string) => fallback;
     return (
         <SheetContent side="left">
             <SheetHeader>
@@ -279,22 +284,22 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
             </SheetHeader>
             <ScrollArea className="h-[calc(100vh-80px)] w-full pr-4">
                 <div className="flex flex-col space-y-4 py-4">
-                    <Link href="/" onClick={onClose} className="text-lg font-medium">Home</Link>
+                    <Link href="/" onClick={onClose} className="text-lg font-medium">{t('header.home', 'Home')}</Link>
 
                     {/* Popular Tools Section */}
                     <div>
                         <h3 className="font-semibold text-foreground mb-2 mt-4 flex items-center gap-2">
                             <Star className="h-4 w-4" />
-                            Popular Tools
+                            {t('search.popular', 'Popular Tools')}
                         </h3>
                         <div className="flex flex-col space-y-2">
                             <Link href="/pdf-to-word" onClick={onClose} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                                 <FileText className="h-5 w-5" />
-                                <span>PDF to Word</span>
+                                <span>{t('tools.pdfToWord', 'PDF to Word')}</span>
                             </Link>
                             <Link href="/jpg-to-pdf" onClick={onClose} className="flex items-center gap-3 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                                 <FileImage className="h-5 w-5" />
-                                <span>JPG to PDF</span>
+                                <span>{t('tools.jpgToPdf', 'JPG to PDF')}</span>
                             </Link>
                         </div>
                     </div>
@@ -321,6 +326,7 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
 // Use shared DonateDialog component from '@/components/donate-dialog'
 
 const AuthArea = () => {
+    const t = (_key: string, fallback: string) => fallback;
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
@@ -347,8 +353,8 @@ const AuthArea = () => {
     const handleLogout = async () => {
         await supabase.auth.signOut();
         toast({
-            title: "Logged out",
-            description: "You have been successfully logged out.",
+            title: t('auth.loggedOut', 'Logged out'),
+            description: t('auth.logoutSuccess', 'You have been successfully logged out.'),
         });
         window.location.href = '/';
     };
@@ -363,22 +369,22 @@ const AuthArea = () => {
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline">
                         <UserCircle className="mr-2 h-4 w-4"/>
-                        Account
+                        {t('auth.account', 'Account')}
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                        <Link href="/admin/dashboard">Dashboard</Link>
+                        <Link href="/admin/dashboard">{t('auth.dashboard', 'Dashboard')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="/admin/profile">Profile</Link>
+                        <Link href="/admin/profile">{t('auth.profile', 'Profile')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
+                        <span>{t('auth.logout', 'Log out')}</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -396,6 +402,7 @@ export function AppHeader() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const pathname = usePathname();
+    const t = (_key: string, fallback: string) => fallback;
 
     useEffect(() => {
         setIsClient(true);
@@ -424,7 +431,7 @@ export function AppHeader() {
                     <SheetTrigger asChild className="md:hidden">
                         <Button variant="ghost" size="icon" className="hover:bg-accent">
                             <Menu className="h-5 w-5" />
-                            <span className="sr-only">Toggle menu</span>
+                            <span className="sr-only">{t('header.toggleMenu', 'Toggle menu')}</span>
                         </Button>
                     </SheetTrigger>
                     <MobileNav onClose={() => setIsMobileMenuOpen(false)} />
@@ -455,7 +462,7 @@ export function AppHeader() {
                         <PopoverTrigger asChild>
                             <Button variant="ghost" className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-accent-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-primary/10 transition-all duration-300 group border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 active:scale-95">
                                 <Wrench className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary group-hover:rotate-12 transition-transform duration-300" />
-                                <span className="font-semibold">Tools</span>
+                                <span className="font-semibold">{t('header.tools', 'Tools')}</span>
                                 <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2 transition-transform duration-300 group-hover:rotate-180" />
                             </Button>
                         </PopoverTrigger>
@@ -466,21 +473,21 @@ export function AppHeader() {
                     <Button variant="ghost" asChild className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-accent-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-primary/10 transition-all duration-300 group border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 active:scale-95">
                         <Link href="/pdf-to-word">
                             <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary group-hover:scale-110 transition-transform duration-300" />
-                            <span className="font-semibold">PDF to Word</span>
+                            <span className="font-semibold">{t('tools.pdfToWord', 'PDF to Word')}</span>
                         </Link>
                     </Button>
 
                     <Button variant="ghost" asChild className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-accent-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-primary/10 transition-all duration-300 group border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 active:scale-95">
                         <Link href="/jpg-to-pdf">
                             <FileImage className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary group-hover:scale-110 transition-transform duration-300" />
-                            <span className="font-semibold">JPG to PDF</span>
+                            <span className="font-semibold">{t('tools.jpgToPdf', 'JPG to PDF')}</span>
                         </Link>
                     </Button>
 
                     <Button variant="ghost" asChild className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-accent-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-primary/10 transition-all duration-300 group border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 active:scale-95">
                         <Link href="/merge-pdf">
                             <FileJson className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary group-hover:scale-110 transition-transform duration-300" />
-                            <span className="font-semibold">Merge PDF</span>
+                            <span className="font-semibold">{t('tools.mergePdf', 'Merge PDF')}</span>
                         </Link>
                     </Button>
 
@@ -489,7 +496,7 @@ export function AppHeader() {
                     <Button variant="ghost" asChild className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm font-medium text-foreground hover:text-accent-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-primary/10 transition-all duration-300 group border border-transparent hover:border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:scale-105 active:scale-95">
                         <Link href="/#tools">
                             <Compass className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary group-hover:scale-110 transition-transform duration-300" />
-                            <span className="font-semibold">Explore</span>
+                            <span className="font-semibold">{t('header.explore', 'Explore')}</span>
                         </Link>
                     </Button>
                 </nav>
@@ -503,10 +510,10 @@ export function AppHeader() {
                         className="relative hover:bg-accent/50 transition-colors group"
                     >
                         <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                        <span className="sr-only">Search Tools</span>
+                        <span className="sr-only">{t('header.searchSr', 'Search Tools')}</span>
                     </Button>
 
-                    <LanguageSwitcher />
+                    {/* Language switcher removed */}
 
                     <ThemeSwitcher />
                     
@@ -517,7 +524,7 @@ export function AppHeader() {
                         className="relative hover:bg-accent/50 transition-colors group"
                     >
                         <Heart className="h-4 w-4 fill-current text-red-500 group-hover:scale-110 transition-transform" />
-                        <span className="sr-only">Buy a Cup of Coffee for me</span>
+                        <span className="sr-only">{t('donate.button', 'Buy a Cup of Coffee for me')}</span>
                     </Button>
 
                     <AuthArea />

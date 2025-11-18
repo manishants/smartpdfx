@@ -10,7 +10,7 @@ import { cookies } from 'next/headers'
 export async function requireSuperadmin(req: Request): Promise<Response | null> {
   try {
     const cookieStore = cookies()
-    const localOverride = cookieStore.get('smartpdfx_superadmin')?.value === 'true'
+    const localOverride = (await cookieStore).get('smartpdfx_superadmin')?.value === 'true'
     if (process.env.ALLOW_EXPORT_LOCAL === '1' || localOverride) {
       return null
     }

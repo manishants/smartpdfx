@@ -10,7 +10,7 @@ interface ModernSectionProps {
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
-  variant?: 'default' | 'glass' | 'gradient';
+  variant?: 'default' | 'glass' | 'gradient' | 'transparent';
   contentClassName?: string;
 }
 
@@ -29,6 +29,8 @@ export function ModernSection({
         return "bg-white/50 backdrop-blur-sm border-0 shadow-xl";
       case 'gradient':
         return "bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-sm border-0 shadow-xl";
+      case 'transparent':
+        return "bg-transparent border-0 shadow-none";
       default:
         return "bg-background border shadow-sm";
     }

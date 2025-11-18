@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+// @ts-ignore
 import archiver from 'archiver'
 import { PassThrough, Readable } from 'stream'
 import { requireSuperadmin } from '@/lib/auth/guard'
@@ -49,7 +50,7 @@ export async function GET(req: Request) {
     const filename = `project_snapshot_${new Date().toISOString().slice(0,10)}.zip`
     const archive = archiver('zip', { zlib: { level: 9 } })
     const stream = new PassThrough()
-    archive.on('error', (err) => {
+    archive.on('error', (err: Error) => {
       stream.destroy(err as any)
     })
 
@@ -68,7 +69,7 @@ export async function GET(req: Request) {
 
     // Log project ZIP export
     try { await addLog({ type: 'export_project', message: 'Project ZIP export', context: { format: 'zip', fileCount: files.length, filename } }) } catch {}
-    return new Response(Readable.toWeb(stream), {
+    return new Response(stream as any, {
       headers: {
         'content-type': 'application/zip',
         'content-disposition': `attachment; filename="${filename}"`,

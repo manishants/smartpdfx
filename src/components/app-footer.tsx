@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, Zap, Star, Heart, Mail, MapPin, Phone, Facebook, Instagram, Youtube, Twitter, Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DonateFooterLink } from "@/components/donate-footer-link";
 
 export function AppFooter() {
     return (
@@ -72,8 +73,14 @@ export function AppFooter() {
                             Quick Links
                         </h3>
                         <nav className="flex flex-col gap-3 text-sm">
+                            <Link href="/tools" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                All Tools
+                            </Link>
                             <Link href="/pdf-to-word" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 PDF to Word
+                            </Link>
+                            <Link href="/word-to-pdf" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Word to PDF
                             </Link>
                             <Link href="/jpg-to-pdf" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 JPG to PDF
@@ -82,9 +89,19 @@ export function AppFooter() {
                             <Link href="/compress-pdf" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 Compress PDF
                             </Link>
+                            <Link href="/merge-pdf" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Merge PDF
+                            </Link>
                             <Link href="/photo-enhancer" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
                                 AI Photo Enhancer
                             </Link>
+                            <Link href="/unlock-pdf" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                Unlock PDF
+                            </Link>
+                            <Link href="/e-sign" className="text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 transform duration-200">
+                                E‑Sign PDF
+                            </Link>
+                            <DonateFooterLink />
                         </nav>
                     </div>
 

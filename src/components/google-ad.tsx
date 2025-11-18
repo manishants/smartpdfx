@@ -12,12 +12,14 @@ declare global {
 export function GoogleAd() {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
   const slot = process.env.NEXT_PUBLIC_ADSENSE_AD_SLOT_ID;
+  const isProd = process.env.NODE_ENV === 'production';
+  const insRef = useRef<HTMLElement | null>(null);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (!mounted || !client || !slot) return;
+    if (!mounted || !client || !slot || !isProd) return;
     const el = insRef.current as HTMLElement | null;
     if (!el) return;
 
@@ -51,7 +53,7 @@ export function GoogleAd() {
     };
   }, [mounted, client, slot]);
 
-  if (!mounted || !client || !slot) {
+  if (!mounted || !client || !slot || !isProd) {
     // Stable placeholder to prevent hydration mismatch and preserve layout
     return (
       <div className="w-full max-w-full my-4" suppressHydrationWarning>

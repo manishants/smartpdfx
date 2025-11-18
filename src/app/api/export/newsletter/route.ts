@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     const rows = subscribers.map(s => ({
       id: s.id,
       email: s.email,
-      subscribed: s.subscribed ? 'true' : 'false',
+      subscribed: !s.unsubscribed ? 'true' : 'false',
       created_at: s.created_at ?? '',
       updated_at: s.updated_at ?? '',
     }))

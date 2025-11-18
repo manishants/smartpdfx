@@ -29,6 +29,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const scriptLoaded = useRef<boolean>(false);
+  const t = (_key: string, fallback: string) => fallback;
 
   const copyToClipboard = (text: string, setter: (v: boolean) => void) => {
     if (!text) return;
@@ -38,7 +39,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
   };
 
   const fallbackUpi = "manishants@ybl";
-  const heading = title || "Buy a Cup of Coffee for me";
+  const heading = title || 'Buy a Cup of Coffee for me';
 
   const loadRazorpayScript = useCallback(() => {
     return new Promise<boolean>((resolve) => {
@@ -91,7 +92,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
         amount: orderJson.order.amount,
         currency: orderJson.order.currency,
         name: "SmartPDFx",
-        description: "Buy a Cup of Coffee for me",
+        description: 'Buy a Cup of Coffee for me',
         order_id: orderJson.order.id,
         theme: { color: "#3b82f6" },
         handler: async (resp: any) => {
@@ -125,6 +126,11 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
       }
       // eslint-disable-next-line new-cap
       const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (resp: any) => {
+        const msg = resp?.error?.description || resp?.error?.reason || "Payment failed";
+        setError(msg);
+        console.error("[razorpay/payment.failed]", resp?.error);
+      });
       rzp.open();
     } catch (e: any) {
       setError(e?.message || "Something went wrong.");
@@ -150,7 +156,7 @@ export default function DonateDialog({ isOpen, onOpenChange, upiId, qrUrl, title
           {qrUrl && (
             <div className="flex flex-col items-center gap-4">
               <div className="p-3 bg-white/90 rounded-2xl border border-white/20 shadow-lg">
-                <Image src={qrUrl} alt="Scan to pay" width={200} height={200} className="rounded-xl" />
+                <Image src={qrUrl} alt={'Scan to pay'} width={200} height={200} className="rounded-xl" />
               </div>
               <p className="text-sm font-medium text-muted-foreground">Scan QR Code to pay with any UPI app</p>
             </div>

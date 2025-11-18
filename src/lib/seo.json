@@ -39,11 +39,6 @@
     "description": "",
     "keywords": []
   },
-  "/unmask-aadhar": {
-    "title": "Unmask Aadhar",
-    "description": "",
-    "keywords": []
-  },
   "/unlock-pdf": {
     "title": "Unlock Pdf",
     "description": "",
@@ -248,11 +243,6 @@
   },
   "/blog": {
     "title": "Blog",
-    "description": "",
-    "keywords": []
-  },
-  "/background-blur": {
-    "title": "Background Blur",
     "description": "",
     "keywords": []
   },

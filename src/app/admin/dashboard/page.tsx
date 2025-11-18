@@ -14,7 +14,7 @@ import { AnalyticsChart } from "./_components/analytics-chart";
 
 const topPages = [
     { page: '/compress-pdf', views: 12503 },
-    { page: '/unmask-aadhar', views: 9870 },
+    { page: '/word-to-pdf', views: 9870 },
     { page: '/merge-pdf', views: 7654 },
     { page: '/e-sign', views: 5432 },
     { page: '/image-to-text', views: 4321 },
@@ -22,7 +22,7 @@ const topPages = [
 
 const topKeywords = [
     { keyword: 'pdf compress', searches: 890 },
-    { keyword: 'aadhar mask', searches: 750 },
+    { keyword: 'merge pdf online', searches: 750 },
     { keyword: 'sign pdf online', searches: 600 },
     { keyword: 'image background remove', searches: 550 },
     { keyword: 'whatsapp chat analysis', searches: 420 },

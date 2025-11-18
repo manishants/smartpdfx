@@ -1,5 +1,5 @@
 
-import { FileSignature, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact, Link, Bot, PenSquare, Code2, Paintbrush, Home, Dumbbell, Utensils, Lightbulb, UserRound, Mail, BookOpen, Route, Music, ShoppingCart, BarChart3, Moon, VideoIcon, Speech, Scissors } from "lucide-react";
+import { FileSignature, FileJson, RotateCcw, Minimize2, LockOpen, ShieldQuestion, ShieldOff, FileUp, ScanText, FileImage, Users, Type, Video, Eraser, UserX, Share2, ArrowDownUp, Grid, Heart, MessageSquare, Pencil, Sparkles, Image as ImageIconLucide, Aperture, Car, AppWindow, Repeat, Milestone, TextQuote, Pilcrow, CaseUpper, QrCode, ClipboardPaste, Star, Palette, Trash2, SearchCheck, Contact, Link, Bot, PenSquare, Code2, Paintbrush, Home, Dumbbell, Utensils, Lightbulb, UserRound, Mail, BookOpen, Route, Music, ShoppingCart, BarChart3, Moon, VideoIcon, Speech, Scissors, Layers } from "lucide-react";
 
 export const toolCategories = [
     { id: 'compress', name: 'Compress' },
@@ -304,7 +304,32 @@ export const tools = [
     href: "/website-color-picker",
     category: 'color_tools',
     color: '#d946ef'
-  }
+  },
+  // Newly added tools
+  {
+    title: "Merge PDF",
+    description: "Combine multiple PDFs into a single document.",
+    icon: Layers,
+    href: "/merge-pdf",
+    category: 'organize',
+    color: '#64748b'
+  },
+  {
+    title: "Word to PDF",
+    description: "Convert DOCX files to high-quality PDF.",
+    icon: FileUp,
+    href: "/word-to-pdf",
+    category: 'convert',
+    color: '#f97316'
+  },
+  {
+    title: "PDF to Scanned PDF",
+    description: "Rasterize pages for privacy-preserving scanned PDFs.",
+    icon: ScanText,
+    href: "/scan-pdf",
+    category: 'security',
+    color: '#ec4899'
+  },
 ];
 
     

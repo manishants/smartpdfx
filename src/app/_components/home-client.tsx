@@ -64,7 +64,23 @@ function FeatureCard({ icon: Icon, title, description, color }: {
   );
 }
 
-export default function HomeClient() {
+type HomeClientProps = {
+  dict?: Record<string, any>
+  locale?: string
+}
+
+function tt(dict: Record<string, any> | undefined, path: string, fallback: string) {
+  if (!dict) return fallback
+  const parts = path.split('.')
+  let cur: any = dict
+  for (const p of parts) {
+    cur = cur?.[p]
+    if (cur === undefined || cur === null) return fallback
+  }
+  return typeof cur === 'string' ? cur : fallback
+}
+
+export default function HomeClient({ dict, locale }: HomeClientProps) {
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
@@ -115,24 +131,21 @@ export default function HomeClient() {
                 <div className="flex items-center gap-2 justify-center lg:justify-start">
                   <Badge variant="secondary" className="bg-gradient-to-r from-primary/10 to-blue-500/10 text-primary border-primary/20">
                     <Sparkles className="w-3 h-3 mr-1" />
-                    AI-Powered Tools
+                    {tt(dict, 'hero.badge', 'AI-Powered Tools')}
                   </Badge>
                 </div>
-                
+
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight max-w-4xl">
-                  <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
-                    Transform Files with
-                  </span>
-                  <br />
-                  <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    SmartPDFx
-                  </span>
+                  {tt(dict, 'hero.title_prefix', 'Transform Files with')}{' '}
+                  <span className="bg-gradient-to-r from-orange-500 via-blue-600 to-purple-600 bg-clip-text text-transparent">SmartPDFx</span>
                 </h1>
-                
+
                 <p className="max-w-[600px] text-lg md:text-xl text-muted-foreground leading-relaxed">
-                  The most advanced online toolkit for PDFs, images, and documents. 
-                  <span className="text-primary font-medium"> Compress, convert, edit, and enhance</span> with 
-                  cutting-edge AI technology.
+                  {tt(
+                    dict,
+                    'hero.subtitle',
+                    'The most advanced online toolkit for PDFs, images, and documents. Compress, convert, edit, and enhance with cutting-edge AI technology.'
+                  )}
                 </p>
                 {/* Stats */}
                 <div className="flex flex-wrap gap-8 justify-center lg:justify-start text-center">
@@ -161,7 +174,7 @@ export default function HomeClient() {
                   <Button size="lg" className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 group" asChild>
                     <Link href="#tools">
                       <Play className="mr-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                      Start Creating
+                      {tt(dict, 'sections.explore.title', 'Explore Tools')}
                     </Link>
                   </Button>
                   
