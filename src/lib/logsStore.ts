@@ -3,7 +3,7 @@ import path from 'path'
 
 type LogEntry = {
   id: string
-  type: 'export_project' | 'export_backup' | 'unlock_pdf'
+  type: 'export_project' | 'export_backup' | 'unlock_pdf' | 'contact_message'
   message: string
   context?: any
   createdAt: string

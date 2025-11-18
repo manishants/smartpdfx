@@ -5,6 +5,7 @@ export default async function SuperadminLogsPage() {
   const exportProjectLogs = getLogs('export_project')
   const exportBackupLogs = getLogs('export_backup')
   const unlockPdfLogs = getLogs('unlock_pdf')
+  const contactMessageLogs = getLogs('contact_message')
 
   const Section = ({ title, logs }: { title: string; logs: ReturnType<typeof getLogs> }) => (
     <section className="mb-10">
@@ -40,6 +41,7 @@ export default async function SuperadminLogsPage() {
       <Section title="Project Export Logs" logs={exportProjectLogs} />
       <Section title="Website Backup Logs" logs={exportBackupLogs} />
       <Section title="Unlock PDF Logs" logs={unlockPdfLogs} />
+      <Section title="Contact Messages" logs={contactMessageLogs} />
     </div>
   )
 }

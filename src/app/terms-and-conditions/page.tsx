@@ -1,15 +1,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModernPageLayout } from "@/components/modern-page-layout";
 
 export default function TermsAndConditionsPage() {
     return (
-        <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-3xl">Terms and Conditions</CardTitle>
-                     <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
-                </CardHeader>
-                <CardContent className="prose dark:prose-invert max-w-none">
+        <ModernPageLayout title="Terms and Conditions" description="Read the terms governing your use of SmartPDFx." backgroundVariant="home">
+            <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-3xl">Terms and Conditions</CardTitle>
+                        <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+                    </CardHeader>
+                    <CardContent className="prose dark:prose-invert max-w-none">
                     <p>
                         Please read these Terms and Conditions ("Terms", "Terms and Conditions") carefully before using the SmartPDFx website (the "Service") operated by SmartPDFx ("us", "we", or "our").
                     </p>
@@ -76,8 +78,9 @@ export default function TermsAndConditionsPage() {
                     <p>
                         If you have any questions about these Terms, please contact us.
                     </p>
-                </CardContent>
-            </Card>
-        </main>
+                    </CardContent>
+                </Card>
+            </main>
+        </ModernPageLayout>
     );
 }

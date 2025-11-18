@@ -34,39 +34,57 @@ export function ModernPageLayout({
     const parts = (pathname || '/').split('/').filter(Boolean);
     return parts[parts.length - 1] || '';
   }, [pathname]);
-  const [displayTitle, setDisplayTitle] = useState<string>(title);
-  const [displayDescription, setDisplayDescription] = useState<string>(description);
+  // Avoid header flicker: defer rendering until we know if CMS overrides exist
+  const [displayTitle, setDisplayTitle] = useState<string>('');
+  const [displayDescription, setDisplayDescription] = useState<string>('');
+  const [pendingHero, setPendingHero] = useState<boolean>(true);
 
   useEffect(() => {
     let cancelled = false;
-    const fetchHeading = async () => {
+    setPendingHero(true);
+    // If no slug, just use provided content immediately
+    if (!slug) {
+      setDisplayTitle(title);
+      setDisplayDescription(description);
+      setPendingHero(false);
+      return;
+    }
+    const load = async () => {
       try {
-        if (!slug) return;
-        const res = await fetch(`/api/tools/heading/${slug}`, { cache: 'no-store' });
-        if (!res.ok) return;
-        const json = await res.json();
-        const h = String(json?.heading || '').trim();
-        if (!cancelled && h) {
-          setDisplayTitle(h);
+        const [hRes, dRes] = await Promise.all([
+          fetch(`/api/tools/heading/${slug}`, { cache: 'no-store' }).catch(() => undefined),
+          fetch(`/api/tools/description/${slug}`, { cache: 'no-store' }).catch(() => undefined),
+        ]);
+        let h = '';
+        let d = '';
+        try {
+          if (hRes && hRes.ok) {
+            const json = await hRes.json();
+            h = String(json?.heading || '').trim();
+          }
+        } catch {}
+        try {
+          if (dRes && dRes.ok) {
+            const json = await dRes.json();
+            d = String(json?.description || '').trim();
+          }
+        } catch {}
+        if (!cancelled) {
+          setDisplayTitle(h || title);
+          setDisplayDescription(d || description);
+          setPendingHero(false);
         }
-      } catch {}
-    };
-    const fetchDescription = async () => {
-      try {
-        if (!slug) return;
-        const res = await fetch(`/api/tools/description/${slug}`, { cache: 'no-store' });
-        if (!res.ok) return;
-        const json = await res.json();
-        const d = String(json?.description || '').trim();
-        if (!cancelled && d) {
-          setDisplayDescription(d);
+      } catch {
+        if (!cancelled) {
+          setDisplayTitle(title);
+          setDisplayDescription(description);
+          setPendingHero(false);
         }
-      } catch {}
+      }
     };
-    fetchHeading();
-    fetchDescription();
+    load();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, title, description]);
 
   const heroBadge = badge ?? 'AI-Powered & Secure'
 
@@ -93,17 +111,7 @@ export function ModernPageLayout({
         
         <div className="relative container mx-auto px-4 py-16">
           <div className="text-center space-y-6">
-            {/* Icon */}
-            {icon && (
-              <div className={cn(
-                "inline-flex p-4 rounded-2xl bg-gradient-to-br shadow-lg",
-                gradient.includes('from-') ? `bg-gradient-to-br ${gradient}` : `bg-gradient-to-br ${gradient}`
-              )}>
-                <div className="text-foreground">
-                  {icon}
-                </div>
-              </div>
-            )}
+            {/* Header icon removed to unify clean hero across all pages */}
             
             {/* Badge */}
             <div className="flex justify-center">
@@ -118,17 +126,25 @@ export function ModernPageLayout({
               </Badge>
             </div>
             
-            {/* Title */}
+            {/* Title: keep consistent tag to avoid hydration mismatches */}
             <h1 className={cn(
               "text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
               "bg-gradient-to-r from-foreground via-primary to-blue-600 bg-clip-text text-transparent"
             )}>
-              {displayTitle}
+              {pendingHero ? (
+                <span className="inline-block h-10 md:h-12 lg:h-14 w-3/4 rounded-md bg-muted/40 animate-pulse" />
+              ) : (
+                displayTitle
+              )}
             </h1>
             
-            {/* Description */}
+            {/* Description: consistent tag during hydration */}
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              {displayDescription}
+              {pendingHero ? (
+                <span className="block h-4 w-full rounded bg-muted/30 animate-pulse" />
+              ) : (
+                displayDescription
+              )}
             </p>
             {/* Feature Highlights */}
             <div className="flex flex-wrap justify-center gap-6 mt-2 text-sm">

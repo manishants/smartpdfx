@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ModernPageLayout } from '@/components/modern-page-layout'
 
 export const dynamic = 'force-static'
 
@@ -30,13 +31,14 @@ export default function ShippingPolicyPage() {
   }
 
   return (
-    <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-3xl">Shipping & Delivery Policy – SmartPDFx.com</CardTitle>
-          <p className="text-sm text-muted-foreground">Last updated: {lastUpdated}</p>
-        </CardHeader>
-        <CardContent className="prose dark:prose-invert max-w-none">
+    <ModernPageLayout title="Shipping & Delivery Policy" description="Understand how digital delivery works at SmartPDFx." backgroundVariant="home">
+      <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl">Shipping & Delivery Policy – SmartPDFx.com</CardTitle>
+            <p className="text-sm text-muted-foreground">Last updated: {lastUpdated}</p>
+          </CardHeader>
+          <CardContent className="prose dark:prose-invert max-w-none">
           <p>
             SmartPDFx.com is a free online tool platform that provides digital services such as PDF conversion, compression,
             editing, and other AI-based utilities. We do not sell any physical products, and therefore, we do not offer
@@ -78,12 +80,13 @@ export default function ShippingPolicyPage() {
             <br />
             Response Time: Within 24–48 hours
           </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Structured Data */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
-    </main>
+        {/* Structured Data */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
+      </main>
+    </ModernPageLayout>
   )
 }

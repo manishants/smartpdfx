@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModernPageLayout } from "@/components/modern-page-layout";
 
 export default function RefundPolicyPage() {
   const lastUpdated = new Date().toLocaleDateString()
@@ -30,13 +31,14 @@ export default function RefundPolicyPage() {
   }
 
   return (
-    <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-3xl">Refund Policy</CardTitle>
-          <p className="text-sm text-muted-foreground">Last updated: {lastUpdated}</p>
-        </CardHeader>
-        <CardContent className="prose dark:prose-invert max-w-none">
+    <ModernPageLayout title="Refund Policy" description="Learn about refunds and contributions on SmartPDFx." backgroundVariant="home">
+      <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl">Refund Policy</CardTitle>
+            <p className="text-sm text-muted-foreground">Last updated: {lastUpdated}</p>
+          </CardHeader>
+          <CardContent className="prose dark:prose-invert max-w-none">
           <p>
             Thank you for supporting SmartPDFx. Some offerings on our site may allow you to <strong>support the creator</strong> through voluntary contributions or access to premium features. These contributions help keep our tools fast, secure, and privacy‑friendly.
           </p>
@@ -70,11 +72,12 @@ export default function RefundPolicyPage() {
           <p>
             Questions about this policy? Please reach us via the contact page. We aim to respond in a timely manner and resolve issues in good faith.
           </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Structured Data for Merchant Return Policy */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(merchantReturnPolicyJsonLd) }} />
-    </main>
+        {/* Structured Data for Merchant Return Policy */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(merchantReturnPolicyJsonLd) }} />
+      </main>
+    </ModernPageLayout>
   )
 }

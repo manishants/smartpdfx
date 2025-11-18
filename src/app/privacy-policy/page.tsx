@@ -1,15 +1,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ModernPageLayout } from "@/components/modern-page-layout";
 
 export default function PrivacyPolicyPage() {
     return (
-        <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-3xl">Privacy Policy</CardTitle>
-                    <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
-                </CardHeader>
-                <CardContent className="prose dark:prose-invert max-w-none">
+        <ModernPageLayout title="Privacy Policy" description="Read how SmartPDFx handles your data and files with privacy-first principles." backgroundVariant="home">
+            <main className="max-w-4xl px-4 py-8 md:py-12 mx-auto">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-3xl">Privacy Policy</CardTitle>
+                        <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+                    </CardHeader>
+                    <CardContent className="prose dark:prose-invert max-w-none">
                     <p>
                         Welcome to SmartPDFx. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our website and tools.
                     </p>
@@ -59,8 +61,9 @@ export default function PrivacyPolicyPage() {
 
                     <h2>8. Contact Us</h2>
                     <p>If you have any questions about this Privacy Policy, please contact us through our contact page.</p>
-                </CardContent>
-            </Card>
-        </main>
+                    </CardContent>
+                </Card>
+            </main>
+        </ModernPageLayout>
     );
 }

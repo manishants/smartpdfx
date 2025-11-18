@@ -5,6 +5,7 @@ import { Users, Shield, Zap, Goal, Sparkles, Star, Heart, Trophy, Linkedin, Twit
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getPageSEO } from "@/lib/seoStore";
+import { ModernPageLayout } from '@/components/modern-page-layout';
 export const dynamic = 'force-dynamic';
 
 const teamMembers = [
@@ -43,38 +44,11 @@ const teamMembers = [
 
 export default function AboutUsPage() {
     return (
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-            {/* Hero Section */}
-            <section className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10"></div>
-                <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-32">
-                    <div className="text-center space-y-8">
-                        <div className="flex justify-center">
-                            <Badge className="px-6 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
-                                <Sparkles className="w-4 h-4 mr-2" />
-                                Meet Our Amazing Team
-                            </Badge>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-purple-900 dark:from-white dark:via-blue-100 dark:to-purple-100 bg-clip-text text-transparent">
-                            About SmartPDFx
-                        </h1>
-                        <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-4xl mx-auto leading-relaxed">
-                            Built with passion in India, SmartPDFx is revolutionizing document management with 100% free, 
-                            world-class tools that empower millions of users globally.
-                        </p>
-                        <div className="flex justify-center gap-4 pt-4">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 shadow-lg">
-                                <Heart className="w-5 h-5 text-red-500" />
-                                <span className="text-sm font-medium">Made with Love in India</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-slate-800/80 shadow-lg">
-                                <Trophy className="w-5 h-5 text-yellow-500" />
-                                <span className="text-sm font-medium">100% Free Forever</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <ModernPageLayout
+          title="About SmartPDFx"
+          description="Built with passion in India, SmartPDFx is revolutionizing document management with 100% free, world-class tools that empower millions of users globally."
+          backgroundVariant="home"
+        >
 
             {/* Mission Section */}
             <section className="py-20 px-4">
@@ -284,7 +258,7 @@ export default function AboutUsPage() {
                 })
               }}
             />
-        </main>
+        </ModernPageLayout>
     );
 }
 

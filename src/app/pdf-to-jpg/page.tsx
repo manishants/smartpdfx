@@ -19,7 +19,6 @@ import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
 // Tool-specific sections removed
-import { pdfToPng } from '@/lib/actions/pdf-to-png';
 import ToolCustomSectionRenderer from '@/components/tool-custom-section';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
@@ -155,13 +154,17 @@ export default function PdfToJpgPage() {
     setResult(null);
     try {
       const fileBuffer = await file.arrayBuffer();
-      pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+      // Ensure the PDF.js worker is available for client-side rendering
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
       const imageUris: string[] = [];
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 }); // Use a good scale for quality
+        // Render at ~150 DPI (72 points per inch base)
+        const DPI = 150;
+        const scale = DPI / 72;
+        const viewport = page.getViewport({ scale });
         
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -213,33 +216,7 @@ export default function PdfToJpgPage() {
     setIsConverting(false);
   };
 
-  const handleServerConvert = async () => {
-    if (!file) {
-      toast({ title: 'No file selected', description: 'Please select a PDF to convert.', variant: 'destructive' });
-      return;
-    }
-    setIsConverting(true);
-    setResult(null);
-    try {
-      // Use FileReader to avoid Node Buffer in the browser
-      const pdfUri = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const out = await pdfToPng({ pdfUri });
-      if (out.error) throw new Error(out.error);
-      if (!out.imageUris || out.imageUris.length === 0) throw new Error('No images returned');
-      setResult({ imageUris: out.imageUris });
-      toast({ title: 'Server Export Complete', description: `Converted ${out.imageUris.length} page(s) via LibreOffice.` });
-    } catch (error: any) {
-      console.error('Server export failed:', error);
-      toast({ title: 'Server Export Failed', description: error.message || 'LibreOffice conversion error.', variant: 'destructive' });
-    } finally {
-      setIsConverting(false);
-    }
-  };
+  // Removed server-side export to ensure fully client-side conversion
 
   return (
     <ModernPageLayout title="PDF to JPG Converter" description="Convert PDF documents to high-quality JPG images with AI-powered precision." backgroundVariant="home">
@@ -290,24 +267,7 @@ export default function PdfToJpgPage() {
                       </>
                     )}
                   </Button>
-                  <Button
-                    onClick={handleServerConvert}
-                    disabled={isConverting}
-                    variant="secondary"
-                    className="ml-2"
-                  >
-                    {isConverting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Exporting...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="mr-2 h-4 w-4" />
-                        Convert via LibreOffice (Server)
-                      </>
-                    )}
-                  </Button>
+                  {/* Server export removed: we keep the experience 100% client-side */}
                 </div>
               </div>
             )}
@@ -398,7 +358,7 @@ export default function PdfToJpgPage() {
                 'ZIP download support',
               ]}
             />
-            <ProTip tip="Use server export for large PDFs; browser export runs entirely locally and is great for privacy." />
+            <ProTip tip="Conversion runs entirely in your browser. For many pages, use ZIP download to save all images at once." />
           </div>
         </div>
       </ModernSection>
