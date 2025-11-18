@@ -68,6 +68,8 @@ export function ModernPageLayout({
     return () => { cancelled = true; };
   }, [slug]);
 
+  const heroBadge = badge ?? 'AI-Powered & Secure'
+
   return (
     <div className={cn("min-h-screen bg-gradient-to-br from-background via-background to-background", className)}>
       {/* Hero Section */}
@@ -104,19 +106,22 @@ export function ModernPageLayout({
             )}
             
             {/* Badge */}
-            {badge && (
-              <div className="flex justify-center">
-                <Badge variant="hero" className="px-4 py-2 text-sm font-medium">
-                  {badge}
-                </Badge>
-              </div>
-            )}
+            <div className="flex justify-center">
+              <Badge
+                variant="secondary"
+                className="px-4 py-2 bg-gradient-to-r from-primary/10 to-blue-600/10 border border-primary/20 text-primary font-medium inline-flex items-center justify-center"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  {heroBadge}
+                </span>
+              </Badge>
+            </div>
             
             {/* Title */}
             <h1 className={cn(
-              "text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
-              // Theme-aware heading gradient similar to homepage
-              `from-slate-900 via-blue-900 to-purple-900 dark:from-white dark:via-blue-100 dark:to-purple-100`
+              "text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
+              "bg-gradient-to-r from-foreground via-primary to-blue-600 bg-clip-text text-transparent"
             )}>
               {displayTitle}
             </h1>
@@ -125,6 +130,22 @@ export function ModernPageLayout({
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {displayDescription}
             </p>
+            {/* Feature Highlights */}
+            <div className="flex flex-wrap justify-center gap-6 mt-2 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                {/* Fallback emoji to avoid icon import overhead */}
+                <span role="img" aria-label="lightning">⚡</span>
+                <span>Lightning Fast</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span role="img" aria-label="shield">🛡️</span>
+                <span>Secure by Design</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span role="img" aria-label="star">⭐</span>
+                <span>Premium Quality</span>
+              </div>
+            </div>
             {/* Related Blog Link */}
             <div className="flex justify-center">
               <ToolRelatedBlogLink slug={slug} />

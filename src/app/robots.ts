@@ -22,7 +22,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: [`${URL}/sitemap.xml`, `${URL}/blog/sitemap.xml`],
+    sitemap: [`${URL}/sitemap.xml`, `${URL}/blog/sitemap.xml`, `${URL}/image-sitemap.xml`],
     host: URL,
   }
 }
