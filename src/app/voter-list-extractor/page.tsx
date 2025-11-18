@@ -220,7 +220,7 @@ const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
                           id="max-pages"
                           type="number"
                           min={1}
-                          max={4000}
+                          max={10000}
 value={maxPagesSelected}
 onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target.value || 1))))}
                           className="mt-2"
@@ -283,6 +283,12 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
                               <TableHead>Father/Husband</TableHead>
                               <TableHead>Gender</TableHead>
                               <TableHead>Age</TableHead>
+                              <TableHead>AC No.</TableHead>
+                              <TableHead>AC Name</TableHead>
+                              <TableHead>Section No.</TableHead>
+                              <TableHead>House No.</TableHead>
+                              <TableHead>Age As On</TableHead>
+                              <TableHead>Publication Date</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -294,6 +300,12 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
                                 <TableCell>{voter.fatherOrHusbandName}</TableCell>
                                 <TableCell>{voter.gender}</TableCell>
                                 <TableCell>{voter.age}</TableCell>
+                                <TableCell>{voter.assemblyConstituencyNumber}</TableCell>
+                                <TableCell>{voter.assemblyConstituencyName}</TableCell>
+                                <TableCell>{voter.sectionNumber}</TableCell>
+                                <TableCell>{voter.houseNumber}</TableCell>
+                                <TableCell>{voter.ageAsOn}</TableCell>
+                                <TableCell>{voter.publicationDate}</TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
@@ -331,6 +343,12 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
                                     <TableHead>Father/Husband</TableHead>
                                     <TableHead>Gender</TableHead>
                                     <TableHead>Age</TableHead>
+                                    <TableHead>AC No.</TableHead>
+                                    <TableHead>AC Name</TableHead>
+                                    <TableHead>Section No.</TableHead>
+                                    <TableHead>House No.</TableHead>
+                                    <TableHead>Age As On</TableHead>
+                                    <TableHead>Publication Date</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -342,6 +360,12 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
                                         <TableCell>{voter.fatherOrHusbandName}</TableCell>
                                         <TableCell>{voter.gender}</TableCell>
                                         <TableCell>{voter.age}</TableCell>
+                                        <TableCell>{voter.assemblyConstituencyNumber}</TableCell>
+                                        <TableCell>{voter.assemblyConstituencyName}</TableCell>
+                                        <TableCell>{voter.sectionNumber}</TableCell>
+                                        <TableCell>{voter.houseNumber}</TableCell>
+                                        <TableCell>{voter.ageAsOn}</TableCell>
+                                        <TableCell>{voter.publicationDate}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

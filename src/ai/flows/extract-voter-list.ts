@@ -24,19 +24,32 @@ const extractVotersPrompt = ai.definePrompt({
     name: 'extractVotersPrompt',
     input: { schema: z.object({ fileUri: z.string() }) },
     output: { schema: ExtractVotersOutputSchema },
-    prompt: `You are an expert at extracting structured data from Indian Electoral Rolls (voter lists). Analyze the provided document, which could be an image or a PDF. Your task is to identify and extract every single voter entry from all pages of the document.
+    prompt: `You are an expert at extracting structured data from Indian Electoral Rolls (voter lists). Analyze the provided page image or PDF page. Identify EVERY voter entry and return a JSON object: { "voters": Voter[] }.
 
-For each voter, extract the following details:
-1.  **id**: The serial number of the voter in the list.
-2.  **voterId**: The voter's ID card number (e.g., "UYA0837520").
-3.  **name**: The voter's full name.
-4.  **fatherOrHusbandName**: The name of the voter's father, mother, or husband.
-5.  **age**: The voter's age.
-6.  **gender**: The voter's gender (Male, Female, or Other).
+For EACH voter, extract and return these fields:
+1.  id — Serial number of the voter in the list.
+2.  voterId — Voter ID card number (e.g., "UYA0837520").
+3.  name — Full name of the voter.
+4.  fatherOrHusbandName — Name of the father/mother/husband.
+5.  age — Age value shown.
+6.  gender — One of: Male, Female, Other.
 
-Pay close attention to the layout. Each voter entry is typically in its own box or section. You must process every page and extract every voter. Do not stop until the entire document has been processed. A partial list is considered a failure.
+Additionally, attach PAGE-LEVEL metadata to EACH voter on that page:
+7.  assemblyConstituencyNumber — From header like "172-बिहारशरीफ" → take the number part "172".
+8.  assemblyConstituencyName — From header like "172-बिहारशरीफ" → take the name part after the hyphen, e.g., "बिहारशरीफ".
+9.  sectionNumber — From text like "भाग संख्या : : 1" → take "1".
+10. houseNumber — From the voter box text like "मकान संख्या : 4" → take "4" (per voter).
+11. ageAsOn — From footer/header text like "उम्र : 01-07-2025 को संदर्भित आयु" → take the date "01-07-2025".
+12. publicationDate — From footer text like "प्रकाशन की पूरक तिथि के अनुसार संशोधित : :- 30-09-2025" → take "30-09-2025".
 
-Return the data as a JSON object with a single key "voters", which is an array of all the voter objects you have found.
+Guidelines:
+- Keep values exactly as printed; do not translate or reformat. Dates should remain in DD-MM-YYYY if seen that way.
+- If a field is not present for a voter, omit that key entirely for that voter (do NOT invent values).
+- Detect minor formatting variations (extra colons or spaces) and still extract the correct values.
+- Each voter entry usually appears inside a boxed section; parse the box to get id, voterId, name, fatherOrHusbandName, age, gender, and houseNumber.
+- The header/footer metadata (assemblyConstituencyNumber, assemblyConstituencyName, sectionNumber, ageAsOn, publicationDate) applies to all voters on the page — include these fields for each voter in this page's output.
+
+Return ONLY the JSON object with a single key "voters" containing the array of voter objects.
 
 Document:
 {{media url=fileUri}}
