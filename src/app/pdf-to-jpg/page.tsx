@@ -15,6 +15,9 @@ import { saveAs } from 'file-saver';
 import * as pdfjsLib from 'pdfjs-dist';
 import { AllTools } from '@/components/all-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
 import { ModernPageLayout } from '@/components/modern-page-layout';
 import { ModernSection } from '@/components/modern-section';
 import { ModernUploadArea } from '@/components/modern-upload-area';
@@ -131,6 +134,8 @@ export default function PdfToJpgPage() {
   const [isConverting, setIsConverting] = useState(false);
   const [result, setResult] = useState<PdfToJpgOutput | null>(null);
   const { toast } = useToast();
+  const [dpi, setDpi] = useState<number>(150);
+  const [quality, setQuality] = useState<number>(90);
 
   const handleFileChange = (file: File) => {
     if (file && file.type === 'application/pdf') {
@@ -161,9 +166,8 @@ export default function PdfToJpgPage() {
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        // Render at ~150 DPI (72 points per inch base)
-        const DPI = 150;
-        const scale = DPI / 72;
+        // Render at chosen DPI (72 points per inch base)
+        const scale = dpi / 72;
         const viewport = page.getViewport({ scale });
         
         const canvas = document.createElement('canvas');
@@ -173,7 +177,7 @@ export default function PdfToJpgPage() {
 
         if (context) {
           await page.render({ canvasContext: context, viewport: viewport }).promise;
-          const imageUri = canvas.toDataURL('image/jpeg', 0.9); // 0.9 quality
+          const imageUri = canvas.toDataURL('image/jpeg', Math.min(1, Math.max(0.5, quality / 100)));
           imageUris.push(imageUri);
         }
       }
@@ -268,6 +272,31 @@ export default function PdfToJpgPage() {
                     )}
                   </Button>
                   {/* Server export removed: we keep the experience 100% client-side */}
+                </div>
+                {/* Conversion Settings */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="dpi" className="text-sm font-medium">Render DPI</Label>
+                      <Badge variant="secondary">{dpi} DPI</Badge>
+                    </div>
+                    <Slider id="dpi" value={[dpi]} onValueChange={([v]) => setDpi(v)} min={72} max={300} step={6} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Faster</span>
+                      <span>Sharper</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="quality" className="text-sm font-medium">JPG Quality</Label>
+                      <Badge variant="secondary">{quality}%</Badge>
+                    </div>
+                    <Slider id="quality" value={[quality]} onValueChange={([v]) => setQuality(v)} min={50} max={100} step={1} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Smaller size</span>
+                      <span>Best quality</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

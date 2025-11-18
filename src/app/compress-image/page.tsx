@@ -18,6 +18,9 @@ import { ModernUploadArea } from '@/components/modern-upload-area';
 import { AIPoweredFeatures } from '@/components/ai-powered-features';
 import { ProTip } from '@/components/pro-tip';
 import ToolRelatedBlogLink from '@/components/tool-related-blog-link';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { compressImageToSize } from '@/lib/actions/compress-image-to-size';
 export const dynamic = 'force-dynamic';
 interface UploadedFile {
   file: File;
@@ -65,6 +68,7 @@ export default function CompressImagePage() {
   const [isCompressing, setIsCompressing] = useState(false);
   const [result, setResult] = useState<CompressImageOutput | null>(null);
   const { toast } = useToast();
+  const [targetSizeKB, setTargetSizeKB] = useState<number>(200);
   const handleFileChange = (file: File) => {
     if (file.type.startsWith('image/')) {
       setFile({
@@ -72,6 +76,10 @@ export default function CompressImagePage() {
         preview: URL.createObjectURL(file),
       });
       setResult(null);
+      // Default target: ~50% of original size in KB, bounded
+      const originalKB = Math.max(1, Math.round(file.size / 1024));
+      const defaultTarget = Math.max(30, Math.round(originalKB * 0.5));
+      setTargetSizeKB(defaultTarget);
     } else {
       toast({ 
         title: "Invalid file type", 
@@ -123,8 +131,8 @@ export default function CompressImagePage() {
     setResult(null);
     try {
       const imageUri = await fileToDataUri(file.file);
-      // For this generic page, we don't set a target size, so it will do a percentage reduction.
-      const compressionResult = await compressImage({ imageUri });
+      // Compress to target size selected by user
+      const compressionResult = await compressImageToSize({ imageUri, targetSizeKB });
       
       if (compressionResult) {
         setResult(compressionResult);
@@ -207,6 +215,25 @@ export default function CompressImagePage() {
               <div className="text-center space-y-2">
                 <p className="font-semibold text-lg">{file.file.name}</p>
                 <Badge variant="secondary" className="text-sm">{formatBytes(file.file.size)}</Badge>
+              </div>
+              {/* Size Target Settings */}
+              <div className="w-full max-w-md space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="target-size" className="text-sm font-medium">Target size</Label>
+                  <Badge variant="secondary">{targetSizeKB} KB</Badge>
+                </div>
+                <Slider
+                  id="target-size"
+                  value={[targetSizeKB]}
+                  onValueChange={([v]) => setTargetSizeKB(v)}
+                  min={10}
+                  max={Math.max(50, Math.round(file.file.size / 1024))}
+                  step={5}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Smaller</span>
+                  <span>Closer to original</span>
+                </div>
               </div>
               <Button 
                 size="lg" 
