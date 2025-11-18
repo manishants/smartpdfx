@@ -625,30 +625,12 @@ const VoterSchema = z.object({
   age: z.string().describe("The voter's age."),
   gender: z.string().describe("The voter's gender."),
   voterId: z.string().describe("The voter's ID card number."),
-  assemblyConstituencyNumber: z
-    .string()
-    .optional()
-    .describe('Assembly Constituency Number (e.g., from "172-बिहारशरीफ" → 172).'),
-  assemblyConstituencyName: z
-    .string()
-    .optional()
-    .describe('Assembly Constituency Name (e.g., from "172-बिहारशरीफ" → बिहारशरीफ).'),
-  sectionNumber: z
-    .string()
-    .optional()
-    .describe('Section Number (e.g., from "भाग संख्या : : 1" → 1).'),
-  houseNumber: z
-    .string()
-    .optional()
-    .describe('House Number (e.g., from "मकान संख्या : 4" → 4).'),
-  ageAsOn: z
-    .string()
-    .optional()
-    .describe('Age As On date string (e.g., from "उम्र : 01-07-2025 को संदर्भित आयु" → 01-07-2025).'),
-  publicationDate: z
-    .string()
-    .optional()
-    .describe('Publication Date (e.g., from "प्रकाशन की पूरक तिथि... : 30-09-2025" → 30-09-2025).'),
+  assemblyConstituencyNumber: z.string().optional().describe("Assembly Constituency numeric code (e.g., '172')."),
+  assemblyConstituencyName: z.string().optional().describe("Assembly Constituency name (e.g., 'बिहारशरीफ')."),
+  sectionNumber: z.string().optional().describe("Section number on the page (e.g., '1')."),
+  houseNumber: z.string().optional().describe("House number for the voter (e.g., '4')."),
+  ageAsOn: z.string().optional().describe("Reference age date in DD-MM-YYYY (e.g., '01-07-2025')."),
+  publicationDate: z.string().optional().describe("Publication date in DD-MM-YYYY (e.g., '30-09-2025')."),
 });
 export type Voter = z.infer<typeof VoterSchema>;
 

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,6 @@ import type { ExtractVotersInput, ExtractVotersOutput, Voter } from '@/lib/types
 import { AllTools } from '@/components/all-tools';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -30,10 +28,6 @@ export default function VoterListExtractorPage() {
   const [result, setResult] = useState<ExtractVotersOutput | null>(null);
   const [processedPages, setProcessedPages] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
-const [maxPagesSelected, setMaxPagesSelected] = useState<number>(40);
-  const [enableLivePreview, setEnableLivePreview] = useState<boolean>(true);
-  const [previewVoters, setPreviewVoters] = useState<Voter[]>([]);
-  const seenKeysRef = useRef<Set<string>>(new Set());
   const { toast } = useToast();
 
   const isAbortError = (error: any) => {
@@ -76,8 +70,6 @@ const [maxPagesSelected, setMaxPagesSelected] = useState<number>(40);
     setResult(null);
     setProcessedPages(0);
     setTotalPages(0);
-    setPreviewVoters([]);
-    seenKeysRef.current = new Set<string>();
     try {
       // If the input is an image, analyze directly. If it's a PDF, process up to 30 pages.
       if (file.type === 'application/pdf') {
@@ -87,7 +79,7 @@ const [maxPagesSelected, setMaxPagesSelected] = useState<number>(40);
 
         const buf = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
+        const maxPages = Math.min(30, pdf.numPages);
         setTotalPages(maxPages);
 
         const allVoters: Voter[] = [];
@@ -109,26 +101,8 @@ const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
             const pageResult = await extractVoters(perPageInput);
             if (pageResult && Array.isArray(pageResult.voters)) {
               allVoters.push(...pageResult.voters);
-              if (enableLivePreview) {
-                // Incremental dedupe and preview update
-                setPreviewVoters((prev) => {
-                  const next = [...prev];
-                  for (const v of pageResult.voters) {
-                    const key = (v.voterId && v.voterId.trim()) || `${v.name}|${v.fatherOrHusbandName}|${v.age}|${v.gender}`;
-                    if (!seenKeysRef.current.has(key)) {
-                      seenKeysRef.current.add(key);
-                      next.push(v);
-                    }
-                  }
-                  return next;
-                });
-              }
             }
           }
-          // Release canvas memory
-          try {
-            (page as any).cleanup?.();
-          } catch {}
           setProcessedPages(i);
         }
 
@@ -141,7 +115,40 @@ const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
           return true;
         });
 
-        setResult({ voters: deduped });
+        // Normalize formatting for new fields
+        const normalizeDigits = (s?: string) => {
+          const m = (s || '').match(/\d+/);
+          return m ? m[0] : '';
+        };
+        const normalizeDate = (s?: string) => {
+          const m = (s || '').match(/\b\d{2}-\d{2}-\d{4}\b/);
+          return m ? m[0] : '';
+        };
+        const normalizeAssemblyNumber = (s?: string) => {
+          // e.g., "172-बिहारशरीफ" or just "172"
+          const m = (s || '').match(/\d{1,4}/);
+          return m ? m[0] : '';
+        };
+        const normalizeAssemblyName = (s?: string) => {
+          const str = (s || '').trim();
+          if (!str) return '';
+          const parts = str.split(/\s*-\s*/);
+          if (parts.length >= 2) return parts.slice(1).join('-').trim();
+          // Fallback: remove leading digits and separators
+          return str.replace(/^\d+\s*-\s*/, '').trim();
+        };
+
+        const normalized = deduped.map(v => ({
+          ...v,
+          assemblyConstituencyNumber: normalizeAssemblyNumber(v.assemblyConstituencyNumber),
+          assemblyConstituencyName: normalizeAssemblyName(v.assemblyConstituencyName),
+          sectionNumber: normalizeDigits(v.sectionNumber),
+          houseNumber: normalizeDigits(v.houseNumber),
+          ageAsOn: normalizeDate(v.ageAsOn),
+          publicationDate: normalizeDate(v.publicationDate),
+        }));
+
+        setResult({ voters: normalized });
       } else {
         const fileUri = await fileToDataUri(file);
         const input: ExtractVotersInput = { fileUri };
@@ -177,7 +184,35 @@ const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
       toast({ title: "No data to download", description: "Please extract voter data first." });
       return;
     }
-    const worksheet = XLSX.utils.json_to_sheet(result.voters);
+    const header = [
+      'id',
+      'voterId',
+      'name',
+      'fatherOrHusbandName',
+      'gender',
+      'age',
+      'assemblyConstituencyNumber',
+      'assemblyConstituencyName',
+      'sectionNumber',
+      'houseNumber',
+      'ageAsOn',
+      'publicationDate',
+    ];
+    const rows = result.voters.map(v => ({
+      id: v.id,
+      voterId: v.voterId,
+      name: v.name,
+      fatherOrHusbandName: v.fatherOrHusbandName,
+      gender: v.gender,
+      age: v.age,
+      assemblyConstituencyNumber: v.assemblyConstituencyNumber || '',
+      assemblyConstituencyName: v.assemblyConstituencyName || '',
+      sectionNumber: v.sectionNumber || '',
+      houseNumber: v.houseNumber || '',
+      ageAsOn: v.ageAsOn || '',
+      publicationDate: v.publicationDate || '',
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(rows, { header });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Voters");
     XLSX.writeFile(workbook, "voter-list.xlsx");
@@ -213,28 +248,6 @@ const maxPages = Math.min(Math.max(1, maxPagesSelected), 10000, pdf.numPages);
                             onChange={handleFileChange}
                         />
                     </div>
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-<Label htmlFor="max-pages">Max pages to process (1–10000)</Label>
-                        <Input
-                          id="max-pages"
-                          type="number"
-                          min={1}
-                          max={10000}
-value={maxPagesSelected}
-onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target.value || 1))))}
-                          className="mt-2"
-                        />
-                      </div>
-                      <div className="flex items-center gap-3 mt-6 md:mt-0">
-                        <Checkbox
-                          id="live-preview"
-                          checked={enableLivePreview}
-                          onCheckedChange={(val) => setEnableLivePreview(Boolean(val))}
-                        />
-                        <Label htmlFor="live-preview">Show live preview while processing</Label>
-                      </div>
-                    </div>
                     {file && (
                         <div className="flex flex-col items-center gap-4 mt-6">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -254,65 +267,14 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
             )}
 
             {isAnalyzing && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1 flex flex-col items-center text-center">
-                      <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                      <h2 className="text-2xl font-semibold mt-4">Extracting Voter Data...</h2>
-                      {totalPages > 0 ? (
-                        <p className="text-muted-foreground">Processing page {processedPages} of {totalPages}</p>
-                      ) : (
-                        <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
-                      )}
-                  </div>
-                  {enableLivePreview && (
-                    <div className="md:col-span-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-5 w-5 text-primary" />
-                          <span className="font-medium">Live Preview</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">Extracted so far: {previewVoters.length}</span>
-                      </div>
-                      <div className="border rounded-lg max-h-[50vh] overflow-y-auto">
-                        <Table>
-                          <TableHeader className="sticky top-0 bg-background">
-                            <TableRow>
-                              <TableHead>ID</TableHead>
-                              <TableHead>Voter ID</TableHead>
-                              <TableHead>Name</TableHead>
-                              <TableHead>Father/Husband</TableHead>
-                              <TableHead>Gender</TableHead>
-                              <TableHead>Age</TableHead>
-                              <TableHead>AC No.</TableHead>
-                              <TableHead>AC Name</TableHead>
-                              <TableHead>Section No.</TableHead>
-                              <TableHead>House No.</TableHead>
-                              <TableHead>Age As On</TableHead>
-                              <TableHead>Publication Date</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {previewVoters.map((voter) => (
-                              <TableRow key={`preview-${voter.id}-${voter.voterId || voter.name}`}>
-                                <TableCell>{voter.id}</TableCell>
-                                <TableCell>{voter.voterId}</TableCell>
-                                <TableCell>{voter.name}</TableCell>
-                                <TableCell>{voter.fatherOrHusbandName}</TableCell>
-                                <TableCell>{voter.gender}</TableCell>
-                                <TableCell>{voter.age}</TableCell>
-                                <TableCell>{voter.assemblyConstituencyNumber}</TableCell>
-                                <TableCell>{voter.assemblyConstituencyName}</TableCell>
-                                <TableCell>{voter.sectionNumber}</TableCell>
-                                <TableCell>{voter.houseNumber}</TableCell>
-                                <TableCell>{voter.ageAsOn}</TableCell>
-                                <TableCell>{voter.publicationDate}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  )}
+                <div className="flex flex-col items-center text-center">
+                    <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                    <h2 className="text-2xl font-semibold mt-4">Extracting Voter Data...</h2>
+                    {totalPages > 0 ? (
+                      <p className="text-muted-foreground">Processing page {processedPages} of {totalPages}</p>
+                    ) : (
+                      <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
+                    )}
                 </div>
             )}
 
@@ -343,10 +305,10 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
                                     <TableHead>Father/Husband</TableHead>
                                     <TableHead>Gender</TableHead>
                                     <TableHead>Age</TableHead>
-                                    <TableHead>AC No.</TableHead>
-                                    <TableHead>AC Name</TableHead>
-                                    <TableHead>Section No.</TableHead>
-                                    <TableHead>House No.</TableHead>
+                                    <TableHead>Assembly No</TableHead>
+                                    <TableHead>Assembly Name</TableHead>
+                                    <TableHead>Section No</TableHead>
+                                    <TableHead>House No</TableHead>
                                     <TableHead>Age As On</TableHead>
                                     <TableHead>Publication Date</TableHead>
                                 </TableRow>
@@ -360,12 +322,12 @@ onChange={(e) => setMaxPagesSelected(Math.max(1, Math.min(10000, Number(e.target
                                         <TableCell>{voter.fatherOrHusbandName}</TableCell>
                                         <TableCell>{voter.gender}</TableCell>
                                         <TableCell>{voter.age}</TableCell>
-                                        <TableCell>{voter.assemblyConstituencyNumber}</TableCell>
-                                        <TableCell>{voter.assemblyConstituencyName}</TableCell>
-                                        <TableCell>{voter.sectionNumber}</TableCell>
-                                        <TableCell>{voter.houseNumber}</TableCell>
-                                        <TableCell>{voter.ageAsOn}</TableCell>
-                                        <TableCell>{voter.publicationDate}</TableCell>
+                                        <TableCell>{voter.assemblyConstituencyNumber || ''}</TableCell>
+                                        <TableCell>{voter.assemblyConstituencyName || ''}</TableCell>
+                                        <TableCell>{voter.sectionNumber || ''}</TableCell>
+                                        <TableCell>{voter.houseNumber || ''}</TableCell>
+                                        <TableCell>{voter.ageAsOn || ''}</TableCell>
+                                        <TableCell>{voter.publicationDate || ''}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
