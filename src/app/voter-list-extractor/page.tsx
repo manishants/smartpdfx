@@ -11,6 +11,7 @@ import { extractVoters } from '@/ai/flows/extract-voter-list';
 import type { ExtractVotersInput, ExtractVotersOutput, Voter } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import * as XLSX from 'xlsx';
+import * as pdfjsLib from 'pdfjs-dist';
 import {
   Table,
   TableBody,
@@ -25,6 +26,8 @@ export default function VoterListExtractorPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<ExtractVotersOutput | null>(null);
+  const [processedPages, setProcessedPages] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const { toast } = useToast();
 
   const isAbortError = (error: any) => {
@@ -65,16 +68,63 @@ export default function VoterListExtractorPage() {
     }
     setIsAnalyzing(true);
     setResult(null);
+    setProcessedPages(0);
+    setTotalPages(0);
     try {
-      const fileUri = await fileToDataUri(file);
-      const input: ExtractVotersInput = { fileUri };
-      
-      const analysisResult = await extractVoters(input);
-      
-      if (analysisResult) {
-        setResult(analysisResult);
+      // If the input is an image, analyze directly. If it's a PDF, process up to 30 pages.
+      if (file.type === 'application/pdf') {
+        // Ensure pdf.js worker is configured and safe under Next.js dev
+        pdfjsLib.GlobalWorkerOptions.disableWorker = true;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        const maxPages = Math.min(40, pdf.numPages);
+        setTotalPages(maxPages);
+
+        const allVoters: Voter[] = [];
+        const DPI = 200; // higher DPI for better OCR accuracy
+        const jpegQuality = 0.9;
+
+        for (let i = 1; i <= maxPages; i++) {
+          const page = await pdf.getPage(i);
+          const scale = DPI / 72;
+          const viewport = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          if (ctx) {
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            const pageImageUri = canvas.toDataURL('image/jpeg', jpegQuality);
+            const perPageInput: ExtractVotersInput = { fileUri: pageImageUri };
+            const pageResult = await extractVoters(perPageInput);
+            if (pageResult && Array.isArray(pageResult.voters)) {
+              allVoters.push(...pageResult.voters);
+            }
+          }
+          setProcessedPages(i);
+        }
+
+        // Deduplicate by voterId if present, else keep entries
+        const seen = new Set<string>();
+        const deduped = allVoters.filter(v => {
+          const key = (v.voterId && v.voterId.trim()) || `${v.name}|${v.fatherOrHusbandName}|${v.age}|${v.gender}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        setResult({ voters: deduped });
       } else {
-        throw new Error("Analysis process returned no data.");
+        const fileUri = await fileToDataUri(file);
+        const input: ExtractVotersInput = { fileUri };
+        const analysisResult = await extractVoters(input);
+        if (analysisResult) {
+          setResult(analysisResult);
+        } else {
+          throw new Error("Analysis process returned no data.");
+        }
       }
     } catch (error: any) {
       if (!isAbortError(error)) {
@@ -159,7 +209,11 @@ export default function VoterListExtractorPage() {
                 <div className="flex flex-col items-center text-center">
                     <Loader2 className="h-12 w-12 text-primary animate-spin" />
                     <h2 className="text-2xl font-semibold mt-4">Extracting Voter Data...</h2>
-                    <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
+                    {totalPages > 0 ? (
+                      <p className="text-muted-foreground">Processing page {processedPages} of {totalPages}</p>
+                    ) : (
+                      <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
+                    )}
                 </div>
             )}
 
