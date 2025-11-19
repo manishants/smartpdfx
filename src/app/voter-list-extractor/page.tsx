@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadCloud, Loader2, RefreshCw, Wand2, FileText, Users, FileDown } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
-import { extractVoters } from '@/ai/flows/extract-voter-list';
-import type { ExtractVotersInput, ExtractVotersOutput, Voter } from '@/lib/types';
+import type { ExtractVotersOutput, Voter } from '@/lib/types';
 import { AllTools } from '@/components/all-tools';
 import * as XLSX from 'xlsx';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -40,6 +39,36 @@ export default function VoterListExtractorPage() {
     );
   };
 
+  // Retry helper for Genkit calls to handle 429/quota with exponential backoff
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const shouldRetry = (error: any) => {
+    const msg = String(error?.message || error || '').toLowerCase();
+    return (
+      msg.includes('429') ||
+      msg.includes('too many requests') ||
+      msg.includes('resource exhausted') ||
+      msg.includes('quota') ||
+      msg.includes('rate') ||
+      msg.includes('fetch failed') ||
+      msg.includes('network') ||
+      msg.includes('timeout')
+    );
+  };
+  async function retryGenkit<T>(fn: () => Promise<T>, attempts = 3, baseDelayMs = 1200): Promise<T> {
+    let lastErr: any;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await fn();
+      } catch (err: any) {
+        lastErr = err;
+        if (!shouldRetry(err) || i === attempts - 1) break;
+        const jitter = Math.floor(Math.random() * 250);
+        await sleep(baseDelayMs * (i + 1) + jitter);
+      }
+    }
+    throw lastErr;
+  }
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
@@ -59,6 +88,22 @@ export default function VoterListExtractorPage() {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  };
+
+  // Server analysis: centralize Genkit flows behind API to avoid client-side quota/CORS
+  const analyzePageOnServer = async (imageUri: string): Promise<Voter[]> => {
+    const resp = await retryGenkit(() => fetch('/api/voter-extract/analyze-page', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUri }),
+    }));
+    const r = resp as Response;
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      throw new Error(text || 'Server analysis failed');
+    }
+    const data = await r.json().catch(() => ({}));
+    return Array.isArray(data?.voters) ? (data.voters as Voter[]) : [];
   };
 
   const handleAnalyze = async () => {
@@ -97,19 +142,17 @@ export default function VoterListExtractorPage() {
           if (ctx) {
             await page.render({ canvasContext: ctx, viewport }).promise;
             const pageImageUri = canvas.toDataURL('image/jpeg', jpegQuality);
-            const perPageInput: ExtractVotersInput = { fileUri: pageImageUri };
-            const pageResult = await extractVoters(perPageInput);
-            if (pageResult && Array.isArray(pageResult.voters)) {
-              allVoters.push(...pageResult.voters);
-            }
+            const pageVoters = await analyzePageOnServer(pageImageUri);
+            allVoters.push(...pageVoters);
           }
           setProcessedPages(i);
         }
 
         // Deduplicate by voterId if present, else keep entries
+        const normalizeEpic = (s?: string) => (s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
         const seen = new Set<string>();
         const deduped = allVoters.filter(v => {
-          const key = (v.voterId && v.voterId.trim()) || `${v.name}|${v.fatherOrHusbandName}|${v.age}|${v.gender}`;
+          const key = (v.voterId && normalizeEpic(v.voterId)) || `${v.name}|${v.fatherOrHusbandName}|${v.age}|${v.gender}`;
           if (seen.has(key)) return false;
           seen.add(key);
           return true;
@@ -140,6 +183,7 @@ export default function VoterListExtractorPage() {
 
         const normalized = deduped.map(v => ({
           ...v,
+          voterId: normalizeEpic(v.voterId),
           assemblyConstituencyNumber: normalizeAssemblyNumber(v.assemblyConstituencyNumber),
           assemblyConstituencyName: normalizeAssemblyName(v.assemblyConstituencyName),
           sectionNumber: normalizeDigits(v.sectionNumber),
@@ -151,10 +195,41 @@ export default function VoterListExtractorPage() {
         setResult({ voters: normalized });
       } else {
         const fileUri = await fileToDataUri(file);
-        const input: ExtractVotersInput = { fileUri };
-        const analysisResult = await extractVoters(input);
-        if (analysisResult) {
-          setResult(analysisResult);
+        const pageVoters = await analyzePageOnServer(fileUri);
+        if (Array.isArray(pageVoters)) {
+          // Normalize formatting for consistency
+          const normalizeDigits = (s?: string) => {
+            const m = (s || '').match(/\d+/);
+            return m ? m[0] : '';
+          };
+          const normalizeDate = (s?: string) => {
+            const m = (s || '').match(/\b\d{2}-\d{2}-\d{4}\b/);
+            return m ? m[0] : '';
+          };
+          const normalizeAssemblyNumber = (s?: string) => {
+            const m = (s || '').match(/\d{1,4}/);
+            return m ? m[0] : '';
+          };
+          const normalizeAssemblyName = (s?: string) => {
+            const str = (s || '').trim();
+            if (!str) return '';
+            const parts = str.split(/\s*-\s*/);
+            if (parts.length >= 2) return parts.slice(1).join('-').trim();
+            return str.replace(/^\d+\s*-\s*/, '').trim();
+          };
+          const normalizeEpic = (s?: string) => (s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+          const normalized = pageVoters.map(v => ({
+            ...v,
+            voterId: normalizeEpic(v.voterId),
+            assemblyConstituencyNumber: normalizeAssemblyNumber(v.assemblyConstituencyNumber),
+            assemblyConstituencyName: normalizeAssemblyName(v.assemblyConstituencyName),
+            sectionNumber: normalizeDigits(v.sectionNumber),
+            houseNumber: normalizeDigits(v.houseNumber),
+            ageAsOn: normalizeDate(v.ageAsOn),
+            publicationDate: normalizeDate(v.publicationDate),
+          }));
+          setResult({ voters: normalized });
         } else {
           throw new Error("Analysis process returned no data.");
         }
@@ -314,8 +389,8 @@ export default function VoterListExtractorPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {result.voters.map((voter) => (
-                                    <TableRow key={voter.id}>
+                                {result.voters.map((voter, idx) => (
+                                    <TableRow key={`${(voter.voterId || '').toUpperCase()}|${voter.assemblyConstituencyNumber || ''}|${voter.sectionNumber || ''}|${voter.id || idx}`}>
                                         <TableCell>{voter.id}</TableCell>
                                         <TableCell>{voter.voterId}</TableCell>
                                         <TableCell>{voter.name}</TableCell>
