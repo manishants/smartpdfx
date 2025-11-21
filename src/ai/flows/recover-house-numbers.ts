@@ -19,7 +19,7 @@ const RecoverHouseNumbersOutputSchema = z.object({
   pairs: z.array(
     z.object({
       id: z.string().describe('Voter serial ID inside the box.'),
-      houseNumber: z.string().describe('Digits-only house number for the voter.'),
+      houseNumber: z.string().describe('Full house number text after the label (preserve alphabets, digits, hyphens, slashes).'),
     })
   ),
 });
@@ -30,14 +30,14 @@ const recoverHouseNumbersPrompt = ai.definePrompt({
   input: { schema: RecoverHouseNumbersInputSchema },
   output: { schema: RecoverHouseNumbersOutputSchema },
   model: 'googleai/gemini-2.0-flash',
-  prompt: `You are an OCR expert for Indian Electoral Rolls. Focus ONLY on mapping voter serial IDs to their house numbers on this page.
+  prompt: `You are an OCR expert for Indian Electoral Rolls. Focus ONLY on mapping voter serial IDs to their HOUSE NUMBER TEXT on this page.
 
 Instructions:
 - Identify each voter box and read:
   • Serial ID labels: "क्रम संख्या", "क्रम सं.", "Serial No".
   • House number labels: "मकान संख्या", "मकान सं.", "मकान नं.", "घर क्रमांक", "घर संख्या", "House No", "House Number".
 - Return an array of objects { id, houseNumber }.
-- Values must be digits only (strip text and punctuation).
+- For houseNumber, return the FULL TEXT after the label, preserving alphabets (e.g., "N", "SF"), Devanagari digits (०–९), ASCII digits, hyphen variants ("-", "–", "—"), slashes ("/"), underscores, and spaces. Example: "N-५३ SF ०४ ११ ०६".
 - Do NOT confuse the serial id with the house number.
 - If candidateIds are provided, only include entries whose id matches an item in that list.
 - If you cannot read a value confidently, omit that pair instead of guessing.

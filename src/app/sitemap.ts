@@ -20,6 +20,8 @@ const EXCLUDE_DIRS = new Set([
   'superadmin',
   'dashboard',
   '_components',
+  // Exclude private municipal voter tool from sitemap
+  'maharastra-muncipal-voters',
 ])
 
 function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'page.js' } {

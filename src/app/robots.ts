@@ -19,6 +19,9 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/**',
           '/superadmin',
           '/superadmin/**',
+          // Block private municipal voter tool from crawling
+          '/maharastra-muncipal-voters',
+          '/maharastra-muncipal-voters/**',
         ],
       },
     ],

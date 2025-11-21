@@ -628,7 +628,13 @@ const VoterSchema = z.object({
   assemblyConstituencyNumber: z.string().optional().describe("Assembly Constituency numeric code (e.g., '172')."),
   assemblyConstituencyName: z.string().optional().describe("Assembly Constituency name (e.g., 'बिहारशरीफ')."),
   sectionNumber: z.string().optional().describe("Section number on the page (e.g., '1')."),
-  houseNumber: z.string().optional().describe("House number for the voter (e.g., '4')."),
+  // Preserve full house number text after label, including letters, Devanagari digits, hyphens, slashes
+  houseNumber: z.string().optional().describe("Full house number text after the label (e.g., 'N-५३ SF ०४ ११ ०६')."),
+  // Optional AC/Part/SNo triple present near EPIC on the top line (e.g., '125/43/1357')
+  acPartInfo: z.string().optional().describe("AC No./AC Part No/AC Part Sno triple (e.g., '125/43/1357' or '१२५/४३/१३५७')."),
+  // Ward Part details recovered from the header line: "यादी भाग क्र. <no> - <name>"
+  wardPartNo: z.string().optional().describe("Ward Part No. extracted from header (e.g., '४३ : २')."),
+  wardPartName: z.string().optional().describe("Ward Part Name extracted from header (e.g., 'उंटवाडी गावठान उंटवाडी परिसर')."),
   ageAsOn: z.string().optional().describe("Reference age date in DD-MM-YYYY (e.g., '01-07-2025')."),
   publicationDate: z.string().optional().describe("Publication date in DD-MM-YYYY (e.g., '30-09-2025')."),
 });
