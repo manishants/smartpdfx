@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-export default function MaharashtraMunicipalVoterListPage() {
+export default function MaharashtraMunicipalVoterListPageV2() {
   const [file, setFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<ExtractVotersOutput | null>(null);
@@ -454,7 +454,7 @@ export default function MaharashtraMunicipalVoterListPage() {
     const worksheet = XLSX.utils.json_to_sheet(rows, { header });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Voters");
-    XLSX.writeFile(workbook, "maharashtra-municipal-voters.xlsx");
+    XLSX.writeFile(workbook, "maharashtra-municipal-voters-v2.xlsx");
   };
 
 
@@ -462,7 +462,7 @@ export default function MaharashtraMunicipalVoterListPage() {
     <>
     <main className="container mx-auto px-4 py-8 md:py-12">
       <header className="text-center">
-        <h1 className="text-4xl font-bold font-headline">Maharashtra Muncipal Voter List tool</h1>
+        <h1 className="text-4xl font-bold font-headline">Maharashtra Muncipal Voter List tool (v2)</h1>
         <p className="text-lg text-muted-foreground mt-2">
           Extract structured voter data from municipal voter lists (images or PDFs).
         </p>
@@ -475,12 +475,12 @@ export default function MaharashtraMunicipalVoterListPage() {
                  <div>
                     <div 
                         className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center cursor-pointer hover:bg-muted transition-colors"
-                        onClick={() => document.getElementById('file-upload-municipal')?.click()}
+                        onClick={() => document.getElementById('file-upload-municipal-v2')?.click()}
                     >
                         <UploadCloud className="mx-auto h-12 w-12 text-primary" />
                         <p className="mt-4 font-semibold text-primary">Click to upload Image or PDF</p>
                         <Input 
-                            id="file-upload-municipal"
+                            id="file-upload-municipal-v2"
                             type="file" 
                             className="hidden" 
                             accept="image/*,application/pdf"

@@ -4,6 +4,7 @@ import { recoverHouseNumbers } from '@/ai/flows/recover-house-numbers';
 import { recoverVoterIds } from '@/ai/flows/recover-voter-ids';
 import { recoverAcTriple } from '@/ai/flows/recover-ac-triple';
 import { recoverWardPart } from '@/ai/flows/recover-ward-part';
+import { recoverVoterDetails } from '@/ai/flows/recover-voter-details';
 import type { ExtractVotersInput, Voter } from '@/lib/types';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -85,30 +86,26 @@ export async function POST(req: NextRequest) {
     const voters: Voter[] = Array.isArray(pageResult?.voters) ? pageResult.voters : [];
 
     // Recover EPIC voter IDs if missing
-    const candidateIds = voters.map(v => v.id).filter(Boolean);
-    let withEpic: Voter[] = voters;
+    // Recover voter IDs across the entire page (do not restrict by initial extraction)
+    let pagePairs: { id: string; voterId: string }[] = [];
     try {
-      const { pairs } = await retryGenkit(() => recoverVoterIds({ imageUri, candidateIds }));
-      const idToEpic = new Map<string, string>();
-      for (const p of pairs) {
-        const id = (p.id || '').trim();
-        const epic = normalizeEpic(p.voterId);
-        if (id && epic) idToEpic.set(id, epic);
-      }
-      withEpic = voters.map(v => {
-        const existing = normalizeEpic(v.voterId);
-        if (existing) return { ...v, voterId: existing };
-        const recovered = v.id ? normalizeEpic(idToEpic.get(v.id)) : '';
-        return recovered ? { ...v, voterId: recovered } : v;
-      });
-    } catch {
-      withEpic = voters.map(v => ({ ...v, voterId: normalizeEpic(v.voterId) }));
+      const { pairs } = await retryGenkit(() => recoverVoterIds({ imageUri }));
+      pagePairs = pairs || [];
+    } catch {}
+    const idToEpic = new Map<string, string>();
+    for (const p of pagePairs) {
+      const id = (p.id || '').trim();
+      const epic = normalizeEpic(p.voterId);
+      if (id && epic) idToEpic.set(id, epic);
     }
+
+    // Prefer normalized EPIC on base results, but we will later merge by ids to include missing boxes
+    const withEpic: Voter[] = voters.map(v => ({ ...v, voterId: normalizeEpic(v.voterId) }));
 
     // Recover house numbers (prefer full text)
     let withHouse: Voter[] = withEpic;
     try {
-      const { pairs } = await retryGenkit(() => recoverHouseNumbers({ imageUri, candidateIds }));
+      const { pairs } = await retryGenkit(() => recoverHouseNumbers({ imageUri }));
       const idToHouse = new Map<string, string>();
       for (const p of pairs) {
         const id = (p.id || '').trim();
@@ -126,10 +123,10 @@ export async function POST(req: NextRequest) {
       withHouse = withEpic.map(v => ({ ...v, houseNumber: normalizeHouseText(v.houseNumber) }));
     }
 
-    // Recover AC/Part/SNo triple and attach
+    // Recover AC/Part/SNo triple and attach (all page)
     const acMap = new Map<string, string>();
     try {
-      const { pairs } = await retryGenkit(() => recoverAcTriple({ imageUri, candidateIds }));
+      const { pairs } = await retryGenkit(() => recoverAcTriple({ imageUri }));
       for (const p of pairs) {
         const id = (p.id || '').trim();
         const ac = normalizeAcTriple(p.acPartInfo);
@@ -146,19 +143,60 @@ export async function POST(req: NextRequest) {
       wardPartName = normalizeWardPartName(partName);
     } catch {}
 
-    const normalized = withHouse.map(v => ({
-      ...v,
-      voterId: normalizeEpic(v.voterId),
-      assemblyConstituencyNumber: normalizeAssemblyNumber(v.assemblyConstituencyNumber),
-      assemblyConstituencyName: normalizeAssemblyName(v.assemblyConstituencyName),
-      sectionNumber: normalizeDigits(v.sectionNumber),
-      houseNumber: normalizeHouseText(v.houseNumber),
-      ageAsOn: normalizeDate(v.ageAsOn),
-      publicationDate: normalizeDate(v.publicationDate),
-      acPartInfo: normalizeAcTriple((acMap.get(v.id || '') || (v as any).acPartInfo || '')),
-      wardPartNo,
-      wardPartName,
-    }));
+    // Recover FULL details for all candidate ids present on the page
+    const candidateIds = Array.from(
+      new Set([
+        ...withHouse.map(v => (v.id || '').trim()).filter(Boolean),
+        ...pagePairs.map(p => (p.id || '').trim()).filter(Boolean),
+      ])
+    );
+
+    let details: Voter[] = [];
+    try {
+      if (candidateIds.length > 0) {
+        const { voters: det } = await retryGenkit(() => recoverVoterDetails({ imageUri, candidateIds }));
+        details = Array.isArray(det) ? det : [];
+      } else {
+        const { voters: det } = await retryGenkit(() => recoverVoterDetails({ imageUri }));
+        details = Array.isArray(det) ? det : [];
+      }
+    } catch {}
+    const idToDetails = new Map<string, Voter>();
+    for (const d of details) {
+      const id = (d.id || '').trim();
+      if (id) idToDetails.set(id, d);
+    }
+
+    // Build final list using union of ids found
+    let unionIds = Array.from(new Set(candidateIds));
+    if (unionIds.length === 0 && details.length > 0) {
+      unionIds = details.map(d => (d.id || '').trim()).filter(Boolean);
+    }
+    const normalized = unionIds.map((id) => {
+      const base = withHouse.find(v => (v.id || '').trim() === id);
+      const det = idToDetails.get(id);
+      const epic = idToEpic.get(id) || normalizeEpic(base?.voterId || det?.voterId || '');
+      const house = normalizeHouseText(
+        (base?.houseNumber || '') || (det?.houseNumber || '')
+      );
+      return {
+        id,
+        name: (det?.name || base?.name || ''),
+        fatherOrHusbandName: (det?.fatherOrHusbandName || base?.fatherOrHusbandName || ''),
+        age: (det?.age || base?.age || ''),
+        gender: (det?.gender || base?.gender || ''),
+        voterId: epic,
+        assemblyConstituencyNumber: normalizeAssemblyNumber(det?.assemblyConstituencyNumber || base?.assemblyConstituencyNumber || ''),
+        assemblyConstituencyName: normalizeAssemblyName(det?.assemblyConstituencyName || base?.assemblyConstituencyName || ''),
+        sectionNumber: normalizeDigits(det?.sectionNumber || base?.sectionNumber || ''),
+        houseNumber: house,
+        ageAsOn: normalizeDate(det?.ageAsOn || base?.ageAsOn || ''),
+        publicationDate: normalizeDate(det?.publicationDate || base?.publicationDate || ''),
+        acPartInfo: normalizeAcTriple((acMap.get(id) || (det as any)?.acPartInfo || (base as any)?.acPartInfo || '')),
+        wardPartNo,
+        wardPartName,
+      } as Voter;
+    });
 
     return NextResponse.json({ voters: normalized });
   } catch (error: any) {

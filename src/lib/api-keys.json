@@ -16,6 +16,22 @@
         "label": "Manishants - Oct 7, 2025",
         "createdAt": "2025-10-31T09:36:23.565Z",
         "enabled": true
+      },
+      {
+        "id": "key_a03fk9q9",
+        "provider": "gemini",
+        "key": "AIzaSyC3FjAz-h7ljKLJH36qsgUk59CsZLztzAQ",
+        "label": "Rrnbnjmw - Nov 11, 2025",
+        "createdAt": "2025-11-21T22:20:56.022Z",
+        "enabled": true
+      },
+      {
+        "id": "key_ux1hlhu5",
+        "provider": "gemini",
+        "key": "AIzaSyA4IWG2kZrMW-t1uesxUg-wDBGPl_kmWTQ",
+        "label": "Sumitrabeheraofficial - Nov 19, 2025",
+        "createdAt": "2025-11-21T22:22:08.767Z",
+        "enabled": true
       }
     ]
   },
