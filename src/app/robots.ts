@@ -25,6 +25,9 @@ export default function robots(): MetadataRoute.Robots {
           // Block v2 municipal voter tool from crawling
           '/maharastra-muncipal-voters-v2',
           '/maharastra-muncipal-voters-v2/**',
+          // Block free OCR municipal voter tool from crawling
+          '/maharastra-muncipal-voters-free',
+          '/maharastra-muncipal-voters-free/**',
         ],
       },
     ],
