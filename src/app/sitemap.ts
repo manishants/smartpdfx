@@ -22,10 +22,8 @@ const EXCLUDE_DIRS = new Set([
   '_components',
   // Exclude private municipal voter tool from sitemap
   'maharastra-muncipal-voters',
-  // Exclude v2 municipal voter tool from sitemap
-  'maharastra-muncipal-voters-v2',
-  // Exclude free OCR municipal voter tool from sitemap
-  'maharastra-muncipal-voters-free',
+  // Exclude voter list processor tool from sitemap
+  'voter-list-processor',
 ])
 
 function resolveScanContext(): { appDir: string; pageFileName: 'page.tsx' | 'page.js' } {
