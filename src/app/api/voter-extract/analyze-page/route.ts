@@ -6,6 +6,9 @@ import { recoverAcTriple } from '@/ai/flows/recover-ac-triple';
 import { recoverWardPart } from '@/ai/flows/recover-ward-part';
 import { recoverVoterDetails } from '@/ai/flows/recover-voter-details';
 import type { ExtractVotersInput, Voter } from '@/lib/types';
+import { getRotatingGeminiKey } from '@/lib/apiKeysStore';
+import { getActiveGeminiKey, reloadAi } from '@/ai/genkit';
+// Removed local OCR fallback per request; use Gemini only.
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const shouldRetry = (error: any) => {
@@ -35,6 +38,9 @@ async function retryGenkit<T>(fn: () => Promise<T>, attempts = 3, baseDelayMs = 
   }
   throw lastErr;
 }
+
+// Removed auto-disabling logic; assume valid configured key per user instruction.
+
 
 const normalizeEpic = (s?: string) => (s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const normalizeDigits = (s?: string) => {
@@ -75,15 +81,23 @@ const normalizeWardPartName = (s?: string) => (s || '').replace(/^[-—–]\s*/,
 
 export async function POST(req: NextRequest) {
   try {
+    // Ensure AI instance reflects latest enabled key immediately (no waiting for rotation timer)
+    try {
+      const activeKey = getActiveGeminiKey();
+      const desiredKey = getRotatingGeminiKey();
+      if (desiredKey && desiredKey !== activeKey) {
+        reloadAi();
+      }
+    } catch {}
     const body = await req.json();
     const imageUri: string = body?.imageUri;
     if (!imageUri || typeof imageUri !== 'string') {
       return NextResponse.json({ error: 'imageUri is required' }, { status: 400 });
     }
-
     const perPageInput: ExtractVotersInput = { fileUri: imageUri };
+    let voters: Voter[] = [];
     const pageResult = await retryGenkit(() => extractVoters(perPageInput));
-    const voters: Voter[] = Array.isArray(pageResult?.voters) ? pageResult.voters : [];
+    voters = Array.isArray(pageResult?.voters) ? pageResult.voters : [];
 
     // Recover EPIC voter IDs if missing
     // Recover voter IDs across the entire page (do not restrict by initial extraction)

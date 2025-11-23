@@ -1,5 +1,6 @@
 {
   "providers": {
+<<<<<<< HEAD
     "gemini": [
       {
         "id": "key_0kbh5bb1",
@@ -34,6 +35,9 @@
         "enabled": true
       }
     ]
+=======
+    "gemini": []
+>>>>>>> 0c86cbf (Maharashtra municipal voters tool: sequential processing, default 100 pages, DPI 300 fallback; configure Gemini via .env.local)
   },
   "rotation": {
     "gemini": {

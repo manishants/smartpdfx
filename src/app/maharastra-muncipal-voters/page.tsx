@@ -26,8 +26,8 @@ export default function MaharashtraMunicipalVoterListPage() {
   const [processedPages, setProcessedPages] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [dataIssues, setDataIssues] = useState<string[]>([]);
-  // Process sequentially with fixed cap of 50 pages to avoid rate-limit skips
-  const [pageLimit] = useState<number>(50);
+  // Fixed default: process up to 100 pages sequentially
+  const DEFAULT_PAGE_LIMIT = 100;
   const { toast } = useToast();
   const HEADER_HOUSE_NO = 'House No';
   const HEADER_AC_PART = 'AC No./AC Part No/AC Part Sno';
@@ -171,22 +171,19 @@ export default function MaharashtraMunicipalVoterListPage() {
 
         const buf = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        // Fixed processing cap: up to 50 pages sequentially
-        const maxPages = Math.min(50, pdf.numPages);
+        const maxPages = Math.min(Math.max(1, DEFAULT_PAGE_LIMIT), pdf.numPages);
         setTotalPages(maxPages);
 
         const allVoters: Voter[] = [];
-        const PRIMARY_DPI = 220; // primary OCR render DPI
-        const FALLBACK_DPI = 300; // fallback DPI for low-count pages
+        const DPI = 200; // base DPI for OCR
         const jpegQuality = 0.9;
 
-        const indices = Array.from({ length: maxPages }, (_, k) => k + 1);
-
+        const LOW_VOTER_THRESHOLD = 4; // trigger fallback when very few boxes
         const renderAndAnalyze = async (i: number): Promise<Voter[]> => {
           try {
-            setProcessedPages(i);
             const page = await pdf.getPage(i);
-            const makeImage = async (dpi: number) => {
+
+            const renderAtDpi = async (dpi: number): Promise<Voter[]> => {
               const scale = dpi / 72;
               const viewport = page.getViewport({ scale });
               const canvas = document.createElement('canvas');
@@ -195,26 +192,20 @@ export default function MaharashtraMunicipalVoterListPage() {
               canvas.height = Math.floor(viewport.height);
               if (ctx) {
                 await page.render({ canvasContext: ctx, viewport }).promise;
-                return canvas.toDataURL('image/jpeg', jpegQuality);
+                const pageImageUri = canvas.toDataURL('image/jpeg', jpegQuality);
+                const pageVoters = await analyzePageOnServer(pageImageUri);
+                return pageVoters;
               }
-              return '';
+              return [];
             };
-            const primaryUri = await makeImage(PRIMARY_DPI);
-            let pageVoters: Voter[] = [];
-            if (primaryUri) {
-              pageVoters = await analyzePageOnServer(primaryUri);
+
+            const primary = await renderAtDpi(DPI);
+            if ((primary?.length || 0) < LOW_VOTER_THRESHOLD) {
+              const fallback = await renderAtDpi(300);
+              // Prefer the fallback if it yields equal or more voters
+              return (fallback.length >= primary.length) ? fallback : primary;
             }
-            // Fallback: if count seems too low for municipal grid, try higher DPI
-            if (!Array.isArray(pageVoters) || pageVoters.length < 15) {
-              const fallbackUri = await makeImage(FALLBACK_DPI);
-              if (fallbackUri) {
-                const secondPass = await analyzePageOnServer(fallbackUri);
-                if (Array.isArray(secondPass) && secondPass.length > pageVoters.length) {
-                  pageVoters = secondPass;
-                }
-              }
-            }
-            return Array.isArray(pageVoters) ? pageVoters : [];
+            return primary;
           } catch (e) {
             console.warn('Page analysis failed for index', i, e);
           } finally {
@@ -222,8 +213,8 @@ export default function MaharashtraMunicipalVoterListPage() {
           }
           return [];
         };
-
-        for (const i of indices) {
+        // Strict sequential processing to avoid page skipping
+        for (let i = 1; i <= maxPages; i++) {
           const voters = await renderAndAnalyze(i);
           allVoters.push(...voters);
         }
@@ -416,6 +407,7 @@ export default function MaharashtraMunicipalVoterListPage() {
     }
   };
 
+
   const handleReset = () => {
     setFile(null);
     setResult(null);
@@ -493,7 +485,7 @@ export default function MaharashtraMunicipalVoterListPage() {
                                 <FileText className="h-5 w-5" />
                                 <span>{file.name}</span>
                             </div>
-                            <div className="flex items-end">
+                            <div className="w-full max-w-xl flex justify-center">
                               <Button 
                                 size="lg" 
                                 onClick={handleAnalyze}
@@ -512,7 +504,7 @@ export default function MaharashtraMunicipalVoterListPage() {
                     <Loader2 className="h-12 w-12 text-primary animate-spin" />
                     <h2 className="text-2xl font-semibold mt-4">Extracting Voter Data...</h2>
                     {totalPages > 0 ? (
-                      <p className="text-muted-foreground">Processing page {processedPages} of {totalPages}</p>
+                      <p className="text-muted-foreground">Processed {processedPages} of {totalPages} pages</p>
                     ) : (
                       <p className="text-muted-foreground">The AI is reading the document. This may take a moment.</p>
                     )}
@@ -521,6 +513,7 @@ export default function MaharashtraMunicipalVoterListPage() {
 
             {result && (
                 <div className="space-y-6">
+                    
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <Users className="h-6 w-6 text-primary"/>

@@ -10,6 +10,7 @@ export type ApiKeyRecord = {
   label?: string
   createdAt: string
   enabled: boolean
+  flagged?: boolean // flagged keys are excluded from rotation
 }
 
 type RotationConfig = {
@@ -136,7 +137,7 @@ export function setGeminiRotationStrategy(strategy: 'hourly' | 'minute'): Rotati
 
 export function getRotatingGeminiKey(date: Date = new Date()): string | null {
   const store = readStore()
-  const keys = store.providers.gemini.filter(k => k.enabled)
+  const keys = store.providers.gemini.filter(k => k.enabled && !k.flagged)
   if (keys.length === 0) return null
   if (!store.rotation.gemini.enabled) {
     return keys[0].key
@@ -153,4 +154,32 @@ export function maskKey(key: string): string {
   if (!key) return ''
   if (key.length <= 8) return key.slice(0, 4) + '****'
   return key.slice(0, 6) + '...' + key.slice(-4)
+}
+
+// Find a Gemini key record by its raw key value
+export function findGeminiRecordByKey(key: string): ApiKeyRecord | null {
+  const store = readStore()
+  const rec = store.providers.gemini.find(k => k.key === key)
+  return rec || null
+}
+
+// Disable a Gemini key by its raw key value (useful when provider reports it leaked)
+export function disableGeminiKeyByValue(key: string): ApiKeyRecord | null {
+  const store = readStore()
+  const idx = store.providers.gemini.findIndex(k => k.key === key)
+  if (idx === -1) return null
+  store.providers.gemini[idx].enabled = false
+  store.providers.gemini[idx].flagged = true
+  writeStore(store)
+  return store.providers.gemini[idx]
+}
+
+// Explicitly (un)flag a Gemini key by id without changing its enabled state
+export function setGeminiKeyFlagged(id: string, flagged: boolean): ApiKeyRecord | null {
+  const store = readStore()
+  const found = store.providers.gemini.find(k => k.id === id)
+  if (!found) return null
+  found.flagged = !!flagged
+  writeStore(store)
+  return found
 }
