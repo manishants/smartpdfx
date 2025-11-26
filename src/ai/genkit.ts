@@ -8,7 +8,7 @@ function buildAi() {
   const envKey = process.env.GOOGLE_API_KEY;
   const apiKey = envKey ? envKey : getRotatingGeminiKey();
   if (!apiKey) {
-    throw new Error('No Gemini API key configured');
+    throw new Error('No Gemini API key configured. Set GOOGLE_API_KEY or add a key in Superadmin.');
   }
   lastKey = apiKey;
   return genkit({
@@ -27,7 +27,7 @@ export function getActiveGeminiKey(): string | null {
   return lastKey;
 }
 
-// Set up hourly rotation if enabled in the store. Guard against duplicate timers in dev.
+// Set up rotation if enabled in the store. Guard against duplicate timers in dev.
 const rotation = getGeminiRotation();
 const globalAny = globalThis as unknown as {
   __geminiRotationTimer?: NodeJS.Timeout;
