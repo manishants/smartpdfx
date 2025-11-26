@@ -1,0 +1,11 @@
+{
+  "providers": {
+    "gemini": []
+  },
+  "rotation": {
+    "gemini": {
+      "enabled": false,
+      "strategy": "hourly"
+    }
+  }
+}

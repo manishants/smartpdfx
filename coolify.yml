@@ -1,0 +1,44 @@
+# Coolify Configuration for SmartPDFx
+# This file helps Coolify understand how to deploy your application
+
+# Application settings
+name: smartpdfx
+type: docker-compose
+
+# Build settings
+build:
+  dockerfile: Dockerfile
+  context: .
+
+# Environment variables (add your production environment variables here)
+environment:
+  NODE_ENV: production
+  NEXT_TELEMETRY_DISABLED: 1
+  PORT: 3000
+
+# Health check configuration
+healthcheck:
+  path: /api/health
+  port: 3000
+  interval: 30s
+  timeout: 10s
+  retries: 3
+
+# Resource limits (adjust based on your VPS specifications)
+resources:
+  memory: 1GB
+  cpu: 1
+
+# Networking
+ports:
+  - "3000:3000"
+
+# Volumes (if you need persistent storage)
+# volumes:
+#   - ./uploads:/app/uploads
+
+# Additional notes for deployment:
+# 1. Make sure to set up your environment variables in Coolify dashboard
+# 2. Configure your domain and SSL certificates
+# 3. Set up any required external services (databases, etc.)
+# 4. Monitor logs and performance after deployment
