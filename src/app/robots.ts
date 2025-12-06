@@ -27,6 +27,8 @@ export default function robots(): MetadataRoute.Robots {
           '/voter-list-processor/**',
         ],
       },
+      { userAgent: 'AhrefsBot', disallow: ['/'] },
+      { userAgent: 'SemrushBot', disallow: ['/'] },
     ],
     sitemap: [`${URL}/sitemap.xml`, `${URL}/blog/sitemap.xml`, `${URL}/image-sitemap.xml`],
     host: URL,

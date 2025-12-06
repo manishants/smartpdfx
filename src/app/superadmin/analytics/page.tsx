@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 
-type DayStat = { day: string; views: number; unique: number }
-type MonthStat = { month: string; views: number; unique: number }
+type DayStat = { day: string; views: number; unique: number; dwellSeconds?: number }
+type MonthStat = { month: string; views: number; unique: number; dwellSeconds?: number }
 type YearStat = { year: string; views: number; unique: number }
-type PageStat = { page: string; views: number; unique: number }
+type PageStat = { page: string; views: number; unique: number; dwellSeconds?: number }
 
 type Stats = {
   totals: { views: number }
@@ -62,7 +62,7 @@ export default function AnalyticsDashboardPage() {
       </Section>
 
       <Section title="By Month">
-        <SimpleTable headers={["Month", "Views", "Unique"]} rows={stats.byMonth.map(m => [m.month, m.views, m.unique])} />
+        <SimpleTable headers={["Month", "Views", "Unique", "Dwell (min)"]} rows={stats.byMonth.map(m => [m.month, m.views, m.unique, ((m.dwellSeconds || 0) / 60).toFixed(1)])} />
       </Section>
 
       <Section title="By Year">
@@ -70,7 +70,7 @@ export default function AnalyticsDashboardPage() {
       </Section>
 
       <Section title="Pages">
-        <SimpleTable headers={["Page", "Views", "Unique"]} rows={stats.pages.map(p => [p.page, p.views, p.unique])} />
+        <SimpleTable headers={["Page", "Views", "Unique", "Avg Time (sec)"]} rows={stats.pages.map(p => [p.page, p.views, p.unique, p.views ? Math.round((p.dwellSeconds || 0) / p.views) : 0])} />
       </Section>
 
       {/* IP repeats removed per privacy setting */}

@@ -35,6 +35,8 @@ const inter = Inter({
 
 // AdSense client ID: use env if set, otherwise default to provided ID
 const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? 'ca-pub-9014719958396297';
+// Google Analytics 4 Measurement ID (e.g., G-XXXXXXXXXX)
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const IS_PROD = process.env.NODE_ENV === 'production';
 export default function RootLayout({
   children,
@@ -64,6 +66,20 @@ export default function RootLayout({
               async
               crossOrigin="anonymous"
             />
+          </>
+        )}
+        {/* Google Analytics 4: only load when GA_ID configured */}
+        {IS_PROD && GA_ID && (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+              `}
+            </Script>
           </>
         )}
         {/* Removed Google Translate: using local dictionary-based i18n */}

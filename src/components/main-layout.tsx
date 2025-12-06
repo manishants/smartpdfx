@@ -5,7 +5,7 @@ import { type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { AppFooter } from "./app-footer";
-import { GoogleHeaderAd } from "./google-header-ad";
+import { PageViewsWidget } from "@/components/page-views-widget";
 import { BottomAdsSection } from "./bottom-ads-section";
 
 export function MainLayout({ children }: { children: ReactNode }) {
@@ -32,7 +32,6 @@ export function MainLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
       <AppHeader />
-      <GoogleHeaderAd />
       {/* Sidebars removed from all pages (tool and informational) */}
       <div className="flex-1 w-full px-2 sm:px-4">
         <main className="flex-1 w-full">
@@ -41,6 +40,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
       </div>
       <BottomAdsSection />
       <AppFooter />
+      <PageViewsWidget />
     </div>
   );
 }
