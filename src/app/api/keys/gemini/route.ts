@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import {
   getGeminiKeys,
   addGeminiKey,
@@ -10,7 +11,15 @@ import {
   maskKey,
 } from '@/lib/apiKeysStore'
 
+function requireSuperadmin(): boolean {
+  try {
+    const jar = cookies();
+    return jar.get('smartpdfx_superadmin')?.value === 'true';
+  } catch { return false }
+}
+
 export async function GET() {
+  if (!requireSuperadmin()) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   const keys = getGeminiKeys().map(k => ({
     id: k.id,
     label: k.label || '',
@@ -18,11 +27,18 @@ export async function GET() {
     enabled: k.enabled,
     createdAt: k.createdAt,
   }))
+  const envKey = process.env.GOOGLE_API_KEY || ''
+  if (envKey) {
+    keys.unshift({
+      id: 'ENV', label: 'Environment', maskedKey: maskKey(envKey), enabled: true, createdAt: new Date().toISOString(),
+    })
+  }
   const rotation = getGeminiRotation()
   return NextResponse.json({ keys, rotation })
 }
 
 export async function POST(req: NextRequest) {
+  if (!requireSuperadmin()) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   try {
     const body = await req.json()
     const key = String(body?.key || '')
@@ -38,6 +54,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!requireSuperadmin()) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
@@ -47,6 +64,7 @@ export async function DELETE(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  if (!requireSuperadmin()) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   try {
     const body = await req.json()
 
