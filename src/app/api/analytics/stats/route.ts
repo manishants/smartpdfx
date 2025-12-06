@@ -6,10 +6,10 @@ export async function GET() {
     const store = readAnalyticsStore()
     const live = getLiveVisitors(90)
 
-    const byDay = Object.entries(store.day).map(([day, d]) => ({ day, views: d.views, unique: (d.uniqueVisitors || []).length }))
-    const byMonth = Object.entries(store.month).map(([month, m]) => ({ month, views: m.views, unique: (m.uniqueVisitors || []).length }))
+    const byDay = Object.entries(store.day).map(([day, d]) => ({ day, views: d.views, unique: (d.uniqueVisitors || []).length, dwellSeconds: Number(d.dwellSeconds || 0) }))
+    const byMonth = Object.entries(store.month).map(([month, m]) => ({ month, views: m.views, unique: (m.uniqueVisitors || []).length, dwellSeconds: Number(m.dwellSeconds || 0) }))
     const byYear = Object.entries(store.year).map(([year, y]) => ({ year, views: y.views, unique: (y.uniqueVisitors || []).length }))
-    const pages = Object.entries(store.pages).map(([page, p]) => ({ page, views: p.views, unique: (p.uniqueVisitors || []).length }))
+    const pages = Object.entries(store.pages).map(([page, p]) => ({ page, views: p.views, unique: (p.uniqueVisitors || []).length, dwellSeconds: Number(p.dwellSeconds || 0) }))
 
     return NextResponse.json({
       totals: { views: store.totals.views },

@@ -5,10 +5,10 @@ import crypto from 'crypto'
 export type AnalyticsStore = {
   totals: { views: number }
   uniqueVisitors: string[]
-  day: Record<string, { views: number; uniqueVisitors: string[] }>
-  month: Record<string, { views: number; uniqueVisitors: string[] }>
+  day: Record<string, { views: number; uniqueVisitors: string[]; dwellSeconds?: number }>
+  month: Record<string, { views: number; uniqueVisitors: string[]; dwellSeconds?: number }>
   year: Record<string, { views: number; uniqueVisitors: string[] }>
-  pages: Record<string, { views: number; uniqueVisitors: string[] }>
+  pages: Record<string, { views: number; uniqueVisitors: string[]; dwellSeconds?: number }>
 }
 
 type SessionsStore = Record<string, { page: string; lastSeen: number }>
@@ -106,11 +106,11 @@ export function trackView({
   store.totals.views = (store.totals.views || 0) + 1
   pushUnique(store.uniqueVisitors, visitorId)
 
-  const d = (store.day[dayKey] = store.day[dayKey] || { views: 0, uniqueVisitors: [] })
+  const d = (store.day[dayKey] = store.day[dayKey] || { views: 0, uniqueVisitors: [], dwellSeconds: 0 })
   d.views += 1
   pushUnique(d.uniqueVisitors, visitorId)
 
-  const m = (store.month[monthKey] = store.month[monthKey] || { views: 0, uniqueVisitors: [] })
+  const m = (store.month[monthKey] = store.month[monthKey] || { views: 0, uniqueVisitors: [], dwellSeconds: 0 })
   m.views += 1
   pushUnique(m.uniqueVisitors, visitorId)
 
@@ -118,7 +118,7 @@ export function trackView({
   y.views += 1
   pushUnique(y.uniqueVisitors, visitorId)
 
-  const p = (store.pages[page] = store.pages[page] || { views: 0, uniqueVisitors: [] })
+  const p = (store.pages[page] = store.pages[page] || { views: 0, uniqueVisitors: [], dwellSeconds: 0 })
   p.views += 1
   pushUnique(p.uniqueVisitors, visitorId)
 
@@ -138,6 +138,23 @@ export function heartbeat({
 }) {
   const current = typeof now === 'number' ? now : Date.now()
   const sessions = readSessions()
+  const prev = sessions[visitorId]
+  // Attribute time since last heartbeat to previous page
+  if (prev && typeof prev.lastSeen === 'number') {
+    const deltaMs = current - prev.lastSeen
+    // Ignore unrealistic gaps; cap single interval to 60s
+    if (deltaMs > 0 && deltaMs < 5 * 60 * 1000) {
+      const seconds = Math.min(Math.floor(deltaMs / 1000), 60)
+      const store = readAnalyticsStore()
+      const t = new Date(current)
+      const monthKey = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`
+      const p = (store.pages[prev.page] = store.pages[prev.page] || { views: 0, uniqueVisitors: [], dwellSeconds: 0 })
+      p.dwellSeconds = (p.dwellSeconds || 0) + seconds
+      const m = (store.month[monthKey] = store.month[monthKey] || { views: 0, uniqueVisitors: [], dwellSeconds: 0 })
+      m.dwellSeconds = (m.dwellSeconds || 0) + seconds
+      writeAnalyticsStore(store)
+    }
+  }
   sessions[visitorId] = { page, lastSeen: current }
 
   // Prune stale
