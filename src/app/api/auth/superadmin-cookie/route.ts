@@ -11,7 +11,9 @@ export async function POST() {
   res.cookies.set('smartpdfx_superadmin', 'true', {
     path: '/',
     httpOnly: true,
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 60 * 60 * 24 * 7,
   });
   return res;
 }
@@ -21,7 +23,8 @@ export async function DELETE() {
   res.cookies.set('smartpdfx_superadmin', '', {
     path: '/',
     httpOnly: true,
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
     maxAge: 0,
   });
   return res;
