@@ -7,7 +7,24 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Ensure native modules (canvas, sharp) can compile during install
+ENV PUPPETEER_SKIP_DOWNLOAD=1
+ENV PYTHON=/usr/bin/python3
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      python3 \
+      pkg-config \
+      libcairo2-dev \
+      libpango1.0-dev \
+      libjpeg-dev \
+      libpng-dev \
+      libgif-dev \
+      librsvg2-dev \
+      libvips-dev; \
+    rm -rf /var/lib/apt/lists/*; \
+    npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
