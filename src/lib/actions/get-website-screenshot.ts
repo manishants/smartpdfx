@@ -11,8 +11,10 @@ export async function getWebsiteScreenshot(
   let browser = null;
 
   try {
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
     browser = await puppeteer.launch({ 
         headless: true,
+        executablePath,
         args: ['--no-sandbox', '--disable-setuid-sandbox'] 
     });
     const page = await browser.newPage();

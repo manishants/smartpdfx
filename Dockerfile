@@ -60,6 +60,7 @@ RUN set -eux; \
       fonts-freefont-ttf \
       fonts-opensymbol \
       curl \
+      ca-certificates \
       libnss3 \
       libx11-6 \
       libxcomposite1 \
@@ -67,6 +68,9 @@ RUN set -eux; \
       libxext6 \
       libxfixes3 \
       libxrandr2 \
+      libxkbcommon0 \
+      libxshmfence1 \
+      libxss1 \
       libgbm1 \
       libgtk-3-0 \
       libatk1.0-0 \
