@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-# Ensure native modules (canvas, sharp) can compile during install
+# Speed up install and ensure native modules (sharp) can compile if needed
 ENV PUPPETEER_SKIP_DOWNLOAD=1
 ENV PYTHON=/usr/bin/python3
 RUN set -eux; \
@@ -16,15 +16,9 @@ RUN set -eux; \
       build-essential \
       python3 \
       pkg-config \
-      libcairo2-dev \
-      libpango1.0-dev \
-      libjpeg-dev \
-      libpng-dev \
-      libgif-dev \
-      librsvg2-dev \
       libvips-dev; \
     rm -rf /var/lib/apt/lists/*; \
-    npm ci
+    npm ci --no-audit --no-fund
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -55,9 +49,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-      libreoffice \
-      libreoffice-java-common \
+      # LibreOffice headless components
+      libreoffice-core \
+      libreoffice-common \
       libreoffice-writer \
+      libreoffice-calc \
+      libreoffice-impress \
       fonts-liberation \
       fonts-dejavu \
       fonts-freefont-ttf \
@@ -77,7 +74,11 @@ RUN set -eux; \
       libcups2 \
       libdrm2 \
       libasound2 \
-      xdg-utils; \
+      xdg-utils \
+      # Runtime libs for sharp
+      libvips \
+      # Chromium for Puppeteer
+      chromium; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
@@ -109,6 +110,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
