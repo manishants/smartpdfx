@@ -85,3 +85,5 @@ __tests__
 
 # Misc
 .modified
+src/app/admin
+src/app/superadmin
