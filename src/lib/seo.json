@@ -34,11 +34,6 @@
     "description": "",
     "keywords": []
   },
-  "/voter-list-extractor": {
-    "title": "Voter List Extractor",
-    "description": "",
-    "keywords": []
-  },
   "/unlock-pdf": {
     "title": "Unlock Pdf",
     "description": "",
@@ -104,11 +99,7 @@
     "description": "",
     "keywords": []
   },
-  "/photo-enhancer": {
-    "title": "Photo Enhancer",
-    "description": "",
-    "keywords": []
-  },
+  
   "/pdf-to-word": {
     "title": "PDF to Word",
     "description": "",

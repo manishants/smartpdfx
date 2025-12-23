@@ -209,15 +209,7 @@ export const tools = [
     category: 'security',
     color: '#ec4899' // pink
   },
-    {
-    title: "Photo Enhancer",
-    description: "Upscale and improve photo quality.",
-    icon: Sparkles,
-    href: "/photo-enhancer",
-    category: 'ai',
-    color: '#10b981'
-  },
-   {
+  {
     title: "Image to Text (OCR)",
     description: "Extract text from an image.",
     icon: ScanText,
@@ -233,14 +225,7 @@ export const tools = [
     category: 'ai',
     color: '#10b981'
   },
-  {
-    title: "Voter List Extractor",
-    description: "Extract data from voter lists.",
-    icon: Users,
-    href: "/voter-list-extractor",
-    category: 'ai',
-    color: '#10b981'
-  },
+  
   {
     title: "QR Code Generator",
     description: "Create a QR code for any URL.",
